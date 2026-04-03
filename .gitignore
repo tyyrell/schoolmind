@@ -1,0 +1,26 @@
+# Database
+database/
+*.db
+*.sqlite
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+.env
+venv/
+env/
+
+# Local config
+.env.local
+secrets.txt
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Uploads (stored in DB as base64)
+static/uploads/
+static/avatars/

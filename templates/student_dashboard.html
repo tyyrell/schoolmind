@@ -1,0 +1,283 @@
+{% extends "base.html" %}
+{% block title %}{{ 'لوحتي' if lang=='ar' else 'My Dashboard' }}{% endblock %}
+{% block topbar_title %}{{ '👋 ' + ('مرحباً، ' if lang=='ar' else 'Hi, ') + session.display_name }}{% endblock %}
+
+{% block extra_head %}
+<style>
+.dash-hero{background:var(--grad-hero);border-radius:var(--r);padding:1.75rem 1.6rem;color:#fff;position:relative;overflow:hidden;box-shadow:var(--sh-lg);margin-bottom:1rem;}
+.dash-hero::before{content:'';position:absolute;width:280px;height:280px;border-radius:50%;background:rgba(192,132,252,.1);top:-70px;right:-50px;animation:float 7s ease-in-out infinite;}
+.dash-hero::after{content:'';position:absolute;width:180px;height:180px;border-radius:50%;background:rgba(56,189,248,.07);bottom:-50px;left:-30px;animation:float 9s ease-in-out infinite reverse;}
+.hero-c{position:relative;z-index:1;}
+.code-pill{display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,.12);padding:.28rem .85rem;border-radius:20px;font-size:.76rem;border:1px solid rgba(255,255,255,.15);margin-top:.7rem;}
+.q-tile{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--r);padding:1.35rem 1rem;text-align:center;cursor:pointer;text-decoration:none;color:var(--text);display:flex;flex-direction:column;align-items:center;gap:.45rem;transition:all var(--tr-s);box-shadow:var(--sh-sm);position:relative;overflow:hidden;}
+.q-tile::after{content:'';position:absolute;bottom:0;left:0;right:0;height:3px;}
+.q-tile.blue::after{background:var(--grad-sky);}.q-tile.green::after{background:var(--grad-em);}.q-tile.warm::after{background:var(--grad-warm);}.q-tile.rose::after{background:var(--grad-rose);}.q-tile.acc::after{background:var(--grad-acc);}
+.q-tile:hover{transform:translateY(-6px);box-shadow:var(--sh);border-color:var(--border-h);}
+.q-tile .ti{font-size:2.1rem;animation:float 4s ease-in-out infinite;}
+.q-tile:nth-child(2) .ti{animation-delay:.6s;}.q-tile:nth-child(3) .ti{animation-delay:1.2s;}.q-tile:nth-child(4) .ti{animation-delay:1.8s;}.q-tile:nth-child(5) .ti{animation-delay:2.4s;}
+.q-tile .tl{font-weight:800;font-size:.88rem;}.q-tile .ts{font-size:.7rem;color:var(--muted);}
+.well-chip{flex:1;text-align:center;padding:.5rem .3rem;border-radius:var(--r-sm);font-size:.72rem;font-weight:700;border:1.5px solid var(--border);cursor:pointer;transition:all var(--tr);}
+.well-chip.safe.active{background:rgba(16,185,129,.1);border-color:var(--success);color:var(--success);}
+.well-chip.lonely.active{background:rgba(245,158,11,.1);border-color:var(--amber);color:var(--amber);}
+.lecture-card{background:linear-gradient(135deg,rgba(14,165,233,.06),rgba(139,92,246,.04));border:1.5px solid var(--border-h);border-radius:var(--r);padding:1.1rem 1.2rem;margin-top:.75rem;animation:fadeUp .5s ease;}
+.daily-prog{display:flex;gap:.5rem;margin-top:.75rem;}
+.prog-item{flex:1;background:var(--bg-muted);border-radius:var(--r-sm);padding:.6rem .5rem;text-align:center;border:1px solid var(--border);}
+.prog-icon{font-size:1.2rem;display:block;margin-bottom:.2rem;}
+.prog-count{font-size:.8rem;font-weight:800;color:var(--p300);}
+.prog-label{font-size:.62rem;color:var(--muted);}
+</style>
+{% endblock %}
+
+{% block chartjs %}{% endblock %}
+
+{% block content %}
+<!-- Hero -->
+<div class="dash-hero">
+  <div class="hero-c">
+    <div style="font-size:.78rem;opacity:.6;margin-bottom:.15rem" id="js-date"></div>
+    <div style="font-size:1.3rem;font-weight:900;margin-bottom:.3rem" id="js-greeting">
+      {{ 'كيف حالك اليوم؟' if lang=='ar' else 'How are you today?' }}
+    </div>
+    <div style="font-size:.82rem;opacity:.72">{{ 'إجاباتك تبقى سرية تماماً 🔐' if lang=='ar' else 'Your answers are completely private 🔐' }}</div>
+    {% if session.anonymous_code %}
+    <div class="code-pill">
+      <i class="bi bi-shield-check"></i>
+      {{ 'رمزك: ' if lang=='ar' else 'Code: ' }}<b>{{ session.anonymous_code }}</b>
+    </div>
+    {% endif %}
+  </div>
+</div>
+
+<!-- Stats -->
+<div class="stats-grid mb-4">
+  {% set ri_col = 'danger' if risk_level in ('high','critical') else 'warning' if risk_level=='medium' else 'success' %}
+  <div class="stat-card info"><span class="stat-icon">📔</span>
+    <div class="stat-number" data-count="{{ journals|length }}">{{ journals|length }}</div>
+    <div class="stat-label">{{ 'يومياتي' if lang=='ar' else 'Journals' }}</div>
+  </div>
+  <div class="stat-card {{ ri_col }}">
+    <span class="stat-icon">{{ '🚨' if risk_level=='critical' else '🔴' if risk_level=='high' else '🟡' if risk_level=='medium' else '💚' }}</span>
+    <div class="stat-number">{{ latest_risk }}</div>
+    <div class="stat-label">{{ 'مؤشر الخطر /10' if lang=='ar' else 'Risk Score /10' }}</div>
+  </div>
+  <div class="stat-card success">
+    <span class="stat-icon">✅</span>
+    <div class="stat-number" data-count="{{ checkins|length }}">{{ checkins|length }}</div>
+    <div class="stat-label">{{ 'تسجيلاتي' if lang=='ar' else 'Check-ins' }}</div>
+  </div>
+  <div class="stat-card info">
+    <span class="stat-icon">📊</span>
+    <div class="stat-number" style="font-size:.85rem;padding-top:.5rem">
+      <span class="risk-badge risk-{{ risk_level }}">
+        {% if lang=='ar' %}{% if risk_level=='low' %}منخفض{% elif risk_level=='medium' %}متوسط{% elif risk_level=='high' %}مرتفع{% else %}حرج{% endif %}
+        {% else %}{{ risk_level|capitalize }}{% endif %}
+      </span>
+    </div>
+    <div class="stat-label">{{ 'المستوى' if lang=='ar' else 'Level' }}</div>
+  </div>
+</div>
+
+<!-- Daily progress -->
+<div class="daily-prog mb-3" id="daily-prog">
+  <div class="prog-item">
+    <span class="prog-icon">📔</span>
+    <div class="prog-count" id="j-count">—/5</div>
+    <div class="prog-label">{{ 'يوميات اليوم' if lang=='ar' else 'Today\'s journals' }}</div>
+  </div>
+  <div class="prog-item">
+    <span class="prog-icon">✅</span>
+    <div class="prog-count" id="c-count">—/1</div>
+    <div class="prog-label">{{ 'تسجيل اليوم' if lang=='ar' else 'Today\'s check-in' }}</div>
+  </div>
+  <div class="prog-item">
+    <span class="prog-icon">📋</span>
+    <div class="prog-count" id="s-count">—/2</div>
+    <div class="prog-label">{{ 'استبيان اليوم' if lang=='ar' else 'Today\'s survey' }}</div>
+  </div>
+</div>
+
+<div class="two-col mb-3">
+  <!-- Check-in card -->
+  <div>
+    <div class="sm-card h-100">
+      <div style="font-size:.92rem;font-weight:800;margin-bottom:.9rem;display:flex;align-items:center;gap:8px">
+        <i class="bi bi-emoji-smile-fill" style="color:var(--sky)"></i>
+        {{ 'كيف حالك الآن؟' if lang=='ar' else 'Daily Check-in' }}
+      </div>
+      <form method="POST" action="{{ url_for('checkin') }}" id="checkin-form">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+        <div style="font-size:.78rem;color:var(--muted);margin-bottom:.6rem;text-align:center">
+          {{ 'اختر مزاجك' if lang=='ar' else 'Choose your mood' }}
+        </div>
+        <div class="mood-selector" role="radiogroup">
+          {% for v,e,ar,en in [('1','😞','سيء جداً','Very bad'),('2','😔','سيء','Bad'),('3','😐','عادي','Okay'),('4','🙂','جيد','Good'),('5','😊','رائع','Great')] %}
+          <button type="button" class="mood-btn {% if loop.index==3 %}selected{% endif %}"
+                  onclick="selectMood(this,'{{ v }}')"
+                  aria-label="{{ ar if lang=='ar' else en }}" title="{{ ar if lang=='ar' else en }}"
+                  aria-pressed="{{ 'true' if loop.index==3 else 'false' }}">{{ e }}</button>
+          {% endfor %}
+        </div>
+        <input type="hidden" name="mood" id="mood-input" value="3">
+        <div style="display:flex;gap:.5rem;margin:.8rem 0">
+          <label class="well-chip safe" id="safe-chip" onclick="toggleChip(this,'safe','safe-chk')">
+            <input type="checkbox" name="feeling_safe" value="1" id="safe-chk" style="display:none">
+            🛡 {{ 'أشعر بالأمان' if lang=='ar' else 'Feel safe' }}
+          </label>
+          <label class="well-chip lonely" id="lonely-chip" onclick="toggleChip(this,'lonely','lonely-chk')">
+            <input type="checkbox" name="feeling_lonely" value="1" id="lonely-chk" style="display:none">
+            😔 {{ 'أشعر بالوحدة' if lang=='ar' else 'Feel lonely' }}
+          </label>
+        </div>
+        <div style="margin-bottom:.75rem">
+          <input type="text" name="notes" class="form-control"
+                 style="font-size:.82rem;padding:.42rem .85rem"
+                 placeholder="{{ 'كيف يسير يومك؟ (اختياري)' if lang=='ar' else 'How is your day? (optional)' }}"
+                 maxlength="200" dir="auto">
+        </div>
+        <button type="submit" class="btn-acc" onclick="playCelebrate()">
+          <i class="bi bi-check-circle-fill"></i>
+          {{ 'تسجيل حالتي' if lang=='ar' else 'Submit Check-in' }}
+        </button>
+      </form>
+      {% if prediction and prediction.trend != 'insufficient_data' %}
+      <div style="margin-top:.8rem;padding:.6rem .85rem;border-radius:var(--r-sm);font-size:.79rem;
+           {% if prediction.trend=='deteriorating' %}background:rgba(244,63,94,.07);border:1px solid rgba(244,63,94,.15);color:#9f1239;
+           {% elif prediction.trend=='improving' %}background:rgba(16,185,129,.07);border:1px solid rgba(16,185,129,.15);color:#065f46;
+           {% else %}background:var(--bg-muted);border:1px solid var(--border);color:var(--muted);{% endif %}">
+        <i class="bi bi-graph-up"></i> {{ prediction.message_ar if lang=='ar' else prediction.message_en }}
+      </div>
+      {% endif %}
+      <div style="margin-top:.7rem;text-align:center">
+        <a href="{{ url_for('survey') }}" class="btn-out" style="font-size:.75rem" onclick="playClick()">
+          <i class="bi bi-clipboard-check"></i> {{ 'أفضل الاستبيان' if lang=='ar' else 'Take survey instead' }}
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Chart card -->
+  <div>
+    <div class="sm-card h-100">
+      <div style="font-size:.92rem;font-weight:800;margin-bottom:.75rem;display:flex;align-items:center;justify-content:space-between">
+        <span><i class="bi bi-graph-up-arrow" style="color:var(--sky)"></i> {{ 'مؤشر الخطر' if lang=='ar' else 'Risk Trend' }}</span>
+        <span style="font-size:.72rem;color:var(--muted)">{{ '30 يوماً' if lang=='ar' else '30 Days' }}</span>
+      </div>
+      <div class="chart-wrap" style="height:195px"><canvas id="riskChart"></canvas></div>
+      {% if not chart_scores or chart_scores == '[]' %}
+      <div style="text-align:center;padding:1.5rem;color:var(--muted);font-size:.83rem">
+        <span style="font-size:2.5rem;display:block;margin-bottom:.4rem;animation:float 3s ease-in-out infinite">📔</span>
+        {{ 'ابدأ بكتابة يومياتك لرؤية البيانات' if lang=='ar' else 'Start journaling to see your data' }}
+      </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+<!-- Lecture of the day -->
+{% if lecture %}
+<div class="lecture-card mb-3">
+  <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:1rem;flex-wrap:wrap">
+    <div style="flex:1">
+      <div style="font-size:.7rem;font-weight:700;color:var(--sky);margin-bottom:.4rem;display:flex;align-items:center;gap:5px">
+        {{ '🎓' if lecture.cat=='skills' else '💙' if lecture.cat=='mental_health' else '🏃' if lecture.cat=='health' else '⭐' }}
+        {{ 'محاضرة اليوم' if lang=='ar' else 'Today\'s Lecture' }}
+      </div>
+      <div style="font-weight:800;font-size:.92rem;color:var(--sky)">
+        {{ lecture.title_ar if lang=='ar' else lecture.title_en }}
+      </div>
+      <div style="font-size:.75rem;color:var(--muted);margin-top:.25rem">{{ 'انقر للمشاهدة على يوتيوب' if lang=='ar' else 'Click to watch on YouTube' }}</div>
+    </div>
+    <a href="{{ lecture.url }}" target="_blank" rel="noopener" class="btn-pri" onclick="playClick()">
+      <i class="bi bi-play-circle-fill"></i>{{ 'شاهد' if lang=='ar' else 'Watch' }}
+    </a>
+  </div>
+</div>
+{% endif %}
+
+<!-- Recent journals -->
+<div class="sm-card mb-3">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem">
+    <div style="font-size:.92rem;font-weight:800;display:flex;align-items:center;gap:8px">
+      <i class="bi bi-journal-richtext" style="color:var(--sky)"></i>{{ 'آخر اليوميات' if lang=='ar' else 'Recent Journals' }}
+    </div>
+    <a href="{{ url_for('journal') }}" class="btn-pri" onclick="playClick()">
+      <i class="bi bi-plus-lg"></i>{{ 'يومية جديدة' if lang=='ar' else 'New Entry' }}
+    </a>
+  </div>
+  {% if journals %}
+  <div class="table-responsive">
+    <table class="sm-tbl">
+      <thead><tr>
+        <th>{{ 'التاريخ' if lang=='ar' else 'Date' }}</th>
+        <th>{{ 'المحتوى' if lang=='ar' else 'Content' }}</th>
+        <th>{{ 'المشاعر' if lang=='ar' else 'Emotion' }}</th>
+        <th>{{ 'الخطر' if lang=='ar' else 'Risk' }}</th>
+      </tr></thead>
+      <tbody>
+        {% for j in journals %}
+        <tr style="animation:fadeUp .3s ease {{ loop.index*0.06 }}s both">
+          <td style="white-space:nowrap;font-size:.74rem;color:var(--muted)">{{ j.created_at[:10] }}</td>
+          <td style="max-width:240px;font-size:.83rem">{{ j.content[:70] }}{% if j.content|length>70 %}…{% endif %}</td>
+          <td>{% if j.dominant_emotion %}<span class="badge-emo emo-{{ j.dominant_emotion }}" style="font-size:.68rem">{{ j.dominant_emotion }}</span>{% else %}—{% endif %}</td>
+          <td>{% if j.risk_score %}
+            <div style="display:flex;align-items:center;gap:5px">
+              <div class="rbar-wrap" style="width:44px"><div class="rbar-fill" data-score="{{ j.risk_score }}"></div></div>
+              <span style="font-size:.76rem;font-weight:700">{{ j.risk_score|round(1) }}</span>
+            </div>{% else %}—{% endif %}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div style="text-align:center;padding:2rem;color:var(--muted)">
+    <span style="font-size:2.8rem;display:block;margin-bottom:.5rem;animation:float 3s ease-in-out infinite">📔</span>
+    <div style="font-weight:700;margin-bottom:.5rem">{{ 'لم تكتب يومية بعد' if lang=='ar' else 'No journals yet' }}</div>
+    <a href="{{ url_for('journal') }}" class="btn-acc" style="display:inline-flex;width:auto;padding:.55rem 1.4rem" onclick="playClick()">
+      {{ 'ابدأ الآن 🎉' if lang=='ar' else 'Start Now 🎉' }}
+    </a>
+  </div>
+  {% endif %}
+</div>
+
+<!-- Quick tiles -->
+<div style="display:grid;grid-template-columns:repeat(5,1fr);gap:.6rem">
+  <a href="{{ url_for('journal') }}" class="q-tile blue" onclick="playClick()"><span class="ti">📔</span><div class="tl">{{ 'يومية' if lang=='ar' else 'Journal' }}</div><div class="ts">{{ 'اكتب' if lang=='ar' else 'Write' }}</div></a>
+  <a href="{{ url_for('companion') }}" class="q-tile green" onclick="playClick()"><span class="ti">🤖</span><div class="tl">{{ 'نور' if lang=='ar' else 'Nour' }}</div><div class="ts">{{ 'تحدث' if lang=='ar' else 'Chat' }}</div></a>
+  <a href="{{ url_for('survey') }}" class="q-tile warm" onclick="playClick()"><span class="ti">📋</span><div class="tl">{{ 'استبيان' if lang=='ar' else 'Survey' }}</div><div class="ts">{{ 'ملأ' if lang=='ar' else 'Fill' }}</div></a>
+  <a href="{{ url_for('student_stats') }}" class="q-tile acc" onclick="playClick()"><span class="ti">📊</span><div class="tl">{{ 'إحصاءاتي' if lang=='ar' else 'Stats' }}</div><div class="ts">{{ 'تحليل' if lang=='ar' else 'Analyze' }}</div></a>
+  <a href="{{ url_for('about') }}" class="q-tile rose" onclick="playClick()"><span class="ti">💡</span><div class="tl">{{ 'عن النظام' if lang=='ar' else 'About' }}</div><div class="ts">{{ 'تعرف' if lang=='ar' else 'Learn' }}</div></a>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+/* ── Time-based greeting ── */
+(function(){
+  const h=new Date().getHours(),l=document.documentElement.lang==='ar';
+  const g=l?(h<12?'صباح الخير ☀️ ':h<17?'مساء الخير 🌤 ':'مساء النور 🌙 '):(h<12?'Good morning ☀️ ':h<17?'Good afternoon 🌤 ':'Good evening 🌙 ');
+  const gEl=document.getElementById('js-greeting');if(gEl)gEl.textContent=g+(l?'كيف حالك اليوم؟':'How are you today?');
+  const dEl=document.getElementById('js-date');
+  if(dEl)dEl.textContent=new Date().toLocaleDateString(l?'ar-JO':'en-US',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+})();
+/* ── Chip toggle ── */
+function toggleChip(c,t,id){const chk=document.getElementById(id);if(chk){chk.checked=!chk.checked;c.classList.toggle('active',chk.checked);}playClick();}
+/* ── Chart ── */
+const sc={{ chart_scores|safe }},lb={{ chart_labels|safe }};
+if(sc&&sc.length){
+  const ctx=document.getElementById('riskChart')?.getContext('2d');
+  if(ctx&&typeof Chart!=='undefined'){
+    const grad=ctx.createLinearGradient(0,0,0,200);
+    grad.addColorStop(0,'rgba(139,92,246,.35)');grad.addColorStop(1,'rgba(139,92,246,.02)');
+    new Chart(ctx,{type:'line',data:{labels:lb,datasets:[{data:sc,borderColor:'#7c3aed',backgroundColor:grad,borderWidth:2.5,fill:true,tension:.4,pointRadius:5,pointBackgroundColor:sc.map(s=>s<2.5?'#10b981':s<5?'#f59e0b':s<7.5?'#ef4444':'#9d174d'),pointBorderColor:'#fff',pointBorderWidth:2,pointHoverRadius:8}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>`${c.parsed.y.toFixed(1)}/10`}}},scales:{y:{min:0,max:10,grid:{color:'rgba(0,0,0,.04)'},ticks:{callback:v=>v.toFixed(0)}},x:{grid:{display:false},ticks:{maxTicksLimit:6}}}}});
+  }
+}
+/* ── Daily status ── */
+fetch('/api/daily-status').then(r=>r.json()).then(d=>{
+  const j=document.getElementById('j-count'),c=document.getElementById('c-count'),s=document.getElementById('s-count');
+  if(j)j.textContent=d.journals_today+'/'+d.journals_max;
+  if(c)c.textContent=d.checkins_today+'/'+d.checkins_max;
+  if(s)s.textContent=d.surveys_today+'/'+d.surveys_max;
+}).catch(()=>{});
+</script>
+{% endblock %}

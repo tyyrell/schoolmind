@@ -1,0 +1,334 @@
+{% extends "base.html" %}
+{% block title %}{{ 'استبيان الحالة النفسية' if lang=='ar' else 'Wellbeing Survey' }}{% endblock %}
+{% block topbar_title %}{{ '📋 استبيان سريع' if lang=='ar' else '📋 Quick Wellbeing Survey' }}{% endblock %}
+
+{% block extra_head %}
+<style>
+.survey-wrap { max-width:660px; margin:0 auto; }
+.q-card {
+  background:var(--bg-card); border-radius:var(--r);
+  border:1px solid var(--border); padding:1.3rem 1.4rem;
+  margin-bottom:.8rem; animation:fadeUp .4s ease both;
+  transition:border-color var(--tr), box-shadow var(--tr);
+}
+.q-card:hover { border-color:var(--border-h); box-shadow:var(--sh-sm); }
+.q-card:nth-child(2){animation-delay:.07s;} .q-card:nth-child(3){animation-delay:.14s;}
+.q-card:nth-child(4){animation-delay:.21s;} .q-card:nth-child(5){animation-delay:.28s;}
+.q-header { display:flex; align-items:center; gap:10px; margin-bottom:.8rem; }
+.q-num {
+  width:30px; height:30px; border-radius:50%;
+  background:var(--grad-sky); color:#fff;
+  display:flex; align-items:center; justify-content:center;
+  font-size:.78rem; font-weight:800; flex-shrink:0;
+}
+.q-text { font-size:.9rem; font-weight:700; }
+.scale-row { display:flex; gap:7px; }
+.scale-btn {
+  flex:1; padding:.6rem .3rem; text-align:center;
+  border:2px solid var(--border); border-radius:var(--r-sm);
+  background:var(--bg-muted); color:var(--muted);
+  cursor:pointer; font-size:.8rem; font-weight:700;
+  font-family:var(--ff); transition:all .22s; position:relative;
+}
+.scale-btn:hover { border-color:var(--sky); color:var(--sky); background:var(--sky-xl); transform:translateY(-2px); }
+.scale-btn.sel {
+  border-color:var(--sky); background:rgba(14,165,233,.15);
+  color:var(--sky-d); transform:translateY(-3px);
+  box-shadow:0 4px 14px rgba(14,165,233,.25);
+}
+.scale-labels { display:flex; justify-content:space-between; font-size:.68rem; color:var(--muted); margin-top:.3rem; padding:0 2px; }
+
+/* Progress indicator */
+.survey-progress { display:flex; gap:6px; margin-bottom:1rem; align-items:center; }
+.prog-dot {
+  width:10px; height:10px; border-radius:50%;
+  background:var(--border); transition:all .3s;
+}
+.prog-dot.answered { background:var(--sky); transform:scale(1.2); }
+.prog-dot.all-done { background:var(--success); }
+
+/* Result card */
+.result-card {
+  border-radius:var(--r); padding:1.6rem;
+  margin-bottom:1rem; animation:bounceIn .6s ease;
+  position:relative; overflow:hidden;
+}
+.result-card.low    { background:linear-gradient(135deg,#f0fdf4,#dcfce7); border:2px solid #bbf7d0; }
+.result-card.medium { background:linear-gradient(135deg,#fffbeb,#fef3c7); border:2px solid #fde68a; }
+.result-card.high   { background:linear-gradient(135deg,#fff5f5,#fee2e2); border:2px solid #fecaca; }
+.result-card.critical { background:linear-gradient(135deg,#fdf2f8,#fce7f3); border:2px solid #fbcfe8; }
+[data-theme="dark"] .result-card.low    { background:rgba(16,185,129,.1); border-color:rgba(16,185,129,.3); }
+[data-theme="dark"] .result-card.medium { background:rgba(245,158,11,.1); border-color:rgba(245,158,11,.3); }
+[data-theme="dark"] .result-card.high   { background:rgba(239,68,68,.1);  border-color:rgba(239,68,68,.3); }
+[data-theme="dark"] .result-card.critical { background:rgba(157,23,77,.1); border-color:rgba(157,23,77,.3); }
+
+.result-score {
+  font-size:3.5rem; font-weight:900; line-height:1; letter-spacing:-2px;
+}
+.breakdown-bar { height:10px; border-radius:20px; background:var(--border); overflow:hidden; margin-top:.4rem; }
+.breakdown-fill { height:100%; border-radius:20px; transition:width 1s cubic-bezier(.4,0,.2,1); }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="survey-wrap">
+
+  <!-- Result (shows after submission) -->
+  {% if result %}
+  <div class="result-card {{ result.level }}" id="survey-result">
+    <div style="display:flex;align-items:center;gap:1.5rem;flex-wrap:wrap">
+      <div style="text-align:center;min-width:90px">
+        <div class="result-score" style="color:{{ result.color }}">{{ result.score }}</div>
+        <div style="font-size:.8rem;color:var(--muted);font-weight:600">/10</div>
+        <div style="font-size:1.4rem;margin-top:.3rem">{{ result.emoji }}</div>
+      </div>
+      <div style="flex:1">
+        <div style="font-size:1.05rem;font-weight:800;margin-bottom:.4rem">
+          {% if lang=='ar' %}
+            {% if result.level=='low' %}✅ حالة جيدة{% elif result.level=='medium' %}⚠️ تحتاج متابعة{% elif result.level=='high' %}🔴 خطر مرتفع{% else %}🚨 يحتاج تدخلاً فورياً{% endif %}
+          {% else %}
+            {% if result.level=='low' %}✅ Good Condition{% elif result.level=='medium' %}⚠️ Needs Attention{% elif result.level=='high' %}🔴 High Risk{% else %}🚨 Needs Immediate Support{% endif %}
+          {% endif %}
+        </div>
+        <div style="font-size:.85rem;color:var(--muted);margin-bottom:.7rem">
+          {{ 'المؤشر الرئيسي: ' if lang=='ar' else 'Main concern: ' }}
+          <strong style="color:{{ result.color }}">
+            {% if lang=='ar' %}{{ result.concern_ar }}{% else %}{{ result.concern_en }}{% endif %}
+          </strong>
+        </div>
+        <!-- Breakdown bars -->
+        {% set bars = [
+          ('mood',    'المزاج','Mood',       '#8b5cf6'),
+          ('stress',  'التوتر','Stress',     '#f59e0b'),
+          ('safety',  'الأمان','Safety',     '#10b981'),
+          ('lonely',  'الوحدة','Loneliness', '#3b82f6'),
+          ('fatigue', 'الإرهاق','Fatigue',   '#f97316'),
+        ] %}
+        {% for key, ar_l, en_l, col in bars %}
+        <div style="margin-bottom:.4rem">
+          <div style="display:flex;justify-content:space-between;font-size:.72rem;margin-bottom:.2rem">
+            <span style="color:var(--muted)">{{ ar_l if lang=='ar' else en_l }}</span>
+            <span style="font-weight:700;color:{{ col }}">{{ result.breakdown.get(key, 0) }}/8</span>
+          </div>
+          <div class="breakdown-bar">
+            <div class="breakdown-fill" style="width:{{ ((result.breakdown.get(key, 0) or 0)/8*100)|round }}%;background:{{ col }}"></div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+
+    <!-- Advice -->
+    <!-- FIX #3 CRITICAL: Removed invalid CSS comment that showed as raw text in HTML -->
+    <div style="margin-top:1rem;padding:.9rem;background:rgba(255,255,255,.5);border-radius:var(--r-sm);font-size:.85rem;line-height:1.75">
+      <strong>💡 {{ 'نصيحة لك:' if lang=='ar' else 'Tip for you:' }}</strong><br>
+      {% if result.level == 'low' %}
+        {{ 'حالتك جيدة! استمر في العناية بنفسك وتواصل مع من تحب. 💚' if lang=='ar' else "You're in a good place! Keep taking care of yourself. 💚" }}
+      {% elif result.level == 'medium' %}
+        {{ 'لاحظنا بعض المؤشرات. جرّب تمارين التنفس والتحدث مع شخص تثق به. 💛' if lang=='ar' else 'Some indicators need attention. Try breathing exercises and talk to someone you trust. 💛' }}
+      {% elif result.level == 'high' %}
+        {{ 'يُنصح بالتحدث مع المرشد المدرسي قريباً. أنت لست وحدك. 🔴' if lang=='ar' else 'We recommend talking to your counselor soon. You are not alone. 🔴' }}
+      {% else %}
+        {{ 'يُرجى التواصل مع المرشد المدرسي اليوم. صحتك النفسية هي الأولوية. 🚨' if lang=='ar' else 'Please reach out to your counselor today. Your mental health matters. 🚨' }}
+      {% endif %}
+    </div>
+
+    {% if result.should_alert %}
+    <div style="margin-top:.7rem;padding:.5rem .8rem;background:rgba(239,68,68,.1);border-radius:var(--r-sm);font-size:.76rem;color:var(--danger);border:1px solid rgba(239,68,68,.2)">
+      <i class="bi bi-bell-fill"></i>
+      {{ ' تم إرسال تنبيه مجهول للمرشد المدرسي.' if lang=='ar' else ' Anonymous alert sent to school counselor.' }}
+    </div>
+    {% endif %}
+
+    <div style="display:flex;gap:.6rem;margin-top:.9rem;flex-wrap:wrap">
+      <a href="{{ url_for('companion') }}" class="btn-pri" onclick="playClick()">
+        <i class="bi bi-chat-heart-fill"></i>
+        {{ 'تحدث مع نور' if lang=='ar' else 'Chat with Nour' }}
+      </a>
+      <a href="{{ url_for('student_dashboard') }}" class="btn-out" onclick="playClick()">
+        <i class="bi bi-house-fill"></i>
+        {{ 'الرئيسية' if lang=='ar' else 'Dashboard' }}
+      </a>
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- Survey card header -->
+  {% if not result %}
+  <div class="sm-card" style="margin-bottom:1rem;background:linear-gradient(135deg,var(--sky-xl),rgba(16,185,129,.05));border-color:var(--border-h)">
+    <div style="font-size:1rem;font-weight:800;margin-bottom:.35rem">
+      <i class="bi bi-clipboard-heart-fill" style="color:var(--sky)"></i>
+      {{ ' استبيان الحالة النفسية' if lang=='ar' else ' Wellbeing Survey' }}
+    </div>
+    <div style="font-size:.83rem;color:var(--muted)">
+      {{ 'أجب على هذه الأسئلة البسيطة. إجاباتك سرية تماماً.' if lang=='ar' else 'Answer these simple questions. Your answers are completely private.' }}
+    </div>
+  </div>
+
+  <!-- Progress dots -->
+  <div class="survey-progress">
+    <span style="font-size:.74rem;color:var(--muted);margin-left:.3rem">0/5</span>
+    {% for i in range(5) %}
+    <div class="prog-dot" id="dot-{{ i+1 }}"></div>
+    {% endfor %}
+    <span id="prog-text" style="font-size:.74rem;color:var(--muted);margin-right:.3rem"></span>
+  </div>
+  {% endif %}
+
+  <!-- Form -->
+  <form method="POST" action="{{ url_for('survey') }}" id="survey-form">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+
+    {% set questions = [
+      ('q1','1','كيف تشعر بشكل عام هذه الأيام؟','How are you feeling in general lately?','😞 سيء جداً','😊 رائع جداً','😞 Very bad','😊 Very great','😃'),
+      ('q2','2','كم مستوى توترك وقلقك؟','How stressed or anxious are you?','🧘 لا توتر','😰 توتر شديد','🧘 No stress','😰 Very stressed','😟'),
+      ('q3','3','هل تشعر بالأمان في مدرستك؟','Do you feel safe at your school?','😨 لا أبداً','🛡 نعم تماماً','😨 Not at all','🛡 Completely safe','🛡'),
+      ('q4','4','كم مرة تشعر بالوحدة؟','How often do you feel lonely?','😢 دائماً','🤝 أبداً','😢 Always','🤝 Never','🤝'),
+      ('q5','5','كيف تقيّم طاقتك هذا الأسبوع؟','How is your energy this week?','😴 منهك جداً','⚡ نشيط جداً','😴 Exhausted','⚡ Very energetic','⚡'),
+    ] %}
+
+    {% for qname, qnum, ar_q, en_q, ar_low, ar_high, en_low, en_high, qicon in questions %}
+    <div class="q-card" id="card-{{ qname }}">
+      <div class="q-header">
+        <div class="q-num">{{ qnum }}</div>
+        <div class="q-text">{{ ar_q if lang=='ar' else en_q }}</div>
+      </div>
+      <div class="scale-row" id="row-{{ qname }}" role="radiogroup"
+           aria-label="{{ ar_q if lang=='ar' else en_q }}">
+        {% for v in range(1,6) %}
+        <button type="button"
+                class="scale-btn {% if result and request.form.get(qname, '') == v|string %}sel{% endif %}"
+                data-q="{{ qname }}" data-v="{{ v }}"
+                aria-label="{{ v }}"
+                onclick="pick('{{ qname }}', {{ v }}, {{ loop.index0 }})">
+          {{ v }}
+        </button>
+        {% endfor %}
+        <input type="hidden" name="{{ qname }}" id="{{ qname }}-val"
+               value="{{ request.form.get(qname, '') }}">
+      </div>
+      <div class="scale-labels">
+        <span>{{ ar_low if lang=='ar' else en_low }}</span>
+        <span>{{ ar_high if lang=='ar' else en_high }}</span>
+      </div>
+    </div>
+    {% endfor %}
+
+    <div class="sm-card" style="margin-bottom:.8rem">
+      <div style="font-size:.88rem;font-weight:700;margin-bottom:.6rem;display:flex;align-items:center;gap:7px">
+        <i class="bi bi-chat-text-fill" style="color:var(--sky)"></i>
+        {{ 'ملاحظات إضافية (اختياري)' if lang=='ar' else 'Additional notes (optional)' }}
+      </div>
+      <textarea name="notes" class="form-control" rows="3" dir="auto" maxlength="500"
+                placeholder="{{ 'هل هناك شيء آخر تريد مشاركته؟' if lang=='ar' else 'Anything else you want to share?' }}"></textarea>
+      <div style="font-size:.7rem;color:var(--muted);margin-top:.3rem;text-align:left" dir="ltr" id="notes-count">0/500</div>
+    </div>
+
+    <button type="submit" class="btn-acc" id="submit-btn" onclick="playCelebrate()">
+      <i class="bi bi-send-fill"></i>
+      {{ 'إرسال الاستبيان' if lang=='ar' else 'Submit Survey' }}
+    </button>
+  </form>
+
+  <div style="text-align:center;margin-top:1rem">
+    <a href="{{ url_for('journal') }}" class="btn-out" onclick="playClick()">
+      <i class="bi bi-journal-text"></i>
+      {{ 'أفضّل كتابة يومية بدلاً من ذلك' if lang=='ar' else 'Write a journal instead' }}
+    </a>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+const L = document.documentElement.lang === 'ar';
+let answeredCount = 0;
+const totalQ = 5;
+
+function pick(q, v, qIdx) {
+  // Update buttons
+  document.querySelectorAll(`[data-q="${q}"]`).forEach(b => {
+    b.classList.toggle('sel', parseInt(b.dataset.v) === v);
+  });
+  // Update hidden input
+  const inp = document.getElementById(`${q}-val`);
+  const wasEmpty = !inp.value;
+  inp.value = v;
+  playClick();
+
+  // Update progress
+  if (wasEmpty) {
+    answeredCount++;
+    updateProgress();
+  }
+
+  // Visual pulse on card
+  const card = document.getElementById(`card-${q}`);
+  if (card) {
+    card.style.borderColor = 'var(--sky)';
+    card.style.boxShadow = '0 0 0 3px rgba(14,165,233,.12)';
+    setTimeout(() => {
+      card.style.borderColor = '';
+      card.style.boxShadow = '';
+    }, 600);
+  }
+}
+
+function updateProgress() {
+  document.querySelectorAll('.prog-dot').forEach((dot, i) => {
+    const qVal = document.getElementById(`q${i+1}-val`)?.value;
+    dot.classList.toggle('answered', !!qVal);
+    dot.classList.toggle('all-done', answeredCount === totalQ);
+  });
+  const text = document.getElementById('prog-text');
+  if (text) {
+    text.textContent = `${answeredCount}/${totalQ}`;
+    text.style.color = answeredCount === totalQ ? 'var(--success)' : 'var(--muted)';
+  }
+}
+
+// Notes character count
+document.querySelector('[name="notes"]')?.addEventListener('input', function() {
+  const el = document.getElementById('notes-count');
+  if (el) el.textContent = this.value.length + '/500';
+});
+
+// Validate all questions answered before submit
+document.getElementById('survey-form')?.addEventListener('submit', function(e) {
+  const qs = ['q1', 'q2', 'q3', 'q4', 'q5'];
+  for (const q of qs) {
+    const val = document.getElementById(`${q}-val`)?.value;
+    if (!val) {
+      e.preventDefault();
+      alert(L
+        ? '⚠️ يرجى الإجابة على جميع الأسئلة قبل الإرسال'
+        : '⚠️ Please answer all questions before submitting');
+      document.getElementById(`card-${q}`)?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      playWarn();
+      return;
+    }
+  }
+  const btn = document.getElementById('submit-btn');
+  if (btn) {
+    btn.disabled = true;
+    btn.innerHTML = `<div class="spin-sm"></div> ${L ? 'جاري التحليل...' : 'Analyzing...'}`;
+  }
+});
+
+// Initialize progress on load
+document.addEventListener('DOMContentLoaded', () => {
+  ['q1','q2','q3','q4','q5'].forEach((q, i) => {
+    if (document.getElementById(`${q}-val`)?.value) {
+      answeredCount++;
+    }
+  });
+  updateProgress();
+});
+
+{% if result %}
+// Scroll to result
+document.getElementById('survey-result')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+playCelebrate();
+{% endif %}
+</script>
+{% endblock %}

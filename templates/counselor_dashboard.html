@@ -1,0 +1,172 @@
+{% extends "base.html" %}
+{% block title %}{{ 'لوحة المرشد' if lang=='ar' else 'Counselor Dashboard' }}{% endblock %}
+{% block topbar_title %}{{ '📊 لوحة تحكم المرشد' if lang=='ar' else '📊 Counselor Dashboard' }}{% endblock %}
+
+{% block content %}
+<!-- Stats -->
+<div class="stats-grid mb-4">
+  <div class="stat-card danger"><span class="stat-icon">🚨</span>
+    <div class="stat-number">{{ students|selectattr('latest_level','in',['high','critical'])|list|length }}</div>
+    <div class="stat-label">{{ 'خطر مرتفع' if lang=='ar' else 'High Risk' }}</div>
+  </div>
+  <div class="stat-card warning">
+    <span class="stat-icon">⚠️</span>
+    <div class="stat-number">{{ students|selectattr('latest_level','equalto','medium')|list|length }}</div>
+    <div class="stat-label">{{ 'متوسط' if lang=='ar' else 'Medium Risk' }}</div>
+  </div>
+  <div class="stat-card warning"><span class="stat-icon">🔔</span>
+    <div class="stat-number">{{ new_alerts }}</div>
+    <div class="stat-label">{{ 'تنبيهات جديدة' if lang=='ar' else 'New Alerts' }}</div>
+  </div>
+  <div class="stat-card info">
+    <span class="stat-icon">👥</span>
+    <div class="stat-number">{{ students|length }}</div>
+    <div class="stat-label">{{ 'إجمالي الطلاب' if lang=='ar' else 'Total Students' }}</div>
+  </div>
+</div>
+
+<div class="two-col">
+  <!-- Students table -->
+  <div>
+    <div class="sm-card">
+      <div style="font-size:.95rem;font-weight:800;margin-bottom:.75rem;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.5rem">
+        <span><i class="bi bi-people-fill" style="color:var(--pri)"></i> {{ 'الطلاب — مرتبون حسب الخطر' if lang=='ar' else 'Students — Sorted by Risk' }}</span>
+        <div style="display:flex;gap:.5rem;align-items:center;flex-wrap:wrap">
+          <input type="text" id="student-search" class="form-control" style="width:180px;padding:.35rem .7rem;font-size:.8rem"
+                 placeholder="{{ '🔍 بحث...' if lang=='ar' else '🔍 Search...' }}"
+                 oninput="filterStudents(this.value)">
+          <a href="{{ url_for('export_csv') }}" class="btn-pri" style="padding:.35rem .8rem;font-size:.78rem" onclick="playClick()">
+            <i class="bi bi-download"></i> {{ 'CSV' }}
+          </a>
+        </div>
+      </div>
+      {% if students %}
+      <div class="table-responsive">
+        <table class="sm-tbl" id="students-table">
+          <thead><tr>
+            <th>{{ 'الرمز' if lang=='ar' else 'Code' }}</th>
+            <th>{{ 'الصف' if lang=='ar' else 'Grade' }}</th>
+            <th>{{ 'مؤشر الخطر' if lang=='ar' else 'Risk' }}</th>
+            <th>{{ 'المستوى' if lang=='ar' else 'Level' }}</th>
+            <th>{{ 'يوميات' if lang=='ar' else 'Journals' }}</th>
+            <th>{{ 'آخر نشاط' if lang=='ar' else 'Last Active' }}</th>
+            <th></th>
+          </tr></thead>
+          <tbody>
+            {% for s in students %}
+            <tr style="animation:fadeUp .3s ease {{ loop.index*0.05 }}s both">
+              <td><span style="font-family:monospace;font-weight:800;font-size:.82rem;color:var(--pri)">{{ s.anonymous_code or 'S-????' }}</span></td>
+              <td style="font-size:.8rem;color:var(--muted)">{{ s.grade or '—' }}</td>
+              <td>
+                <div style="display:flex;align-items:center;gap:6px">
+                  <div class="rbar-wrap" style="width:50px"><div class="rbar-fill" data-score="{{ s.latest_risk or 0 }}"></div></div>
+                  <span style="font-size:.8rem;font-weight:700">{{ (s.latest_risk or 0)|round(0)|int }}</span>
+                </div>
+              </td>
+              <td><span class="risk-badge risk-{{ s.latest_level or 'low' }}">
+                {% if lang=='ar' %}{% if s.latest_level=='low' or not s.latest_level %}منخفض{% elif s.latest_level=='medium' %}متوسط{% elif s.latest_level=='high' %}مرتفع{% else %}حرج{% endif %}
+                {% else %}{{ (s.latest_level or 'low')|capitalize }}{% endif %}
+              </span></td>
+              <td style="font-size:.82rem">{{ s.journal_count or 0 }}</td>
+              <td style="font-size:.74rem;color:var(--muted)">{{ (s.last_entry or '—')[:10] }}</td>
+              <td>
+                <a href="{{ url_for('student_detail', uid=s.id) }}" class="btn-pri" style="padding:.28rem .65rem;font-size:.74rem" onclick="playClick()">
+                  <i class="bi bi-eye-fill"></i>
+                </a>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% else %}
+      <div style="text-align:center;padding:2.5rem;color:var(--muted)">
+        <div style="font-size:2.5rem;margin-bottom:.5rem;animation:float 3s ease-in-out infinite">👥</div>
+        {{ 'لا يوجد طلاب مسجلون بعد' if lang=='ar' else 'No students registered yet' }}
+      </div>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Right column -->
+  <div>
+    <!-- Chart -->
+    <div class="sm-card" style="margin-bottom:.75rem">
+      <div style="font-size:.9rem;font-weight:800;margin-bottom:.8rem">
+        <i class="bi bi-pie-chart-fill" style="color:var(--pri)"></i>
+        {{ ' توزيع مستوى الخطر' if lang=='ar' else ' Risk Distribution' }}
+      </div>
+      <div class="chart-wrap" style="height:185px">
+        <canvas id="distChart"></canvas>
+      </div>
+    </div>
+
+    <!-- Alerts -->
+    <div class="sm-card">
+      <div style="font-size:.9rem;font-weight:800;margin-bottom:.8rem;display:flex;align-items:center;justify-content:space-between">
+        <span><i class="bi bi-bell-fill" style="color:var(--danger)"></i> {{ 'التنبيهات' if lang=='ar' else 'Alerts' }}</span>
+        {% if new_alerts > 0 %}
+        <span style="background:var(--danger);color:#fff;font-size:.68rem;padding:.15rem .5rem;border-radius:10px;font-weight:700;animation:pulse 2s ease infinite">
+          {{ new_alerts }} {{ 'جديد' if lang=='ar' else 'new' }}
+        </span>
+        {% endif %}
+      </div>
+
+      {% if alerts %}
+        {% for a in alerts[:8] %}
+        <div class="alert-item {{ a.risk_level or 'low' }}">
+          <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px">
+            <div style="flex:1">
+              <div style="display:flex;align-items:center;gap:6px;margin-bottom:.2rem;flex-wrap:wrap">
+                <span style="font-family:monospace;font-size:.78rem;font-weight:800;color:var(--pri)">{{ a.anonymous_code }}</span>
+                <span class="risk-badge risk-{{ a.risk_level or 'low' }}" style="font-size:.65rem">{{ a.risk_level or 'low' }}</span>
+                {% if a.status == 'new' %}<span style="background:rgba(239,68,68,.15);color:var(--danger);font-size:.62rem;padding:.1rem .4rem;border-radius:6px;font-weight:700;animation:pulse 2s ease infinite">{{ 'جديد' if lang=='ar' else 'NEW' }}</span>{% endif %}
+              </div>
+              <div style="font-size:.76rem;color:var(--muted)">{{ (a.summary or '')[:65] }}…</div>
+              <div style="font-size:.68rem;color:var(--muted);margin-top:.15rem">{{ (a.created_at or '')[:16] }}</div>
+            </div>
+          </div>
+          {% if a.status == 'new' %}
+          <form method="POST" action="{{ url_for('update_alert', aid=a.id) }}" style="margin-top:.45rem">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+            <div style="display:flex;gap:5px">
+              <input type="hidden" name="status" value="reviewed">
+              <button type="submit" class="btn-out" style="font-size:.71rem;padding:.2rem .55rem" onclick="playClick()">✓ {{ 'مراجعة' if lang=='ar' else 'Review' }}</button>
+              <button type="submit" class="btn-pri" style="font-size:.71rem;padding:.2rem .55rem" onclick="this.previousElementSibling.value='handled';playOk()">
+                <i class="bi bi-check2-all"></i> {{ 'تم' if lang=='ar' else 'Done' }}
+              </button>
+            </div>
+          </form>
+          {% endif %}
+        </div>
+        {% endfor %}
+      {% else %}
+      <div style="text-align:center;padding:1.5rem;color:var(--muted);font-size:.84rem">
+        <div style="font-size:1.8rem;margin-bottom:.3rem;animation:float 3s ease-in-out infinite">✅</div>
+        {{ 'لا توجد تنبيهات حالياً' if lang=='ar' else 'No alerts at this time' }}
+      </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block chartjs %}{% endblock %}
+{% block scripts %}
+<script>
+const dd={{ chart_dist|safe }};
+const ctx=document.getElementById('distChart').getContext('2d');
+new Chart(ctx,{type:'doughnut',data:{
+  labels:['{{ "منخفض" if lang=="ar" else "Low" }}','{{ "متوسط" if lang=="ar" else "Medium" }}','{{ "مرتفع" if lang=="ar" else "High" }}'],
+  datasets:[{data:dd,backgroundColor:['#10b981','#f59e0b','#ef4444'],borderColor:'var(--bg-card)',borderWidth:4,hoverOffset:8}]
+},options:{responsive:true,maintainAspectRatio:false,cutout:'68%',plugins:{legend:{position:'bottom',labels:{padding:14,font:{size:12}}},tooltip:{callbacks:{label:c=>` ${c.label}: ${c.parsed} {{ "طالب" if lang=="ar" else "students" }}`}}}}});
+
+function filterStudents(q){
+  q=q.toLowerCase();
+  document.querySelectorAll('#students-table tbody tr').forEach(row=>{
+    const text=row.textContent.toLowerCase();
+    row.style.display=text.includes(q)?'':'none';
+  });
+}
+</script>
+{% endblock %}

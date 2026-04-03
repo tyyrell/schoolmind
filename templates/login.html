@@ -1,0 +1,213 @@
+{% extends "base.html" %}
+{% block title %}{{ 'تسجيل الدخول' if lang=='ar' else 'Sign In' }} — SchoolMind AI{% endblock %}
+
+{% block auth_content %}
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Cairo','Poppins',sans-serif;}
+
+/* ── FIX: allow scrolling ── */
+html,body{height:auto;min-height:100vh;overflow-y:auto!important;overflow-x:hidden;}
+
+[data-theme="dark"] .scene{background:linear-gradient(145deg,#030012 0%,#12003e 40%,#2e0870 75%,#5b21b6 100%)!important;}
+[data-theme="dark"] .login-card{background:rgba(255,255,255,.05)!important;border-color:rgba(139,92,246,.3)!important;}
+.scene{
+  min-height:100vh;width:100%;
+  background:linear-gradient(145deg,#020d1c 0%,#041e38 35%,#0a3d62 65%,#0ea5e9 100%);
+  display:flex;align-items:center;justify-content:center;
+  padding:1.5rem 1rem;position:relative;overflow:hidden;
+}
+.blob{position:absolute;border-radius:50%;filter:blur(70px);pointer-events:none;opacity:.5;}
+.blob1{width:480px;height:480px;background:radial-gradient(circle,rgba(14,165,233,.45),rgba(6,182,212,.15));top:-130px;right:-90px;animation:morph 12s ease-in-out infinite;}
+.blob2{width:360px;height:360px;background:radial-gradient(circle,rgba(16,185,129,.35),rgba(20,184,166,.1));bottom:-90px;left:-70px;animation:morph 15s ease-in-out infinite reverse;}
+.blob3{width:260px;height:260px;background:radial-gradient(circle,rgba(245,158,11,.25),transparent);top:40%;left:5%;animation:float 9s ease-in-out infinite;filter:blur(55px);}
+.grid-bg{position:absolute;inset:0;background-image:linear-gradient(rgba(14,165,233,.05) 1px,transparent 1px),linear-gradient(90deg,rgba(14,165,233,.05) 1px,transparent 1px);background-size:44px 44px;}
+
+.float-icon{position:absolute;font-size:1.8rem;pointer-events:none;opacity:.16;animation:float linear infinite;}
+
+/* ── TOP BAR for quick settings ── */
+.top-bar{
+  position:fixed;top:0;right:0;left:0;z-index:9999;
+  display:flex;justify-content:flex-end;gap:.5rem;
+  padding:.55rem 1.2rem;
+  background:rgba(2,13,28,.4);
+  backdrop-filter:blur(12px);
+}
+[dir="rtl"] .top-bar{flex-direction:row;}
+.top-bar-btn{
+  display:flex;align-items:center;gap:5px;
+  padding:.32rem .75rem;border-radius:20px;
+  border:1px solid rgba(14,165,233,.25);
+  background:rgba(14,165,233,.1);
+  color:rgba(255,255,255,.7);
+  font-size:.75rem;font-family:'Cairo','Poppins',sans-serif;
+  cursor:pointer;text-decoration:none;
+  transition:all .2s;
+}
+.top-bar-btn:hover{background:rgba(14,165,233,.25);color:#fff;transform:translateY(-1px);}
+
+/* ── Card ── */
+.login-card{
+  background:rgba(255,255,255,.07);
+  backdrop-filter:blur(28px) saturate(180%);-webkit-backdrop-filter:blur(28px);
+  border:1px solid rgba(14,165,233,.22);border-radius:26px;
+  padding:2.5rem 2.2rem;width:100%;max-width:440px;
+  box-shadow:0 30px 100px rgba(0,0,0,.45),inset 0 1px 0 rgba(255,255,255,.1);
+  position:relative;z-index:1;animation:bounceIn .7s cubic-bezier(.34,1.56,.64,1);
+  margin-top:3.5rem;/* leave room for top-bar */
+}
+.login-card::before{content:'';position:absolute;inset:0;border-radius:26px;background:linear-gradient(135deg,rgba(14,165,233,.07) 0%,transparent 60%);pointer-events:none;}
+
+/* Dual logos in card header */
+.card-logos{display:flex;align-items:center;justify-content:center;gap:12px;margin-bottom:1rem;}
+.card-logo-img{height:44px;width:auto;max-width:100px;object-fit:contain;filter:drop-shadow(0 2px 8px rgba(14,165,233,.4));}
+
+.logo-ring{
+  width:76px;height:76px;border-radius:50%;
+  background:linear-gradient(135deg,#0ea5e9,#38bdf8,#10b981);
+  display:flex;align-items:center;justify-content:center;font-size:2.1rem;
+  margin:0 auto 1.1rem;
+  box-shadow:0 8px 28px rgba(14,165,233,.55),0 0 0 8px rgba(14,165,233,.1);
+  animation:float 4s ease-in-out infinite,glow-sky 3s ease-in-out infinite;
+  position:relative;
+}
+.logo-ring::after{content:'';position:absolute;inset:-7px;border-radius:50%;border:2px solid rgba(14,165,233,.28);animation:breathe 3.5s ease-in-out infinite;}
+
+.card-title{text-align:center;font-size:1.5rem;font-weight:900;background:linear-gradient(135deg,#fff 30%,rgba(56,189,248,.9));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:.2rem;}
+.card-sub{text-align:center;font-size:.79rem;color:rgba(255,255,255,.45);margin-bottom:1.5rem;line-height:1.6;}
+
+.ai-status{display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:1.4rem;font-size:.72rem;color:rgba(56,189,248,.65);}
+.wav{display:flex;gap:2px;align-items:center;}
+.wav span{width:3px;background:rgba(14,165,233,.7);border-radius:2px;animation:waveBar .8s ease-in-out infinite;}
+.wav span:nth-child(1){height:8px;}.wav span:nth-child(2){height:14px;animation-delay:.1s;}
+.wav span:nth-child(3){height:10px;animation-delay:.2s;}.wav span:nth-child(4){height:16px;animation-delay:.3s;}
+.wav span:nth-child(5){height:8px;animation-delay:.4s;}
+
+.inp-group{margin-bottom:1.05rem;position:relative;}
+.inp-label{display:block;font-size:.8rem;font-weight:700;color:rgba(255,255,255,.58);margin-bottom:.32rem;}
+.inp-field{width:100%;padding:.73rem 1rem .73rem 2.8rem;background:rgba(255,255,255,.07);border:1.5px solid rgba(14,165,233,.18);border-radius:12px;color:#fff;font-family:'Cairo','Poppins',sans-serif;font-size:.9rem;transition:all .25s;}
+[dir="ltr"] .inp-field{padding:.73rem 2.8rem .73rem 1rem;}
+.inp-field::placeholder{color:rgba(255,255,255,.26);}
+.inp-field:focus{border-color:rgba(14,165,233,.65);background:rgba(255,255,255,.12);outline:none;box-shadow:0 0 0 4px rgba(14,165,233,.14);}
+.inp-ico{position:absolute;bottom:.76rem;right:.88rem;color:rgba(14,165,233,.45);font-size:.95rem;pointer-events:none;}
+[dir="ltr"] .inp-ico{right:auto;left:.88rem;}
+.inp-field:focus+.inp-ico{color:rgba(56,189,248,.85);}
+.eye-btn{position:absolute;bottom:.76rem;left:.88rem;background:none;border:none;cursor:pointer;color:rgba(255,255,255,.32);font-size:.9rem;transition:.2s;}
+[dir="ltr"] .eye-btn{left:auto;right:.88rem;}
+.eye-btn:hover{color:rgba(255,255,255,.7);}
+
+.btn-submit{width:100%;padding:.92rem;background:linear-gradient(135deg,#0ea5e9 0%,#38bdf8 50%,#10b981 100%);background-size:200%;color:#fff;border:none;border-radius:13px;font-family:'Cairo','Poppins',sans-serif;font-size:1rem;font-weight:800;cursor:pointer;transition:all .3s;box-shadow:0 6px 24px rgba(14,165,233,.45);margin-top:.2rem;display:flex;align-items:center;justify-content:center;gap:8px;position:relative;overflow:hidden;animation:shimmer 3s linear infinite;}
+.btn-submit:hover{transform:translateY(-3px);box-shadow:0 10px 35px rgba(14,165,233,.6);}
+.btn-submit:active{transform:scale(.97);}
+
+.divider{display:flex;align-items:center;gap:.7rem;margin:1rem 0;}
+.divider::before,.divider::after{content:'';flex:1;border-top:1px solid rgba(255,255,255,.1);}
+.divider span{font-size:.73rem;color:rgba(255,255,255,.25);}
+
+.btn-reg{width:100%;padding:.75rem;background:transparent;color:rgba(14,165,233,.8);border:1.5px solid rgba(14,165,233,.28);border-radius:13px;font-family:'Cairo','Poppins',sans-serif;font-size:.9rem;font-weight:700;cursor:pointer;transition:.25s;text-decoration:none;display:block;text-align:center;margin-bottom:.55rem;}
+.btn-reg:hover{background:rgba(14,165,233,.1);border-color:rgba(14,165,233,.55);color:#38bdf8;transform:translateY(-1px);}
+
+.btn-anon{width:100%;padding:.68rem;background:rgba(245,158,11,.12);color:rgba(251,191,36,.85);border:1.5px solid rgba(245,158,11,.25);border-radius:13px;font-family:'Cairo','Poppins',sans-serif;font-size:.84rem;font-weight:600;cursor:pointer;transition:.25s;text-decoration:none;display:block;text-align:center;}
+.btn-anon:hover{background:rgba(245,158,11,.2);border-color:rgba(245,158,11,.5);transform:translateY(-1px);}
+
+.demo-box{margin-top:.9rem;padding:.68rem .9rem;background:rgba(14,165,233,.05);border:1px solid rgba(14,165,233,.18);border-radius:11px;font-size:.74rem;color:rgba(255,255,255,.47);line-height:1.9;}
+.demo-box b{color:rgba(56,189,248,.85);}
+
+.fl{padding:.65rem .9rem;border-radius:10px;margin-bottom:1rem;font-size:.83rem;font-weight:600;display:flex;align-items:center;gap:7px;}
+.fl-err{background:rgba(244,63,94,.18);color:#fca5a5;border:1px solid rgba(244,63,94,.28);}
+.fl-ok {background:rgba(16,185,129,.15);color:#6ee7b7;border:1px solid rgba(16,185,129,.22);}
+</style>
+
+<!-- Quick top bar: theme + language always visible -->
+<div class="top-bar">
+  <a href="{{ url_for('set_lang', lang='en' if lang=='ar' else 'ar') }}" class="top-bar-btn">
+    {{ '🌐 EN' if lang=='ar' else '🌐 AR' }}
+  </a>
+  <a href="{{ url_for('set_theme', theme='dark' if theme=='light' else 'light') }}" class="top-bar-btn">
+    {{ '🌙' if theme=='light' else '☀️' }}
+  </a>
+</div>
+
+<div class="scene">
+  <div class="grid-bg"></div>
+  <div class="blob blob1"></div><div class="blob blob2"></div><div class="blob blob3"></div>
+  <span class="float-icon" style="top:8%;left:5%;animation-duration:7s;animation-delay:-2s">🧠</span>
+  <span class="float-icon" style="top:18%;right:8%;animation-duration:9s;animation-delay:-4s">💙</span>
+  <span class="float-icon" style="top:72%;left:3%;animation-duration:8s;animation-delay:-1s">✨</span>
+  <span class="float-icon" style="top:82%;right:6%;animation-duration:10s;animation-delay:-6s">🌟</span>
+  <span class="float-icon" style="top:45%;left:7%;animation-duration:6s;animation-delay:-3s">🤝</span>
+
+  <div class="login-card">
+    <!-- Dual logos -->
+    <div class="card-logos">
+      <img src="/static/images/logo1.png" class="card-logo-img" alt="Logo 1" onerror="this.style.display='none'">
+      <img src="/static/images/logo2.png" class="card-logo-img" alt="Logo 2" onerror="this.style.display='none'">
+    </div>
+
+    <div class="logo-ring" aria-hidden="true">🧠</div>
+    <div class="card-title">SchoolMind AI</div>
+    <div class="card-sub">{{ 'نظام الكشف المبكر عن التنمر والضغوط النفسية' if lang=='ar' else 'AI-Powered Early Detection of Bullying & Stress' }}</div>
+
+    <div class="ai-status">
+      <span>{{ 'النظام نشط' if lang=='ar' else 'System Active' }}</span>
+      <div class="wav"><span></span><span></span><span></span><span></span><span></span></div>
+    </div>
+
+    {% with msgs = get_flashed_messages(with_categories=true) %}
+      {% for cat, msg in msgs %}
+        <div class="fl {{ 'fl-err' if cat=='error' else 'fl-ok' }}">{{ msg }}</div>
+      {% endfor %}
+    {% endwith %}
+
+    <form method="POST" action="{{ url_for('login') }}" novalidate>
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+      <div class="inp-group">
+        <label class="inp-label" for="username">{{ 'اسم المستخدم' if lang=='ar' else 'Username' }}</label>
+        <input type="text" id="username" name="username" class="inp-field"
+               placeholder="{{ 'أدخل اسم المستخدم' if lang=='ar' else 'Enter username' }}"
+               autocomplete="username" required autofocus>
+        <i class="bi bi-person-fill inp-ico"></i>
+      </div>
+      <div class="inp-group">
+        <label class="inp-label" for="password">{{ 'كلمة المرور' if lang=='ar' else 'Password' }}</label>
+        <input type="password" id="password" name="password" class="inp-field"
+               placeholder="••••••••" autocomplete="current-password" required style="padding-left:2.8rem">
+        <i class="bi bi-lock-fill inp-ico"></i>
+        <button type="button" class="eye-btn" onclick="togglePwd()" tabindex="-1">
+          <i class="bi bi-eye" id="eye-ico"></i>
+        </button>
+      </div>
+      <button type="submit" class="btn-submit" id="login-btn" onclick="playClick()">
+        <i class="bi bi-box-arrow-in-right"></i>
+        {{ 'دخول' if lang=='ar' else 'Sign In' }}
+      </button>
+    </form>
+
+    <div class="divider"><span>{{ 'أو' if lang=='ar' else 'or' }}</span></div>
+    <a href="{{ url_for('register') }}" class="btn-reg" onclick="playClick()">
+      ✨ {{ 'إنشاء حساب جديد' if lang=='ar' else 'Create New Account' }}
+    </a>
+    <div style="text-align:center;margin-bottom:.5rem">
+      <a href="{{ url_for('forgot_password') }}" style="font-size:.76rem;color:rgba(192,132,252,.7);text-decoration:none" onclick="playClick()">
+        🔑 {{ 'نسيت كلمة المرور؟' if lang=='ar' else 'Forgot password?' }}
+      </a>
+    </div>
+    <a href="{{ url_for('register_anonymous') }}" class="btn-anon" onclick="playClick()">
+      👤 {{ 'دخول مجهول الهوية' if lang=='ar' else 'Anonymous Access' }}
+    </a>
+
+    <div class="demo-box">
+      <div style="font-weight:700;color:rgba(56,189,248,.75);margin-bottom:.2rem">🧪 {{ 'حسابات تجريبية' if lang=='ar' else 'Demo Accounts' }}</div>
+      <b>student1</b> / <b>pass123</b> &nbsp;·&nbsp; <b>counselor1</b> / <b>counsel123</b>
+    </div>
+  </div>
+</div>
+
+<script>
+function togglePwd(){const p=document.getElementById('password'),i=document.getElementById('eye-ico');p.type=p.type==='password'?'text':'password';i.className=p.type==='password'?'bi bi-eye':'bi bi-eye-slash';playClick();}
+document.querySelector('form')?.addEventListener('submit',function(){
+  const b=document.getElementById('login-btn');
+  if(b){b.disabled=true;b.innerHTML='<div class="wav"><span></span><span></span><span></span></div>&nbsp;{{ "جاري الدخول..." if lang=="ar" else "Signing in..." }}';}
+});
+</script>
+{% endblock %}

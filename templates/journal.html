@@ -1,0 +1,234 @@
+{% extends "base.html" %}
+{% block title %}{{ 'يومياتي' if lang=='ar' else 'My Journal' }}{% endblock %}
+{% block topbar_title %}{{ '📔 اكتب يومياتك' if lang=='ar' else '📔 Write Your Journal' }}{% endblock %}
+
+{% block extra_head %}
+<style>
+.mood-selector{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-bottom:1rem;}
+.mood-btn{width:52px;height:52px;border:2px solid var(--border);border-radius:50%;background:var(--bg-card);cursor:pointer;font-size:1.55rem;display:flex;align-items:center;justify-content:center;transition:all .25s cubic-bezier(.34,1.56,.64,1);position:relative;}
+.mood-btn:hover{border-color:var(--pri);transform:scale(1.2) translateY(-3px);box-shadow:0 6px 18px rgba(26,107,138,.25);}
+.mood-btn.selected{border-color:var(--pri);background:rgba(26,107,138,.08);transform:scale(1.22) translateY(-4px);box-shadow:0 6px 18px rgba(26,107,138,.3);}
+.mood-btn.selected::after{content:'✓';position:absolute;bottom:-7px;background:var(--pri);color:#fff;width:14px;height:14px;border-radius:50%;font-size:.5rem;font-weight:900;display:flex;align-items:center;justify-content:center;}
+.jwrite{background:var(--bg);border:2px solid var(--border);border-radius:var(--r);color:var(--text);font-family:var(--ff);padding:1rem;width:100%;font-size:.9rem;line-height:1.8;transition:all .22s;min-height:165px;resize:vertical;}
+.jwrite:focus{border-color:var(--pri);outline:none;box-shadow:0 0 0 4px rgba(26,107,138,.1);background:var(--bg-card);}
+.char-track{height:3px;background:var(--border);border-radius:2px;margin-top:.4rem;overflow:hidden;}
+.char-fill{height:100%;background:linear-gradient(90deg,var(--acc),var(--pri));border-radius:2px;transition:width .3s ease;width:0;}
+.live-pill{display:none;background:var(--bg);border:1px solid var(--border);border-radius:var(--r-sm);padding:.55rem .9rem;margin-top:.6rem;font-size:.82rem;animation:fadeUp .3s ease;}
+.risk-gauge{text-align:center;padding:1rem 0;}
+.gauge-num{font-size:3.2rem;font-weight:900;line-height:1;letter-spacing:-2px;}
+.recent-row{display:flex;gap:10px;align-items:center;padding:.55rem 0;border-bottom:1px solid var(--border);animation:fadeUp .3s ease both;}
+.recent-row:last-child{border-bottom:none;}
+.priv-note{display:flex;gap:8px;align-items:flex-start;padding:.75rem;background:rgba(39,201,158,.06);border:1px solid rgba(39,201,158,.18);border-radius:var(--r-sm);font-size:.78rem;color:var(--muted);margin-top:.9rem;}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="two-col">
+  <!-- ── FORM ── -->
+  <div>
+    <div class="sm-card">
+      <div style="font-size:.96rem;font-weight:800;margin-bottom:1rem;display:flex;align-items:center;gap:8px;">
+        <i class="bi bi-pencil-square" style="color:var(--acc)"></i>
+        {{ 'يومية جديدة' if lang=='ar' else 'New Journal Entry' }}
+      </div>
+
+      <!-- FIX: action + method + CSRF -->
+      <form method="POST" action="{{ url_for('journal') }}" id="jform">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+
+        <!-- Mood -->
+        <div style="margin-bottom:1rem;">
+          <div style="font-size:.8rem;font-weight:700;color:var(--muted);margin-bottom:.65rem;text-align:center">
+            {{ 'كيف مزاجك الآن؟' if lang=='ar' else 'How are you feeling?' }}
+          </div>
+          <div class="mood-selector" role="radiogroup" aria-label="{{ 'اختيار المزاج' if lang=='ar' else 'Mood selector' }}">
+            {% for v,e,ar,en in [('1','😞','سيء جداً','Very bad'),('2','😔','سيء','Bad'),('3','😐','عادي','Okay'),('4','🙂','جيد','Good'),('5','😊','رائع','Great')] %}
+            <button type="button" class="mood-btn {% if loop.index==3 %}selected{% endif %}"
+                    onclick="selectMood(this,'{{ v }}')"
+                    aria-label="{{ ar if lang=='ar' else en }}"
+                    title="{{ ar if lang=='ar' else en }}"
+                    aria-pressed="{{ 'true' if loop.index==3 else 'false' }}">{{ e }}</button>
+            {% endfor %}
+          </div>
+          <input type="hidden" name="mood_score" id="mood-input" value="3">
+        </div>
+
+        <!-- Textarea -->
+        <div style="margin-bottom:.8rem">
+          <label for="jcontent" style="font-size:.82rem;font-weight:700;display:block;margin-bottom:.4rem">
+            {{ 'اكتب هنا... (عربي أو إنجليزي)' if lang=='ar' else 'Write here... (Arabic or English)' }}
+          </label>
+          <textarea id="jcontent" name="content" class="jwrite" dir="auto"
+                    required minlength="5"
+                    placeholder="{{ 'اكتب عن يومك، مشاعرك، أي شيء تريد التعبير عنه. هذا فضاؤك الخاص 💙' if lang=='ar' else 'Write about your day, feelings, anything on your mind. This is your safe space 💙' }}"
+                    oninput="onType(this)" maxlength="5000">{{ request.form.get('content','') }}</textarea>
+          <div style="display:flex;justify-content:space-between;margin-top:.3rem;font-size:.72rem;color:var(--muted)">
+            <span id="char-c">0 {{ 'حرف' if lang=='ar' else 'chars' }}</span> · <span id="word-c">0 {{ 'كلمة' if lang=='ar' else 'words' }}</span>
+            <span>🔐 {{ 'مشفر وسري' if lang=='ar' else 'Encrypted & private' }}</span>
+          </div>
+          <div class="char-track"><div class="char-fill" id="char-fill"></div></div>
+          <!-- Live AI pill -->
+          <div class="live-pill" id="live-pill">
+            <div style="display:flex;align-items:center;gap:7px;color:var(--muted)">
+              <div class="spin-sm"></div>
+              {{ 'جاري التحليل...' if lang=='ar' else 'Analyzing...' }}
+            </div>
+          </div>
+        </div>
+
+        <button type="submit" class="btn-acc" {% if today_count|default(0) >= 5 %}disabled style="opacity:.55;cursor:not-allowed"{% endif %} onclick="playOk()">
+          <i class="bi bi-cpu-fill"></i>
+          {{ 'تحليل وإرسال' if lang=='ar' else 'Analyze & Submit' }} {% if today_count >= 4 %}<small style="opacity:.7">({{ 5-today_count }} {{ 'متبقية' if lang=='ar' else 'left' }})</small>{% endif %}
+        </button>
+      </form>
+
+      <div class="priv-note">
+        <i class="bi bi-shield-check" style="color:var(--acc);flex-shrink:0;font-size:1rem"></i>
+        <span>{{ 'بياناتك مشفرة ومجهولة. فقط رمزك السري يُرسل للمرشد عند الحاجة، بدون اسمك.' if lang=='ar' else 'Your data is encrypted and anonymized. Only your secret code is sent if needed — never your name.' }}</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── RESULT / RECENT ── -->
+  <div>
+    {% if analysis and risk %}
+    <div class="sm-card" id="result-card" style="border:2px solid {% if risk.level in ('high','critical') %}var(--danger){% elif risk.level=='medium' %}var(--warn){% else %}var(--success){% endif %};margin-bottom:.75rem">
+      <div style="font-size:.95rem;font-weight:800;margin-bottom:1rem;display:flex;align-items:center;gap:8px">
+        <i class="bi bi-cpu-fill" style="color:var(--pri)"></i>
+        {{ 'نتيجة التحليل' if lang=='ar' else 'Analysis Result' }}
+      </div>
+
+      <div class="risk-gauge">
+        <div class="gauge-num" style="color:{{ risk.color }}">{{ risk.score }}</div>
+        <div style="font-size:.74rem;color:var(--muted)">/10</div>
+        <div style="max-width:160px;margin:.6rem auto" class="rbar-wrap">
+          <div class="rbar-fill" data-score="{{ risk.score }}"></div>
+        </div>
+        <span class="risk-badge risk-{{ risk.level }}" style="margin-top:.3rem">
+          {% if lang=='ar' %}
+            {% if risk.level=='low' %}✅ حالة جيدة
+            {% elif risk.level=='medium' %}⚠️ تحتاج متابعة
+            {% elif risk.level=='high' %}🔴 خطر مرتفع
+            {% else %}🚨 حرج{% endif %}
+          {% else %}
+            {% if risk.level=='low' %}✅ Low Risk
+            {% elif risk.level=='medium' %}⚠️ Medium
+            {% elif risk.level=='high' %}🔴 High Risk
+            {% else %}🚨 Critical{% endif %}
+          {% endif %}
+        </span>
+      </div>
+
+      <div style="margin-bottom:.8rem">
+        <div style="font-size:.76rem;color:var(--muted);margin-bottom:.35rem">{{ 'المشاعر المكتشفة' if lang=='ar' else 'Detected Emotion' }}</div>
+        <span class="badge-emo emo-{{ analysis.dominant_emotion }}" style="font-size:.85rem;padding:.35rem .9rem">
+          {% set emap_ar = {'bullying':'⚠️ تنمر','depression':'💜 اكتئاب','anxiety':'💛 قلق','isolation':'🔵 عزلة','positive':'💚 إيجابي','neutral':'⚪ طبيعي'} %}
+          {% set emap_en = {'bullying':'⚠️ Bullying','depression':'💜 Depression','anxiety':'💛 Anxiety','isolation':'🔵 Isolation','positive':'💚 Positive','neutral':'⚪ Neutral'} %}
+          {{ emap_ar.get(analysis.dominant_emotion, analysis.dominant_emotion) if lang=='ar' else emap_en.get(analysis.dominant_emotion, analysis.dominant_emotion) }}
+        </span>
+      </div>
+
+      {% if analysis.found_keywords %}
+      <div style="margin-bottom:.8rem">
+        <div style="font-size:.76rem;color:var(--muted);margin-bottom:.4rem">{{ 'الكلمات المكتشفة' if lang=='ar' else 'Keywords' }}</div>
+        <div style="display:flex;flex-wrap:wrap;gap:4px">
+          {% for cat, words in analysis.found_keywords.items() %}
+            {% for w in words[:3] %}<span class="badge-emo emo-{{ cat }}" style="font-size:.7rem">{{ w }}</span>{% endfor %}
+          {% endfor %}
+        </div>
+      </div>
+      {% endif %}
+
+      <div style="padding:.85rem;background:var(--bg);border-radius:var(--r-sm);font-size:.84rem;line-height:1.75;border:1px solid var(--border)">
+        {% if analysis.ai_summary %}
+        <div style="margin-bottom:.6rem;padding:.6rem .8rem;background:rgba(14,165,233,.06);border-radius:var(--r-sm);border:1px solid rgba(14,165,233,.15);font-size:.82rem;color:var(--muted)">
+          <span style="font-size:.72rem;font-weight:700;color:var(--sky);display:block;margin-bottom:.2rem">
+            <i class="bi bi-cpu-fill"></i> {{ 'تحليل محرك الذكاء الاصطناعي المحلي' if lang=='ar' else 'محرك الذكاء الاصطناعي المحلي Analysis' }}
+          </span>
+          {{ analysis.ai_summary }}
+        </div>
+        {% endif %}
+        <span style="font-size:1.1rem">🤖 </span>
+        {% if analysis.ai_advice %}
+          {{ analysis.ai_advice }}
+        {% elif risk.level == 'low' %}{{ 'أنت بخير! استمر في الاهتمام بنفسك. 💚' if lang=='ar' else "You're doing well! Keep taking care of yourself. 💚" }}
+        {% elif risk.level == 'medium' %}{{ 'لاحظنا بعض المؤشرات. أنت لست وحدك. 💛' if lang=='ar' else "We noticed some indicators. You're not alone. 💛" }}
+        {% elif risk.level == 'high' %}{{ 'نشعر بقلق على راحتك. تحدث مع المرشد. 🔴' if lang=='ar' else "We're concerned. Please talk to your counselor. 🔴" }}
+        {% else %}{{ 'يُرجى التحدث مع المرشد فوراً. أنت مهم. 🚨' if lang=='ar' else "Please speak to your counselor immediately. You matter. 🚨" }}
+        {% endif %}
+        {% if analysis.source == 'schoolmind' %}
+        <div style="margin-top:.5rem;font-size:.68rem;color:var(--muted);display:flex;align-items:center;gap:4px">
+          <i class="bi bi-stars"></i> {{ 'مُحلَّل بواسطة محرك الذكاء الاصطناعي المحلي' if lang=='ar' else 'Analyzed by محرك الذكاء الاصطناعي المحلي' }}
+        </div>
+        {% endif %}
+      </div>
+
+      {% if risk.should_alert %}
+      <div style="margin-top:.7rem;padding:.5rem .8rem;background:rgba(239,68,68,.08);border-radius:var(--r-sm);font-size:.76rem;color:var(--danger);border:1px solid rgba(239,68,68,.2)">
+        <i class="bi bi-bell-fill"></i> {{ 'تم إرسال تنبيه مجهول للمرشد.' if lang=='ar' else 'Anonymous alert sent to counselor.' }}
+      </div>
+      {% endif %}
+
+      <a href="{{ url_for('companion') }}" class="btn-out" style="display:flex;justify-content:center;margin-top:.85rem;text-decoration:none" onclick="playClick()">
+        <i class="bi bi-chat-heart-fill"></i>
+        {{ 'تحدث مع المساعد الذكي' if lang=='ar' else 'Talk to AI Companion' }}
+      </a>
+    </div>
+    {% else %}
+    <div class="sm-card" style="text-align:center;padding:2.5rem 1rem;margin-bottom:.75rem">
+      <div style="font-size:3rem;margin-bottom:.7rem;animation:float 3s ease-in-out infinite">✍️</div>
+      <div style="font-weight:700;margin-bottom:.3rem">{{ 'اكتب يومياتك' if lang=='ar' else 'Write Your Journal' }}</div>
+      <div style="font-size:.83rem;color:var(--muted)">{{ 'سيظهر تحليل الذكاء الاصطناعي هنا بعد الإرسال' if lang=='ar' else 'AI analysis will appear here after submission' }}</div>
+    </div>
+    {% endif %}
+
+    {% if recent_journals %}
+    <div class="sm-card">
+      <div style="font-size:.88rem;font-weight:800;margin-bottom:.8rem;color:var(--muted)">
+        <i class="bi bi-clock-history"></i> {{ 'آخر التسجيلات' if lang=='ar' else 'Recent Entries' }}
+      </div>
+      {% for j in recent_journals[:6] %}
+      <div class="recent-row" style="animation-delay:{{ loop.index * 0.06 }}s">
+        <span class="badge-emo emo-{{ j.dominant_emotion or 'neutral' }}" style="font-size:.66rem;flex-shrink:0">{{ j.dominant_emotion or 'neutral' }}</span>
+        <span style="flex:1;font-size:.78rem;color:var(--muted);overflow:hidden;white-space:nowrap;text-overflow:ellipsis">{{ j.content[:55] }}…</span>
+        <span style="font-size:.7rem;color:var(--muted);flex-shrink:0">{{ j.created_at[:10] }}</span>
+      </div>
+      {% endfor %}
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+let _lt;
+function onType(ta){
+  const n=ta.value.length;
+  const wc=ta.value.trim()?ta.value.trim().split(/\s+/).length:0;
+  const wcEl=document.getElementById('word-c');
+  if(wcEl)wcEl.textContent=wc+' {{ "كلمة" if lang=="ar" else "words" }}';
+  const cc=document.getElementById('char-c');
+  const cf=document.getElementById('char-fill');
+  const lp=document.getElementById('live-pill');
+  if(cc) cc.textContent=n+' {{ "حرف" if lang=="ar" else "chars" }}';
+  if(cf){cf.style.width=Math.min(n/5000*100,100)+'%';cf.style.background=n>4500?'var(--danger)':n>3000?'var(--warn)':'var(--grad-pri)';}if(n>4800 && cc){cc.style.color='var(--danger)';}
+  clearTimeout(_lt);
+  if(n>15){
+    if(lp){lp.style.display='block';lp.innerHTML='<div style="display:flex;align-items:center;gap:7px;color:var(--muted);font-size:.82rem"><div class="spin-sm"></div>{{ "جاري التحليل..." if lang=="ar" else "Analyzing..." }}</div>';}
+    _lt=setTimeout(()=>{
+      fetch('/api/analyze',{method:'POST',headers:{'Content-Type':'application/json','X-CSRF-Token':'{{ csrf_token }}'},body:JSON.stringify({text:ta.value})})
+      .then(r=>r.json()).then(d=>{
+        if(!lp)return;
+        const em={ar:{bullying:'⚠️ تنمر',depression:'💜 اكتئاب',anxiety:'💛 قلق',isolation:'🔵 عزلة',positive:'💚 إيجابي',neutral:'⚪ طبيعي'},en:{bullying:'⚠️ Bullying',depression:'💜 Depression',anxiety:'💛 Anxiety',isolation:'🔵 Isolation',positive:'💚 Positive',neutral:'⚪ Neutral'}};
+        const ll=document.documentElement.lang==='ar'?'ar':'en';
+        lp.innerHTML=`<div style="display:flex;align-items:center;gap:8px;font-size:.82rem"><span class="badge-emo emo-${d.dominant_emotion}">${em[ll][d.dominant_emotion]||d.dominant_emotion}</span><span style="color:var(--muted)">${ll==='ar'?'ثقة:':'Confidence:'} ${Math.round((d.confidence||0)*100)}%</span></div>`;
+      }).catch(()=>{if(lp)lp.style.display='none';});
+    },700);
+  } else { if(lp)lp.style.display='none'; }
+}
+const ct=document.getElementById('jcontent');
+if(ct&&ct.value)onType(ct);
+{% if analysis %}document.getElementById('result-card')?.scrollIntoView({behavior:'smooth',block:'start'});{% endif %}
+</script>
+{% endblock %}

@@ -1,0 +1,8 @@
+User-agent: *
+Disallow: /student
+Disallow: /counselor
+Disallow: /journal
+Disallow: /companion
+Disallow: /api
+Allow: /
+Sitemap: /sitemap.xml
