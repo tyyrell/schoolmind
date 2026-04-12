@@ -1,0 +1,131 @@
+{% extends "base.html" %}
+{% block title %}{{ 'إنجازاتي' if lang=='ar' else 'My Achievements' }}{% endblock %}
+{% block topbar_title %}{{ '🏅 إنجازاتي وشعلتي' if lang=='ar' else '🏅 My Achievements & Streak' }}{% endblock %}
+
+{% block extra_head %}
+<style>
+.streak-hero{background:linear-gradient(135deg,#7c2d12,#ea580c,#f97316);border-radius:var(--r);padding:2rem 1.5rem;color:#fff;text-align:center;margin-bottom:1rem;position:relative;overflow:hidden;box-shadow:0 12px 40px rgba(249,115,22,.35);}
+.streak-hero::before{content:'🔥';position:absolute;font-size:10rem;opacity:.06;right:-1rem;top:-1rem;}
+.flame-num{font-size:4.5rem;font-weight:900;line-height:1;text-shadow:0 4px 20px rgba(0,0,0,.3);}
+.streak-stat{background:rgba(255,255,255,.15);border-radius:12px;padding:.7rem 1rem;flex:1;min-width:80px;}
+.badge-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:.7rem;margin-bottom:1rem;}
+.badge-card{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--r);padding:1rem;text-align:center;transition:all var(--tr);}
+.badge-card.earned{border-color:var(--warn);background:linear-gradient(135deg,rgba(245,158,11,.08),rgba(249,115,22,.04));}
+.badge-card:hover.earned{transform:translateY(-3px);box-shadow:0 6px 20px rgba(245,158,11,.2);}
+.badge-card.locked{opacity:.4;filter:grayscale(1);}
+.badge-icon{font-size:2.5rem;margin-bottom:.4rem;display:block;}
+.badge-label{font-size:.75rem;font-weight:700;line-height:1.3;}
+.badge-date{font-size:.65rem;color:var(--muted);margin-top:.2rem;}
+.cat-section{font-size:.9rem;font-weight:800;margin:1rem 0 .6rem;display:flex;align-items:center;gap:8px;}
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Streak Hero -->
+<div class="streak-hero">
+  <div style="position:relative;z-index:1">
+    <div style="font-size:.88rem;opacity:.8;margin-bottom:.25rem">{{ 'الشعلة اليومية 🔥' if lang=='ar' else '🔥 Daily Streak' }}</div>
+    <div class="flame-num">{{ streak.current }}</div>
+    <div style="font-size:.88rem;opacity:.85;margin:.4rem 0">{{ 'يوم متتالٍ' if lang=='ar' else 'consecutive days' }}</div>
+    <div style="display:flex;gap:.5rem;justify-content:center;flex-wrap:wrap;margin-top:.75rem">
+      <div class="streak-stat">
+        <div style="font-size:1.4rem;font-weight:900">{{ streak.longest }}</div>
+        <div style="font-size:.7rem;opacity:.8">{{ 'أطول ستريك' if lang=='ar' else 'Longest' }}</div>
+      </div>
+      <div class="streak-stat">
+        <div style="font-size:1.4rem;font-weight:900">{{ streak.total_days }}</div>
+        <div style="font-size:.7rem;opacity:.8">{{ 'إجمالي الأيام' if lang=='ar' else 'Total Days' }}</div>
+      </div>
+      <div class="streak-stat">
+        <div style="font-size:1.4rem;font-weight:900">{{ badges|length }}</div>
+        <div style="font-size:.7rem;opacity:.8">{{ 'إنجازاتي' if lang=='ar' else 'Achievements' }}</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Streak Tip -->
+{% if streak.current == 0 %}
+<div class="sm-card" style="border-color:rgba(249,115,22,.3);background:rgba(249,115,22,.04);margin-bottom:.75rem">
+  <div style="font-size:.87rem;line-height:1.75">
+    🔥 <strong>{{ 'ابدأ شعلتك اليوم!' if lang=='ar' else 'Start your streak today!' }}</strong>
+    {{ ' سجّل يوميتك أو حالتك اليومية للحفاظ على الشعلة!' if lang=='ar' else ' Log your journal or daily check-in to start your streak!' }}
+  </div>
+</div>
+{% elif streak.current >= 7 %}
+<div class="sm-card" style="border-color:rgba(245,158,11,.3);background:rgba(245,158,11,.04);margin-bottom:.75rem">
+  <div style="font-size:.87rem;line-height:1.75">
+    🌟 <strong>{{ f'رائع! {streak.current} أيام متتالية!' if lang=="ar" else f'Amazing! {streak.current} days in a row!' }}</strong>
+    {{ ' حافظ على شعلتك واستمر!' if lang=='ar' else ' Keep it up and maintain your streak!' }}
+  </div>
+</div>
+{% endif %}
+
+<!-- Earned Badges -->
+{% if badges %}
+<div class="cat-section">
+  <i class="bi bi-trophy-fill" style="color:var(--warn)"></i>
+  {{ 'الإنجازات المكتسبة' if lang=='ar' else 'Earned Achievements' }}
+  <span style="background:rgba(245,158,11,.15);color:var(--warn);padding:.1rem .5rem;border-radius:10px;font-size:.75rem">{{ badges|length }}</span>
+</div>
+<div class="badge-grid">
+  {% for badge in badges %}
+  <div class="badge-card earned">
+    <span class="badge-icon">{{ badge.icon }}</span>
+    <div class="badge-label">{{ badge.label_ar if lang=='ar' else badge.label_en }}</div>
+    {% if badge.earned_at %}
+    <div class="badge-date"><i class="bi bi-calendar3"></i> {{ badge.earned_at }}</div>
+    {% endif %}
+  </div>
+  {% endfor %}
+</div>
+{% endif %}
+
+<!-- All Badges (locked/unlocked) -->
+<div class="cat-section">
+  <i class="bi bi-lock-fill" style="color:var(--muted)"></i>
+  {{ 'جميع الإنجازات' if lang=='ar' else 'All Achievements' }}
+</div>
+<div class="badge-grid">
+  {% set earned_keys = badges|map(attribute='key')|list %}
+  {% for key, badge in all_badge_defs.items() %}
+  {% set is_earned = key in earned_keys %}
+  <div class="badge-card {{ 'earned' if is_earned else 'locked' }}" title="{{ badge.label_ar if lang=='ar' else badge.label_en }}">
+    <span class="badge-icon">{{ badge.icon }}</span>
+    <div class="badge-label">{{ badge.label_ar if lang=='ar' else badge.label_en }}</div>
+    {% if not is_earned %}
+    <div class="badge-date" style="color:var(--muted)">🔒 {{ 'مقفل' if lang=='ar' else 'Locked' }}</div>
+    {% endif %}
+  </div>
+  {% endfor %}
+</div>
+
+<!-- How to earn -->
+<div class="sm-card" style="margin-top:.75rem">
+  <div style="font-size:.9rem;font-weight:800;margin-bottom:.7rem;display:flex;align-items:center;gap:8px">
+    <i class="bi bi-question-circle-fill" style="color:var(--sky)"></i>
+    {{ 'كيف تكسب إنجازات؟' if lang=='ar' else 'How to earn achievements?' }}
+  </div>
+  {% for icon, ar, en in [
+    ('📔','اكتب يوميات يومياً للحفاظ على الشعلة','Write daily journals to maintain your streak'),
+    ('🔥','حافظ على ستريك 3، 7، 14، 30 يوماً لإنجازات خاصة','Keep streaks of 3, 7, 14, 30 days for special badges'),
+    ('🎮','العب ألعابنا التفاعلية وحقق نقاطاً','Play games and earn points for badges'),
+    ('🏆','أضف وأنجز أهدافاً شخصية','Add and complete personal goals'),
+    ('🫁','أكمل 5 جلسات تنفس','Complete 5 breathing sessions'),
+  ] %}
+  <div style="display:flex;align-items:center;gap:.7rem;padding:.4rem 0;border-bottom:1px solid var(--border)">
+    <div style="font-size:1.2rem">{{ icon }}</div>
+    <div style="font-size:.82rem;color:var(--muted)">{{ ar if lang=='ar' else en }}</div>
+  </div>
+  {% endfor %}
+</div>
+
+<div style="display:flex;gap:.6rem;flex-wrap:wrap;margin-top:.75rem">
+  <a href="{{ url_for('journal') }}" class="btn-pri" onclick="playClick()">
+    <i class="bi bi-journal-text"></i>{{ ' اكتب يومية' if lang=='ar' else ' Write Journal' }}
+  </a>
+  <a href="{{ url_for('games') }}" class="btn-acc" style="width:auto;padding:.55rem 1.1rem" onclick="playClick()">
+    <i class="bi bi-controller"></i>{{ ' ألعاب' if lang=='ar' else ' Games' }}
+  </a>
+</div>
+{% endblock %}

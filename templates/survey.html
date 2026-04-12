@@ -1,0 +1,285 @@
+{% extends "base.html" %}
+{% block title %}{{ 'استبيان الحالة النفسية' if lang=='ar' else 'Wellbeing Survey' }}{% endblock %}
+{% block topbar_title %}{{ '📋 استبيان الحالة النفسية' if lang=='ar' else '📋 Wellbeing Survey' }}{% endblock %}
+
+{% block extra_head %}
+<style>
+.survey-wrap{max-width:680px;margin:0 auto;}
+.q-card{background:var(--bg-card);border-radius:var(--r);border:1px solid var(--border);padding:1.3rem 1.4rem;margin-bottom:.8rem;animation:fadeUp .4s ease both;transition:border-color var(--tr),box-shadow var(--tr);}
+.q-card:hover{border-color:var(--border-h);box-shadow:var(--sh-sm);}
+{% for i in range(2,11) %}.q-card:nth-child({{i}}){animation-delay:{{(i-1)*0.06}}s;}{% endfor %}
+.q-header{display:flex;align-items:center;gap:10px;margin-bottom:.8rem;}
+.q-num{width:32px;height:32px;border-radius:50%;background:var(--grad-sky);color:#fff;display:flex;align-items:center;justify-content:center;font-size:.78rem;font-weight:800;flex-shrink:0;}
+.q-text{font-size:.9rem;font-weight:700;line-height:1.5;}
+.scale-row{display:flex;gap:6px;}
+.scale-btn{flex:1;padding:.65rem .3rem;text-align:center;border:2px solid var(--border);border-radius:var(--r-sm);background:var(--bg-muted);color:var(--muted);cursor:pointer;font-size:.8rem;font-weight:700;transition:all .18s;position:relative;}
+.scale-btn:hover{border-color:var(--sky);color:var(--sky);transform:translateY(-2px);}
+.scale-btn.sel{border-color:var(--p300);background:rgba(139,92,246,.12);color:var(--p300);transform:translateY(-2px);box-shadow:var(--sh-p);}
+.scale-btn .emoji{font-size:1.2rem;display:block;margin-bottom:.15rem;}
+.scale-lbl{display:flex;justify-content:space-between;font-size:.68rem;color:var(--muted);margin-top:.35rem;padding:0 .1rem;}
+.result-card{background:var(--bg-card);border-radius:var(--r);border:2px solid var(--border);padding:1.5rem;margin-bottom:1rem;text-align:center;}
+.result-ring{width:100px;height:100px;border-radius:50%;margin:0 auto .75rem;display:flex;align-items:center;justify-content:center;font-size:2.5rem;border:6px solid;}
+.bar-wrap{background:var(--border);border-radius:6px;height:10px;overflow:hidden;margin:.4rem 0;}
+.bar-fill{height:100%;border-radius:6px;transition:width 1s ease;}
+.prog-indicator{display:flex;gap:4px;justify-content:center;margin-bottom:1.2rem;}
+.prog-dot{width:8px;height:8px;border-radius:50%;background:var(--border);transition:background .3s;}
+.prog-dot.done{background:var(--p300);}
+.prog-dot.curr{background:var(--sky);transform:scale(1.4);}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="survey-wrap">
+{% if result %}
+<!-- ── Result Card ── -->
+{% set score = result.score %}
+{% set color = result.color %}
+<div class="result-card" style="border-color:{{ color }}40;animation:bounceIn .6s ease">
+  <div class="result-ring" style="border-color:{{ color }};background:{{ color }}15">{{ result.emoji }}</div>
+  <div style="font-size:1.4rem;font-weight:900;margin-bottom:.3rem">
+    {{ result.concern_ar if lang=='ar' else result.concern_en }}
+  </div>
+  <div style="font-size:.83rem;color:var(--muted);margin-bottom:1rem">
+    {{ 'درجتك: ' if lang=='ar' else 'Your score: ' }}<strong style="color:{{ color }}">{{ '%.1f'|format(score) }}/10</strong>
+  </div>
+  <div class="bar-wrap"><div class="bar-fill" style="width:{{ score*10 }}%;background:{{ color }}"></div></div>
+
+  <!-- Category breakdown -->
+  {% if result.category_scores %}
+  <div style="margin:1.1rem 0 .7rem;font-size:.84rem;font-weight:700;text-align:right">
+    {{ 'تفاصيل النتيجة:' if lang=='ar' else 'Score breakdown:' }}
+  </div>
+  {% for cat, val in result.category_scores.items() %}
+  {% if val > 0 %}
+  {% set pct = (val / (result.category_scores.values()|sum) * 100)|round|int %}
+  <div style="display:flex;align-items:center;gap:.5rem;margin:.35rem 0">
+    <div style="font-size:.72rem;color:var(--muted);width:100px;text-align:right;flex-shrink:0">
+      {{ {'bullying':'تنمر','depression':'حزن','anxiety':'قلق','isolation':'وحدة','anger':'غضب','sleep':'نوم','self_worth':'ثقة','academic':'دراسة','neutral':'طبيعي'}.get(cat,cat) if lang=='ar' else cat }}
+    </div>
+    <div style="flex:1;background:var(--border);border-radius:4px;height:8px;overflow:hidden">
+      <div style="width:{{ pct }}%;background:var(--p300);height:100%;border-radius:4px;transition:width 1s ease"></div>
+    </div>
+    <div style="font-size:.7rem;color:var(--muted);width:30px">{{ pct }}%</div>
+  </div>
+  {% endif %}
+  {% endfor %}
+  {% endif %}
+
+  <!-- Advice based on level -->
+  <div style="margin-top:1rem;padding:.85rem;background:var(--bg-muted);border-radius:var(--r-sm);border:1px solid var(--border);text-align:right">
+    <div style="font-size:.84rem;font-weight:700;margin-bottom:.4rem">
+      💡 {{ 'توصية نور:' if lang=='ar' else "Nour's Recommendation:" }}
+    </div>
+    <div style="font-size:.82rem;color:var(--muted);line-height:1.8">
+      {% if result.level == 'critical' %}
+        {{ 'نتيجتك تشير لحاجة ماسة للدعم. أرجوك تحدث مع المرشد المدرسي أو اتصل بـ 911 فوراً 🆘' if lang=='ar' else 'Your score suggests urgent need for support. Please talk to your school counselor or call 911 immediately 🆘' }}
+      {% elif result.level == 'high' %}
+        {{ 'نتيجتك تشير لبعض الصعوبات. ننصح بالتحدث مع المرشد المدرسي وتجربة مركز التنفس والأنشطة التفاعلية.' if lang=='ar' else 'Your score suggests some difficulties. We recommend talking to your school counselor and trying the breathing center and interactive activities.' }}
+      {% elif result.level == 'medium' %}
+        {{ 'أنت بخير بشكل عام! جرب يومياتك وألعاب الاسترخاء وتمارين التنفس للحفاظ على توازنك.' if lang=='ar' else "You're generally okay! Try journaling, relaxation games, and breathing exercises to maintain your balance." }}
+      {% else %}
+        {{ 'ممتاز! أنت بحالة جيدة. حافظ على هذا وشارك مع الآخرين من حولك 🌟' if lang=='ar' else "Excellent! You're in great shape. Keep it up and share positivity with those around you 🌟" }}
+      {% endif %}
+    </div>
+  </div>
+
+  {% if result.should_alert %}
+  <div style="margin-top:.75rem;padding:.6rem .85rem;background:rgba(239,68,68,.06);border:1px solid rgba(239,68,68,.2);border-radius:var(--r-sm);font-size:.78rem;color:var(--danger)">
+    🔔 {{ 'تم إخطار مرشدك المدرسي بشكل سري' if lang=='ar' else 'Your school counselor has been notified confidentially' }}
+  </div>
+  {% endif %}
+</div>
+
+<div style="display:flex;gap:.6rem;flex-wrap:wrap;margin-bottom:.75rem">
+  <a href="{{ url_for('companion') }}" class="btn-pri" onclick="playClick()">
+    <i class="bi bi-chat-heart-fill"></i>{{ ' تحدث مع نور' if lang=='ar' else ' Chat with Nour' }}
+  </a>
+  <a href="{{ url_for('emergency') }}" class="btn-out" onclick="playClick()">
+    <i class="bi bi-telephone-fill"></i>{{ ' طوارئ' if lang=='ar' else ' Emergency' }}
+  </a>
+  <a href="{{ url_for('breathing_center') }}" class="btn-acc" style="width:auto;padding:.55rem 1rem" onclick="playClick()">
+    <i class="bi bi-lungs-fill"></i>{{ ' تنفس' if lang=='ar' else ' Breathe' }}
+  </a>
+</div>
+<hr style="border:none;border-top:1px solid var(--border);margin:.75rem 0">
+{% endif %}
+
+<!-- ── Survey Form ── -->
+<form method="POST" id="survey-form" onsubmit="return validateSurvey()">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+
+  <!-- Header -->
+  <div class="sm-card" style="margin-bottom:.9rem;background:var(--grad-hero);border:none;color:#fff;padding:1.25rem 1.4rem">
+    <div style="font-size:1rem;font-weight:900;margin-bottom:.25rem">📋 {{ 'استبيان الحالة النفسية' if lang=='ar' else 'Mental Wellbeing Survey' }}</div>
+    <div style="font-size:.8rem;opacity:.8">{{ '10 أسئلة سريعة لمعرفة كيف تشعر — لا توجد إجابات خاطئة' if lang=='ar' else '10 quick questions about how you feel — no wrong answers' }}</div>
+    <!-- Progress dots -->
+    <div class="prog-indicator" style="margin-top:.75rem" id="prog-dots">
+      {% for i in range(1,11) %}<div class="prog-dot {% if loop.first %}curr{% endif %}" id="dot-{{ i }}"></div>{% endfor %}
+    </div>
+  </div>
+
+  {% set questions_ar = [
+    ('😊 كيف مزاجك اليوم عموماً؟', ['سيئ جداً','سيئ','عادي','جيد','ممتاز'], 'mood'),
+    ('🛡️ هل تشعر بالأمان في المدرسة؟', ['لا أبداً','نادراً','أحياناً','غالباً','دائماً'], 'safety'),
+    ('😰 ما مستوى قلقك هذه الأيام؟', ['لا قلق','قليل','متوسط','كثير','شديد جداً'], 'anxiety'),
+    ('😴 كيف نومك مؤخراً؟', ['سيئ جداً','سيئ','مقبول','جيد','ممتاز'], 'sleep'),
+    ('👊 هل تتعرض للتنمر من أحد؟', ['كثيراً','أحياناً','نادراً','نادر جداً','لا أبداً'], 'bullying'),
+    ('💙 هل تشعر بالوحدة أو العزلة؟', ['دائماً','كثيراً','أحياناً','نادراً','أبداً'], 'isolation'),
+    ('💪 ما مستوى ثقتك بنفسك؟', ['منعدمة','منخفضة','متوسطة','جيدة','عالية جداً'], 'self_worth'),
+    ('📚 كيف تؤثر الدراسة على حالتك النفسية؟', ['سلبياً جداً','سلبياً','محايدة','إيجابياً','إيجابياً جداً'], 'academic'),
+    ('😤 هل تجد صعوبة في إدارة غضبك؟', ['دائماً','كثيراً','أحياناً','نادراً','أبداً'], 'anger'),
+    ('🌟 هل تشعر بالأمل في مستقبلك؟', ['لا أبداً','نادراً','أحياناً','غالباً','دائماً'], 'hope'),
+  ] %}
+  {% set questions_en = [
+    ('😊 How is your mood today in general?', ['Very bad','Bad','Okay','Good','Excellent'], 'mood'),
+    ('🛡️ Do you feel safe at school?', ['Not at all','Rarely','Sometimes','Often','Always'], 'safety'),
+    ('😰 What is your anxiety level these days?', ['No anxiety','Little','Moderate','A lot','Very intense'], 'anxiety'),
+    ('😴 How has your sleep been lately?', ['Very bad','Bad','Acceptable','Good','Excellent'], 'sleep'),
+    ('👊 Are you experiencing bullying from anyone?', ['A lot','Sometimes','Rarely','Very rarely','Not at all'], 'bullying'),
+    ('💙 Do you feel lonely or isolated?', ['Always','Often','Sometimes','Rarely','Never'], 'isolation'),
+    ('💪 What is your self-confidence level?', ['None','Low','Moderate','Good','Very high'], 'self_worth'),
+    ('📚 How does studying affect your mental state?', ['Very negatively','Negatively','Neutral','Positively','Very positively'], 'academic'),
+    ('😤 Do you have difficulty managing your anger?', ['Always','Often','Sometimes','Rarely','Never'], 'anger'),
+    ('🌟 Do you feel hopeful about your future?', ['Not at all','Rarely','Sometimes','Often','Always'], 'hope'),
+  ] %}
+
+  {% set questions = questions_ar if lang=='ar' else questions_en %}
+  {% for q_text, opts, cat in questions %}
+  {% set q_num = loop.index %}
+  <div class="q-card" id="qcard-{{ q_num }}" data-q="{{ q_num }}">
+    <div class="q-header">
+      <div class="q-num">{{ q_num }}</div>
+      <div class="q-text">{{ q_text }}</div>
+    </div>
+    <input type="hidden" name="q{{ q_num }}" id="q{{ q_num }}-val" value="">
+    <div class="scale-row" role="group">
+      {% for opt in opts %}
+      {% set v = loop.index %}
+      {% set emojis = ['😞','😕','😐','🙂','😊'] %}
+      <button type="button"
+              class="scale-btn"
+              onclick="selectOption({{ q_num }}, {{ v }}, this)"
+              title="{{ opt }}">
+        <span class="emoji">{{ emojis[loop.index0] }}</span>
+        <span style="font-size:.65rem;display:block">{{ v }}</span>
+      </button>
+      {% endfor %}
+    </div>
+    <div class="scale-lbl">
+      <span>{{ opts[0] }}</span>
+      <span>{{ opts[4] }}</span>
+    </div>
+  </div>
+  {% endfor %}
+
+  <!-- Notes -->
+  <div class="q-card">
+    <div class="q-header">
+      <div class="q-num">💬</div>
+      <div class="q-text">{{ 'هل تريد إضافة ملاحظة أو التحدث عن شيء محدد؟ (اختياري)' if lang=='ar' else 'Want to add a note or share something specific? (Optional)' }}</div>
+    </div>
+    <textarea name="notes" rows="3" placeholder="{{ 'اكتب هنا...' if lang=='ar' else 'Write here...' }}"
+              style="width:100%;resize:none;font-family:var(--ff);font-size:.85rem;background:var(--bg);border:1px solid var(--border);border-radius:var(--r-sm);padding:.7rem .9rem;color:var(--text);transition:border-color var(--tr)"
+              maxlength="500" onfocus="this.style.borderColor='var(--sky)'" onblur="this.style.borderColor='var(--border)'"></textarea>
+  </div>
+
+  <div id="form-error" style="display:none;padding:.7rem;background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.25);border-radius:var(--r-sm);font-size:.84rem;color:var(--danger);margin-bottom:.7rem"></div>
+
+  <button type="submit" class="btn-pri" id="submit-btn" style="width:100%;padding:.75rem;font-size:.95rem">
+    <i class="bi bi-clipboard-check-fill"></i>
+    {{ ' إرسال الاستبيان' if lang=='ar' else ' Submit Survey' }}
+  </button>
+  <div style="text-align:center;font-size:.75rem;color:var(--muted);margin-top:.5rem">
+    🔒 {{ 'إجاباتك سرية ومشفرة' if lang=='ar' else 'Your answers are confidential and encrypted' }}
+  </div>
+</form>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+const L = document.documentElement.lang === 'ar';
+const answered = {};
+
+function selectOption(qNum, val, btn) {
+  // Deselect all in this question
+  const card = document.getElementById('qcard-' + qNum);
+  card.querySelectorAll('.scale-btn').forEach(b => b.classList.remove('sel'));
+  btn.classList.add('sel');
+  document.getElementById('q' + qNum + '-val').value = val;
+  answered[qNum] = val;
+  playClick();
+
+  // Update progress dots
+  updateDots();
+
+  // Auto-scroll to next question
+  const nextCard = document.getElementById('qcard-' + (qNum + 1));
+  if (nextCard) {
+    setTimeout(() => nextCard.scrollIntoView({behavior:'smooth', block:'nearest'}), 200);
+  }
+}
+
+function updateDots() {
+  const total = 10;
+  for (let i = 1; i <= total; i++) {
+    const dot = document.getElementById('dot-' + i);
+    if (!dot) continue;
+    if (answered[i]) {
+      dot.classList.add('done');
+      dot.classList.remove('curr');
+    } else {
+      dot.classList.remove('done');
+    }
+  }
+  // Find first unanswered
+  for (let i = 1; i <= total; i++) {
+    if (!answered[i]) {
+      const dot = document.getElementById('dot-' + i);
+      if (dot) dot.classList.add('curr');
+      break;
+    }
+  }
+}
+
+function validateSurvey() {
+  const missing = [];
+  for (let i = 1; i <= 10; i++) {
+    if (!answered[i]) missing.push(i);
+  }
+  if (missing.length > 0) {
+    const errEl = document.getElementById('form-error');
+    const msg = L
+      ? `يرجى الإجابة على الأسئلة: ${missing.map(n=>'#'+n).join('، ')}`
+      : `Please answer questions: ${missing.map(n=>'#'+n).join(', ')}`;
+    errEl.textContent = '⚠️ ' + msg;
+    errEl.style.display = 'block';
+    // Scroll to first missing
+    const firstMissing = document.getElementById('qcard-' + missing[0]);
+    if (firstMissing) firstMissing.scrollIntoView({behavior:'smooth', block:'center'});
+    // Highlight missing cards
+    missing.forEach(n => {
+      const card = document.getElementById('qcard-' + n);
+      if (card) {
+        card.style.borderColor = 'rgba(239,68,68,.5)';
+        card.style.background = 'rgba(239,68,68,.04)';
+        setTimeout(() => { card.style.borderColor=''; card.style.background=''; }, 3000);
+      }
+    });
+    return false;
+  }
+  document.getElementById('form-error').style.display = 'none';
+  const btn = document.getElementById('submit-btn');
+  btn.disabled = true;
+  btn.innerHTML = `<span style="display:inline-block;width:16px;height:16px;border:2.5px solid rgba(255,255,255,.4);border-top-color:#fff;border-radius:50%;animation:spin 1s linear infinite"></span> ${L?'جاري التحليل...':'Analyzing...'}`;
+  return true;
+}
+
+// Animate bars in result if present
+document.querySelectorAll('.bar-fill').forEach(b => {
+  const w = b.style.width;
+  b.style.width = '0';
+  setTimeout(() => b.style.width = w, 300);
+});
+</script>
+{% endblock %}

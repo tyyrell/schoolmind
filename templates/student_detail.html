@@ -1,0 +1,215 @@
+{% extends "base.html" %}
+{% block title %}{{ 'تفاصيل الطالب' if lang=='ar' else 'Student Detail' }}{% endblock %}
+{% block topbar_title %}{{ '🔍 ' + ('تفاصيل: ' if lang=='ar' else 'Student: ') + (student.anonymous_code or '') }}{% endblock %}
+
+{% block content %}
+<div style="margin-bottom:1rem;display:flex;align-items:center;gap:.5rem;flex-wrap:wrap">
+  <a href="{{ url_for('counselor_dashboard') }}" class="btn-out" onclick="playClick()">
+    <i class="bi bi-arrow-right"></i>{{ 'العودة' if lang=='ar' else 'Back' }}
+  </a>
+  <a href="{{ url_for('counselor_edit_student', uid=student.id) }}" class="btn-pri" onclick="playClick()">
+    <i class="bi bi-pencil-fill"></i>{{ 'تعديل' if lang=='ar' else 'Edit' }}
+  </a>
+</div>
+
+<div class="two-col">
+  <!-- Student card -->
+  <div>
+    <div class="sm-card" style="text-align:center">
+      <div style="width:70px;height:70px;border-radius:50%;background:linear-gradient(135deg,var(--sky),var(--pri));display:flex;align-items:center;justify-content:center;font-size:2rem;margin:0 auto .9rem;box-shadow:0 4px 16px rgba(56,189,248,.3);animation:float 4s ease-in-out infinite">👤</div>
+      <div style="font-size:.9rem;font-weight:800;margin-bottom:.2rem">{{ student.display_name or '—' }}</div>
+      <div style="font-size:.78rem;color:var(--muted)">{{ student.grade or '—' }}</div>
+      <div style="margin-top:.6rem">
+        <span style="font-family:monospace;background:var(--bg);padding:.25rem .8rem;border-radius:8px;font-size:.82rem;color:var(--pri);font-weight:700;border:1px solid var(--border)">
+          {{ student.anonymous_code }}
+        </span>
+      </div>
+
+      <!-- Stats row -->
+      {% if personal_stats %}
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:.5rem;margin-top:.9rem">
+        <div style="background:var(--bg-muted);border-radius:var(--r-sm);padding:.5rem .3rem;border:1px solid var(--border)">
+          <div style="font-size:1.2rem;font-weight:900;color:var(--sky)">{{ personal_stats.total_journals }}</div>
+          <div style="font-size:.62rem;color:var(--muted)">{{ 'يومية' if lang=='ar' else 'Journals' }}</div>
+        </div>
+        <div style="background:var(--bg-muted);border-radius:var(--r-sm);padding:.5rem .3rem;border:1px solid var(--border)">
+          <div style="font-size:1.2rem;font-weight:900;color:{{ 'var(--danger)' if personal_stats.latest_risk >= 5 else 'var(--warn)' if personal_stats.latest_risk >= 2.5 else 'var(--success)' }}">{{ personal_stats.latest_risk }}</div>
+          <div style="font-size:.62rem;color:var(--muted)">{{ 'خطر /10' if lang=='ar' else 'Risk /10' }}</div>
+        </div>
+        <div style="background:var(--bg-muted);border-radius:var(--r-sm);padding:.5rem .3rem;border:1px solid var(--border)">
+          <div style="font-size:1.2rem;font-weight:900;color:var(--pri)">{{ personal_stats.weekly_streak }}</div>
+          <div style="font-size:.62rem;color:var(--muted)">{{ 'أيام' if lang=='ar' else 'Days' }}</div>
+        </div>
+      </div>
+      {% endif %}
+
+      <!-- Prediction -->
+      {% if prediction and prediction.trend != 'insufficient_data' %}
+      <div style="margin-top:1rem;padding:.7rem .85rem;border-radius:var(--r-sm);font-size:.82rem;text-align:right;
+           {% if prediction.trend=='deteriorating' %}background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.2);color:var(--danger);
+           {% elif prediction.trend=='improving' %}background:rgba(16,185,129,.08);border:1px solid rgba(16,185,129,.2);color:var(--success);
+           {% else %}background:var(--bg);border:1px solid var(--border);color:var(--muted);{% endif %}">
+        <div style="font-weight:700;margin-bottom:.2rem">
+          <i class="bi bi-graph-up-arrow"></i>
+          {{ 'التنبؤ:' if lang=='ar' else 'Prediction:' }}
+        </div>
+        {{ prediction.message_ar if lang=='ar' else prediction.message_en }}
+        <div style="font-size:.7rem;margin-top:.2rem;opacity:.75">
+          {{ 'الدرجة المتوقعة: ' if lang=='ar' else 'Predicted: ' }}{{ prediction.predicted_score }}/10
+        </div>
+      </div>
+      {% endif %}
+
+      <!-- Current risk badge -->
+      {% if personal_stats %}
+      <div style="margin-top:.8rem">
+        <span class="risk-badge risk-{{ personal_stats.latest_level }}" style="font-size:.8rem;padding:.3rem .9rem">
+          {% if lang=='ar' %}
+            {% if personal_stats.latest_level=='low' %}✅ منخفض{% elif personal_stats.latest_level=='medium' %}⚠️ متوسط{% elif personal_stats.latest_level=='high' %}🔴 مرتفع{% else %}🚨 حرج{% endif %}
+          {% else %}
+            {% if personal_stats.latest_level=='low' %}✅ Low{% elif personal_stats.latest_level=='medium' %}⚠️ Medium{% elif personal_stats.latest_level=='high' %}🔴 High{% else %}🚨 Critical{% endif %}
+          {% endif %}
+        </span>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Chart -->
+  <div>
+    <div class="sm-card h-100">
+      <div style="font-size:.9rem;font-weight:800;margin-bottom:.8rem;display:flex;align-items:center;justify-content:space-between">
+        <span><i class="bi bi-graph-up" style="color:var(--pri)"></i> {{ ' مؤشر الخطر عبر الزمن' if lang=='ar' else ' Risk Score Over Time' }}</span>
+        <span style="font-size:.7rem;color:var(--muted)">{{ 'آخر 30 يوم' if lang=='ar' else 'Last 30 days' }}</span>
+      </div>
+      {% if chart_scores and chart_scores != '[]' %}
+      <div class="chart-wrap" style="height:210px">
+        <canvas id="stuChart"></canvas>
+      </div>
+      {% else %}
+      <div style="text-align:center;padding:3rem 1rem;color:var(--muted)">
+        <span style="font-size:2.5rem;display:block;margin-bottom:.5rem;animation:float 3s ease-in-out infinite">📊</span>
+        {{ 'لا توجد بيانات بعد' if lang=='ar' else 'No data yet' }}
+      </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+<!-- Journals -->
+<div class="sm-card" style="margin-top:.75rem">
+  <div style="font-size:.9rem;font-weight:800;margin-bottom:.85rem;display:flex;align-items:center;justify-content:space-between">
+    <span><i class="bi bi-journal-richtext" style="color:var(--pri)"></i> {{ ' يوميات الطالب (آخر 20)' if lang=='ar' else ' Student Journals (Last 20)' }}</span>
+    <span style="font-size:.75rem;color:var(--muted)">{{ journals|length }} {{ 'يومية' if lang=='ar' else 'entries' }}</span>
+  </div>
+  {% if journals %}
+  <div class="table-responsive">
+    <table class="sm-tbl">
+      <thead><tr>
+        <th>{{ 'التاريخ' if lang=='ar' else 'Date' }}</th>
+        <th>{{ 'المحتوى' if lang=='ar' else 'Content' }}</th>
+        <th>{{ 'المشاعر' if lang=='ar' else 'Emotion' }}</th>
+        <th>{{ 'الخطر' if lang=='ar' else 'Risk' }}</th>
+        <th>{{ 'تنمر' if lang=='ar' else 'Bully' }}</th>
+      </tr></thead>
+      <tbody>
+        {% for j in journals %}
+        <tr style="animation:fadeUp .3s ease {{ loop.index*0.05 }}s both">
+          <td style="white-space:nowrap;font-size:.75rem;color:var(--muted)">{{ j.created_at[:16] }}</td>
+          <td style="max-width:280px;font-size:.83rem">{{ j.content[:100] }}{% if j.content|length > 100 %}…{% endif %}</td>
+          <td>
+            {% if j.dominant_emotion %}
+            <span class="badge-emo emo-{{ j.dominant_emotion }}" style="font-size:.69rem">{{ j.dominant_emotion }}</span>
+            {% else %}—{% endif %}
+          </td>
+          <td>
+            {% if j.risk_score is not none %}
+            <div style="display:flex;align-items:center;gap:5px">
+              <div class="rbar-wrap" style="width:40px"><div class="rbar-fill" data-score="{{ j.risk_score }}"></div></div>
+              <span style="font-weight:800;font-size:.83rem;color:{{ 'var(--danger)' if (j.risk_score or 0)>=5 else ('var(--warn)' if (j.risk_score or 0)>=2.5 else 'var(--success)') }}">{{ (j.risk_score or 0)|round(1) }}</span>
+            </div>
+            {% else %}—{% endif %}
+          </td>
+          <td>
+            {% if j.has_bullying %}
+            <span style="color:var(--danger);font-weight:700;font-size:.77rem;animation:pulse 2s ease infinite">⚠️ {{ 'نعم' if lang=='ar' else 'Yes' }}</span>
+            {% else %}<span style="color:var(--muted);font-size:.75rem">—</span>{% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div style="text-align:center;padding:2rem;color:var(--muted);font-size:.84rem">
+    <span style="font-size:2.5rem;display:block;margin-bottom:.4rem;animation:float 3s ease-in-out infinite">📔</span>
+    {{ 'لا توجد يوميات بعد' if lang=='ar' else 'No journals yet' }}
+  </div>
+  {% endif %}
+</div>
+{% endblock %}
+
+{% block chartjs %}{% endblock %}
+{% block scripts %}
+<script>
+const sc = {{ chart_scores|safe }}, lb = {{ chart_labels|safe }};
+if (sc && sc.length) {
+  const ctx = document.getElementById('stuChart')?.getContext('2d');
+  if (ctx && typeof Chart !== 'undefined') {
+    const g = ctx.createLinearGradient(0, 0, 0, 180);
+    g.addColorStop(0, 'rgba(139,92,246,.25)');
+    g.addColorStop(1, 'rgba(139,92,246,.02)');
+    new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: lb,
+        datasets: [{
+          label: 'Risk',
+          data: sc,
+          borderColor: '#7c3aed',
+          backgroundColor: g,
+          borderWidth: 2.5,
+          fill: true,
+          tension: .4,
+          pointRadius: 5,
+          // FIX CRITICAL #2: Use /10 thresholds (was /100: 25/50/75)
+          pointBackgroundColor: sc.map(s =>
+            s < 2.5 ? '#10b981' :
+            s < 5   ? '#f59e0b' :
+            s < 7.5 ? '#ef4444' : '#9d174d'
+          ),
+          pointBorderColor: '#fff',
+          pointBorderWidth: 2,
+          pointHoverRadius: 7,
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            callbacks: {
+              label: c => ` ${c.parsed.y.toFixed(1)}/10`,
+              afterLabel: c => {
+                const s = c.parsed.y;
+                const L = document.documentElement.lang === 'ar';
+                if (s >= 7.5) return L ? '🚨 حرج' : '🚨 Critical';
+                if (s >= 5.0) return L ? '🔴 مرتفع' : '🔴 High';
+                if (s >= 2.5) return L ? '⚠️ متوسط' : '⚠️ Medium';
+                return L ? '✅ منخفض' : '✅ Low';
+              }
+            }
+          }
+        },
+        scales: {
+          // FIX: Y axis max is 10 (not 100)
+          y: { min: 0, max: 10, grid: { color: 'rgba(0,0,0,.04)' }, ticks: { callback: v => v } },
+          x: { grid: { display: false }, ticks: { maxTicksLimit: 8 } }
+        }
+      }
+    });
+  }
+}
+</script>
+{% endblock %}

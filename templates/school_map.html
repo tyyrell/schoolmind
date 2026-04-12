@@ -1,0 +1,115 @@
+{% extends "base.html" %}
+{% block title %}{{ 'خريطة الصحة النفسية' if lang=='ar' else 'Mental Health Map' }}{% endblock %}
+{% block topbar_title %}{{ '🗺 خريطة صحة المدرسة' if lang=='ar' else '🗺 School Health Map' }}{% endblock %}
+
+{% block content %}
+<!-- Hero -->
+<div class="hero-card mb-4">
+  <div style="position:relative;z-index:1">
+    <div style="font-size:1.1rem;font-weight:900;margin-bottom:.35rem">
+      {{ 'خريطة الصحة النفسية للمدرسة' if lang=='ar' else 'School Mental Health Map' }}
+    </div>
+    <div style="font-size:.82rem;opacity:.8">
+      {{ 'إحصاءات مجمّعة ومجهولة الهوية. لا تظهر أسماء أو هويات الطلاب.' if lang=='ar'
+         else 'Aggregated and anonymized statistics. No student names shown.' }}
+    </div>
+  </div>
+</div>
+
+<!-- Stats -->
+<div class="stats-grid mb-4">
+  <div class="stat-card info"><span class="stat-icon">🏫</span><div class="stat-number">{{ stats.total }}</div><div class="stat-label">{{ 'إجمالي الطلاب' if lang=='ar' else 'Total Students' }}</div></div>
+  <div class="stat-card success"><span class="stat-icon">💚</span><div class="stat-number">{{ stats.pct_low }}%</div><div class="stat-label">{{ 'حالة جيدة' if lang=='ar' else 'Good Condition' }}</div></div>
+  <div class="stat-card warning"><span class="stat-icon">💛</span><div class="stat-number">{{ stats.pct_medium }}%</div><div class="stat-label">{{ 'ضغط متوسط' if lang=='ar' else 'Moderate Stress' }}</div></div>
+  <div class="stat-card danger"><span class="stat-icon">🔴</span><div class="stat-number">{{ stats.pct_high + stats.pct_critical }}%</div><div class="stat-label">{{ 'خطر مرتفع' if lang=='ar' else 'High Risk' }}</div></div>
+</div>
+
+<div class="two-col">
+  <!-- Chart -->
+  <div>
+    <div class="sm-card">
+      <div style="font-size:.95rem;font-weight:800;margin-bottom:1rem">
+        <i class="bi bi-bar-chart-fill" style="color:var(--pri)"></i>
+        {{ ' توزيع الحالات النفسية' if lang=='ar' else ' Mental Health Distribution' }}
+      </div>
+      <div class="chart-wrap" style="height:265px">
+        <canvas id="mapChart"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- Progress bars -->
+  <div>
+    <div class="sm-card h-100">
+      <div style="font-size:.95rem;font-weight:800;margin-bottom:1rem">
+        <i class="bi bi-activity" style="color:var(--pri)"></i>
+        {{ ' مستويات الصحة النفسية' if lang=='ar' else ' Health Levels' }}
+      </div>
+      {% for level, pct, icon, ar_l, en_l, col, count in [
+        ('low',    stats.pct_low,      '✅','حالة جيدة','Good',          '#10b981', stats.low),
+        ('medium', stats.pct_medium,   '💛','ضغط متوسط','Moderate',      '#f59e0b', stats.medium),
+        ('high',   stats.pct_high,     '🔴','خطر مرتفع','High Risk',     '#ef4444', stats.high),
+        ('critical',stats.pct_critical,'🚨','حالة حرجة','Critical',      '#9d174d', stats.critical),
+      ] %}
+      <div style="margin-bottom:1.3rem;animation:fadeUp .4s ease {{ loop.index * 0.1 }}s both">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.38rem">
+          <div style="font-size:.86rem;font-weight:700;display:flex;align-items:center;gap:5px">
+            {{ icon }} {{ ar_l if lang=='ar' else en_l }}
+          </div>
+          <div style="font-size:.9rem;font-weight:900;color:{{ col }}">{{ pct }}%</div>
+        </div>
+        <div class="rbar-wrap" style="height:10px">
+          <div style="height:100%;border-radius:20px;background:{{ col }};width:{{ pct }}%;transition:width 1s cubic-bezier(.4,0,.2,1) {{ loop.index*0.15 }}s"></div>
+        </div>
+        <div style="font-size:.71rem;color:var(--muted);margin-top:.2rem">
+          {{ count|int }} {{ 'طالب' if lang=='ar' else 'students' }}
+        </div>
+      </div>
+      {% endfor %}
+
+      <div style="padding:.65rem;background:rgba(14,165,233,.06);border-radius:var(--r-sm);border:1px solid rgba(14,165,233,.18);font-size:.75rem;color:var(--muted)">
+        <i class="bi bi-shield-check-fill" style="color:var(--sky)"></i>
+        {{ ' إحصاءات مجمّعة ومجهولة — لا تُظهر بيانات شخصية' if lang=='ar' else ' Aggregated & anonymous — no personal data shown' }}
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Recommendations -->
+<div class="sm-card" style="margin-top:.75rem">
+  <div style="font-size:.95rem;font-weight:800;margin-bottom:1rem">
+    <i class="bi bi-lightbulb-fill" style="color:var(--warn)"></i>
+    {{ ' توصيات على مستوى المدرسة' if lang=='ar' else ' School-Level Recommendations' }}
+  </div>
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:.75rem">
+    {% for ico, col, ar_t, en_t, ar_d, en_d in [
+      ('bi-people-fill',    'var(--sky)',    'برامج التوعية',         'Awareness Programs',       'جلسات توعية جماعية حول الصحة النفسية والتنمر',   'Organize group awareness sessions'),
+      ('bi-chat-dots-fill', 'var(--success)', 'بيئة آمنة للتواصل',    'Safe Communication',       'إنشاء قنوات آمنة للتعبير عن المخاوف',            'Create safe channels for students'),
+      ('bi-book-fill',      'var(--warn)',    'التدريب المهني',        'Professional Training',    'تدريب المعلمين على اكتشاف علامات الضغط النفسي',   'Train teachers to recognize stress signs'),
+      ('bi-heart-fill',     'var(--danger)',  'الدعم المجتمعي',        'Community Support',        'التعاون مع الأسر لخلق بيئة داعمة',               'Collaborate with families'),
+    ] %}
+    <div style="display:flex;gap:10px;align-items:flex-start;padding:.75rem;background:var(--bg);border-radius:var(--r-sm);border:1px solid var(--border);animation:fadeUp .4s ease {{ loop.index*0.08 }}s both;transition:all .2s" onmouseover="this.style.transform='translateY(-3px)';this.style.boxShadow='var(--sh)'" onmouseout="this.style.transform='';this.style.boxShadow=''">
+      <i class="bi {{ ico }}" style="font-size:1.3rem;color:{{ col }};flex-shrink:0;margin-top:2px"></i>
+      <div>
+        <div style="font-weight:700;font-size:.85rem;margin-bottom:.2rem">{{ ar_t if lang=='ar' else en_t }}</div>
+        <div style="font-size:.78rem;color:var(--muted)">{{ ar_d if lang=='ar' else en_d }}</div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+const ctx=document.getElementById('mapChart').getContext('2d');
+const grad1=ctx.createLinearGradient(0,0,0,200); grad1.addColorStop(0,'rgba(16,185,129,.9)'); grad1.addColorStop(1,'rgba(16,185,129,.5)');
+const grad2=ctx.createLinearGradient(0,0,0,200); grad2.addColorStop(0,'rgba(245,158,11,.9)'); grad2.addColorStop(1,'rgba(245,158,11,.5)');
+const grad3=ctx.createLinearGradient(0,0,0,200); grad3.addColorStop(0,'rgba(239,68,68,.9)'); grad3.addColorStop(1,'rgba(239,68,68,.5)');
+const grad4=ctx.createLinearGradient(0,0,0,200); grad4.addColorStop(0,'rgba(157,23,77,.9)'); grad4.addColorStop(1,'rgba(157,23,77,.5)');
+new Chart(ctx,{type:'bar',data:{
+  labels:['{{ "جيد" if lang=="ar" else "Good" }}','{{ "متوسط" if lang=="ar" else "Moderate" }}','{{ "مرتفع" if lang=="ar" else "High Risk" }}','{{ "حرج" if lang=="ar" else "Critical" }}'],
+  datasets:[{label:'{{ "%" }}',data:[{{ stats.pct_low }},{{ stats.pct_medium }},{{ stats.pct_high }},{{ stats.pct_critical }}],backgroundColor:[grad1,grad2,grad3,grad4],borderColor:['#10b981','#f59e0b','#ef4444','#9d174d'],borderWidth:2,borderRadius:10,borderSkipped:false}]
+},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>` ${c.parsed.y}%`}}},scales:{y:{beginAtZero:true,max:100,grid:{color:'rgba(0,0,0,0.04)'},ticks:{callback:v=>v+'%'}},x:{grid:{display:false}}}}});
+</script>
+{% endblock %}

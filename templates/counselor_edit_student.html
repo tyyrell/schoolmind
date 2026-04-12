@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% block title %}{{ 'تعديل بيانات الطالب' if lang=='ar' else 'Edit Student' }}{% endblock %}
+{% block topbar_title %}{{ '✏️ تعديل: ' + student.display_name if lang=='ar' else '✏️ Edit: ' + student.display_name }}{% endblock %}
+
+{% block content %}
+<div style="margin-bottom:1rem">
+  <a href="{{ url_for('counselor_students') }}" class="btn-out" onclick="playClick()">
+    <i class="bi bi-arrow-right"></i>{{ 'رجوع' if lang=='ar' else 'Back' }}
+  </a>
+</div>
+
+<div style="max-width:520px">
+  <div class="sm-card" style="margin-bottom:.75rem">
+    <div style="text-align:center;padding:.5rem 0 .8rem">
+      <div style="font-size:2rem;margin-bottom:.4rem">👤</div>
+      <div style="font-weight:800">{{ student.display_name }}</div>
+      <div style="font-size:.78rem;color:var(--muted)">@{{ student.username }} · {{ student.grade or '—' }}</div>
+      <div style="font-family:monospace;font-size:.8rem;color:var(--sky);margin-top:.3rem">{{ student.anonymous_code }}</div>
+      {% if student.birthdate %}<div style="font-size:.75rem;color:var(--muted);margin-top:.2rem">📅 {{ student.birthdate }}</div>{% endif %}
+      {% if student.national_id %}<div style="font-size:.75rem;color:var(--muted)">🪪 {{ student.national_id }}</div>{% endif %}
+    </div>
+  </div>
+
+  <div class="sm-card">
+    <div style="font-size:.9rem;font-weight:800;margin-bottom:.9rem"><i class="bi bi-pencil-fill" style="color:var(--sky)"></i> {{ ' تعديل بيانات الطالب' if lang=='ar' else ' Edit Student Data' }}</div>
+    <form method="POST" action="{{ url_for('counselor_edit_student', uid=student.id) }}">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+      <div style="margin-bottom:.9rem">
+        <label style="font-size:.8rem;font-weight:700;display:block;margin-bottom:.35rem">{{ 'الاسم الكامل' if lang=='ar' else 'Full Name' }}</label>
+        <input type="text" name="display_name" class="form-control" value="{{ student.display_name }}" placeholder="{{ 'اترك فارغاً لعدم التغيير' if lang=='ar' else 'Leave empty to keep' }}">
+      </div>
+      <div style="margin-bottom:.9rem">
+        <label style="font-size:.8rem;font-weight:700;display:block;margin-bottom:.35rem">{{ 'اسم المستخدم' if lang=='ar' else 'Username' }}</label>
+        <input type="text" name="username" class="form-control" value="{{ student.username }}" placeholder="{{ 'اترك فارغاً لعدم التغيير' if lang=='ar' else 'Leave empty to keep' }}">
+      </div>
+      <div style="margin-bottom:.9rem">
+        <label style="font-size:.8rem;font-weight:700;display:block;margin-bottom:.35rem">{{ 'كلمة مرور جديدة (في حال النسيان)' if lang=='ar' else 'New Password (if forgotten)' }}</label>
+        <input type="password" name="new_password" class="form-control" placeholder="{{ 'اترك فارغاً لعدم التغيير' if lang=='ar' else 'Leave empty to keep current' }}" autocomplete="new-password">
+      </div>
+      <div style="background:rgba(245,158,11,.07);border:1px solid rgba(245,158,11,.2);border-radius:var(--r-sm);padding:.7rem .85rem;font-size:.77rem;color:var(--warn);margin-bottom:.9rem">
+        ⚠️ {{ 'إعادة تعيين كلمة المرور تُزيل الكلمة القديمة نهائياً.' if lang=='ar' else 'Resetting the password permanently replaces the old one.' }}
+      </div>
+      <div style="display:flex;gap:.6rem">
+        <button type="submit" class="btn-acc" onclick="playOk()"><i class="bi bi-check-circle-fill"></i> {{ 'حفظ التغييرات' if lang=='ar' else 'Save Changes' }}</button>
+        <a href="{{ url_for('counselor_students') }}" class="btn-out" onclick="playClick()">{{ 'إلغاء' if lang=='ar' else 'Cancel' }}</a>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

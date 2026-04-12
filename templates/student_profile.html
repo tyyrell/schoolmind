@@ -1,0 +1,264 @@
+{% extends "base.html" %}
+{% block title %}{{ 'إدارة حسابي' if lang=='ar' else 'My Account' }}{% endblock %}
+{% block topbar_title %}{{ '👤 إدارة الحساب' if lang=='ar' else '👤 Account Settings' }}{% endblock %}
+
+{% block content %}
+<div class="two-col">
+  <!-- Profile card -->
+  <div>
+    <div class="sm-card" style="text-align:center">
+      <!-- FIX #1 CRITICAL: Use avatar_b64 from user object (DB column), NOT avatar_filename -->
+      <div style="position:relative;width:96px;height:96px;margin:0 auto 1rem;">
+        {% set av = user.avatar_b64 or session.get('avatar_b64','') %}
+        {% if av %}
+        <img src="{{ av }}" alt="Avatar" id="avatar-preview"
+             style="width:96px;height:96px;border-radius:50%;object-fit:cover;border:3px solid var(--sky);box-shadow:0 4px 18px rgba(56,189,248,.3);animation:float 4s ease-in-out infinite"
+             onerror="this.onerror=null;this.parentNode.innerHTML='<div id=\'avatar-preview\' style=\'width:96px;height:96px;border-radius:50%;background:var(--grad-pri);display:flex;align-items:center;justify-content:center;font-size:2.5rem;border:3px solid var(--border)\'>{{ (user.display_name or \"?\")[0] }}</div>'">
+        {% else %}
+        <div id="avatar-preview" style="width:96px;height:96px;border-radius:50%;background:var(--grad-pri);display:flex;align-items:center;justify-content:center;font-size:2.5rem;border:3px solid var(--border);box-shadow:var(--sh-sm)">
+          {{ (user.display_name or '?')[0] }}
+        </div>
+        {% endif %}
+        <label for="avatar-upload"
+               style="position:absolute;bottom:0;right:0;width:28px;height:28px;background:var(--sky);border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;border:2px solid var(--bg-card);box-shadow:var(--sh-sm);transition:transform .2s"
+               title="{{ 'تغيير الصورة الشخصية' if lang=='ar' else 'Change profile photo' }}"
+               onmouseover="this.style.transform='scale(1.15)'" onmouseout="this.style.transform='scale(1)'">
+          <i class="bi bi-camera-fill" style="font-size:.7rem;color:#fff"></i>
+        </label>
+      </div>
+
+      <div style="font-size:1rem;font-weight:800;margin-bottom:.2rem">{{ user.display_name }}</div>
+      <div style="font-size:.78rem;color:var(--muted)">@{{ user.username }}</div>
+      {% if user.grade %}<div style="margin-top:.4rem"><span class="risk-badge risk-low">{{ user.grade }}</span></div>{% endif %}
+      {% if user.anonymous_code %}<div style="margin-top:.5rem;font-family:monospace;font-size:.8rem;color:var(--sky)">{{ user.anonymous_code }}</div>{% endif %}
+
+      {% if user.is_anonymous %}
+      <div style="margin-top:.7rem;padding:.7rem .9rem;background:rgba(245,158,11,.08);border-radius:var(--r-sm);font-size:.78rem;color:var(--warn);border:1px solid rgba(245,158,11,.2);text-align:right">
+        <div style="font-weight:800;margin-bottom:.3rem">👤 {{ 'حساب مجهول الهوية' if lang=='ar' else 'Anonymous Account' }}</div>
+        {% if session.anon_password %}
+        <div style="font-size:.74rem;opacity:.85">
+          {{ 'احفظ بيانات دخولك:' if lang=='ar' else 'Save your login credentials:' }}<br>
+          <b>{{ 'المستخدم:' if lang=='ar' else 'Username:' }}</b> <code style="background:rgba(0,0,0,.1);padding:.1rem .3rem;border-radius:4px">{{ user.username }}</code><br>
+          <b>{{ 'كلمة المرور:' if lang=='ar' else 'Password:' }}</b> <code style="background:rgba(0,0,0,.1);padding:.1rem .3rem;border-radius:4px">{{ session.anon_password }}</code>
+        </div>
+        {% endif %}
+      </div>
+      {% endif %}
+
+      <!-- FIX: Avatar upload form - enctype multipart -->
+      <form method="POST" action="{{ url_for('student_profile') }}"
+            enctype="multipart/form-data" id="avatar-form" style="margin-top:.7rem">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+        <input type="hidden" name="action" value="upload_avatar">
+        <input type="file" id="avatar-upload" name="avatar"
+               accept=".jpg,.jpeg,.png,.gif,.webp" style="display:none"
+               onchange="previewAndSubmit(this)">
+      </form>
+      <div style="font-size:.7rem;color:var(--muted);margin-top:.3rem">
+        {{ 'انقر على 📷 لتغيير الصورة · max 200KB' if lang=='ar' else 'Click 📷 to change photo · max 200KB' }}
+      </div>
+    </div>
+
+    <!-- Account info -->
+    <div class="sm-card" style="margin-top:.75rem">
+      <div style="font-size:.9rem;font-weight:800;margin-bottom:.8rem;display:flex;align-items:center;gap:7px">
+        <i class="bi bi-info-circle-fill" style="color:var(--sky)"></i>
+        {{ 'معلومات الحساب' if lang=='ar' else 'Account Info' }}
+      </div>
+      {% for label_ar, label_en, val in [
+        ('تاريخ الإنشاء','Created', user.created_at[:10] if user.created_at else '—'),
+        ('الدور','Role', 'طالب' if lang=='ar' else 'Student'),
+        ('الرقم الوطني','National ID', (user.national_id or '—') if not user.is_anonymous else '🔒 مخفي'),
+        ('تاريخ الميلاد','Birthdate', (user.birthdate or '—') if not user.is_anonymous else '🔒 مخفي'),
+      ] %}
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:.5rem 0;border-bottom:1px solid var(--border);font-size:.84rem;">
+        <span style="color:var(--muted)">{{ label_ar if lang=='ar' else label_en }}</span>
+        <span style="font-weight:600">{{ val }}</span>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- Edit forms -->
+  <div>
+    <!-- Update info -->
+    <div class="sm-card" style="margin-bottom:.75rem">
+      <div style="font-size:.9rem;font-weight:800;margin-bottom:.9rem;display:flex;align-items:center;gap:7px">
+        <i class="bi bi-pencil-fill" style="color:var(--sky)"></i>
+        {{ 'تعديل المعلومات' if lang=='ar' else 'Edit Info' }}
+      </div>
+      <form method="POST" action="{{ url_for('student_profile') }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+        <input type="hidden" name="action" value="update_info">
+        <div style="margin-bottom:.9rem">
+          <label style="font-size:.8rem;font-weight:700;display:block;margin-bottom:.35rem">
+            {{ 'الاسم الكامل' if lang=='ar' else 'Full Name' }} *
+          </label>
+          <input type="text" name="display_name" class="form-control"
+                 value="{{ user.display_name }}" required maxlength="120">
+        </div>
+        {% if not user.is_anonymous %}
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:.8rem;margin-bottom:.9rem">
+          <div>
+            <label style="font-size:.8rem;font-weight:700;display:block;margin-bottom:.35rem">
+              {{ 'الرقم الوطني' if lang=='ar' else 'National ID' }}
+            </label>
+            <input type="text" name="national_id" class="form-control"
+                   value="{{ user.national_id or '' }}"
+                   placeholder="{{ '9-12 رقم' if lang=='ar' else '9-12 digits' }}"
+                   maxlength="12" pattern="\d{9,12}" inputmode="numeric">
+          </div>
+          <div>
+            <label style="font-size:.8rem;font-weight:700;display:block;margin-bottom:.35rem">
+              {{ 'تاريخ الميلاد' if lang=='ar' else 'Birthdate' }}
+            </label>
+            <input type="date" name="birthdate" class="form-control"
+                   value="{{ user.birthdate or '' }}" style="color-scheme:{{ 'dark' if theme=='dark' else 'light' }}">
+          </div>
+        </div>
+        {% endif %}
+        <button type="submit" class="btn-acc" onclick="playOk()">
+          <i class="bi bi-check-circle-fill"></i>
+          {{ 'حفظ التغييرات' if lang=='ar' else 'Save Changes' }}
+        </button>
+      </form>
+    </div>
+
+    <!-- Change password -->
+    <div class="sm-card">
+      <div style="font-size:.9rem;font-weight:800;margin-bottom:.9rem;display:flex;align-items:center;gap:7px">
+        <i class="bi bi-key-fill" style="color:var(--warn)"></i>
+        {{ 'تغيير كلمة المرور' if lang=='ar' else 'Change Password' }}
+      </div>
+      <form method="POST" action="{{ url_for('student_profile') }}" id="pw-form">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+        <input type="hidden" name="action" value="change_password">
+        <div style="margin-bottom:.85rem">
+          <label style="font-size:.8rem;font-weight:700;display:block;margin-bottom:.32rem">
+            {{ 'كلمة المرور الحالية' if lang=='ar' else 'Current Password' }}
+          </label>
+          <input type="password" name="old_password" class="form-control"
+                 placeholder="••••••••" required autocomplete="current-password">
+        </div>
+        <div style="margin-bottom:.85rem">
+          <label style="font-size:.8rem;font-weight:700;display:block;margin-bottom:.32rem">
+            {{ 'كلمة المرور الجديدة' if lang=='ar' else 'New Password' }}
+          </label>
+          <input type="password" name="new_password" class="form-control" id="new-pw"
+                 placeholder="{{ '6 أحرف فأكثر' if lang=='ar' else 'Min 6 chars' }}"
+                 required autocomplete="new-password" oninput="checkPwStrength(this)">
+          <!-- FIX: Password strength bar -->
+          <div style="height:3px;background:var(--border);border-radius:2px;margin-top:.35rem;overflow:hidden">
+            <div id="pw-str-fill" style="height:100%;border-radius:2px;width:0;transition:width .3s,background .3s"></div>
+          </div>
+          <div id="pw-str-text" style="font-size:.7rem;color:var(--muted);margin-top:.2rem"></div>
+        </div>
+        <div style="margin-bottom:.85rem">
+          <label style="font-size:.8rem;font-weight:700;display:block;margin-bottom:.32rem">
+            {{ 'تأكيد كلمة المرور' if lang=='ar' else 'Confirm New Password' }}
+          </label>
+          <input type="password" name="confirm_new_password" class="form-control" id="conf-pw"
+                 placeholder="••••••••" required autocomplete="new-password"
+                 oninput="checkPwMatch()">
+          <div id="pw-match-msg" style="font-size:.7rem;margin-top:.2rem"></div>
+        </div>
+        <!-- FIX: Password rules hint -->
+        <div style="padding:.5rem .75rem;background:var(--bg-muted);border-radius:var(--r-sm);font-size:.74rem;color:var(--muted);margin-bottom:.85rem;border:1px solid var(--border)">
+          <i class="bi bi-info-circle"></i>
+          {{ '6 أحرف على الأقل · ليست أرقاماً فقط' if lang=='ar' else '6+ characters · Not only digits' }}
+        </div>
+        <button type="submit" class="btn-warm" onclick="playClick()">
+          <i class="bi bi-key-fill"></i>
+          {{ 'تغيير كلمة المرور' if lang=='ar' else 'Change Password' }}
+        </button>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+const L = document.documentElement.lang === 'ar';
+
+/* FIX CRITICAL: Preview avatar and auto-submit */
+function previewAndSubmit(input) {
+  const file = input.files[0];
+  if (!file) return;
+  if (file.size > 200 * 1024) {
+    alert(L ? '⚠️ حجم الصورة يجب أن يكون أقل من 200KB' : '⚠️ Image must be under 200KB');
+    input.value = '';
+    return;
+  }
+  const r = new FileReader();
+  r.onload = e => {
+    const prev = document.getElementById('avatar-preview');
+    if (prev && prev.tagName === 'IMG') {
+      prev.src = e.target.result;
+    } else if (prev) {
+      const img = document.createElement('img');
+      img.id = 'avatar-preview';
+      img.src = e.target.result;
+      img.style.cssText = 'width:96px;height:96px;border-radius:50%;object-fit:cover;border:3px solid var(--sky);box-shadow:var(--sh-sm)';
+      prev.parentNode.replaceChild(img, prev);
+    }
+  };
+  r.readAsDataURL(file);
+  setTimeout(() => document.getElementById('avatar-form').submit(), 400);
+}
+
+/* Password strength */
+function checkPwStrength(inp) {
+  const val = inp.value;
+  const fill = document.getElementById('pw-str-fill');
+  const text = document.getElementById('pw-str-text');
+  if (!fill || !text) return;
+  if (!val) { fill.style.width = '0'; text.textContent = ''; return; }
+  let pct = 0;
+  if (val.length >= 6)  pct += 25;
+  if (val.length >= 10) pct += 20;
+  if (/[A-Z]/.test(val)) pct += 15;
+  if (/[0-9]/.test(val)) pct += 20;
+  if (/[^A-Za-z0-9]/.test(val)) pct += 20;
+  let col, msg;
+  if (pct < 30) { col = '#ef4444'; msg = L ? 'ضعيفة 🔴' : 'Weak 🔴'; }
+  else if (pct < 60) { col = '#f59e0b'; msg = L ? 'متوسطة 🟡' : 'Fair 🟡'; }
+  else { col = '#10b981'; msg = L ? '✅ قوية' : '✅ Strong'; }
+  fill.style.width = Math.min(pct, 100) + '%';
+  fill.style.background = col;
+  text.style.color = col;
+  text.textContent = msg;
+  checkPwMatch();
+}
+
+function checkPwMatch() {
+  const pw = document.getElementById('new-pw')?.value;
+  const cf = document.getElementById('conf-pw')?.value;
+  const msg = document.getElementById('pw-match-msg');
+  if (!msg || !cf) return;
+  if (pw === cf) { msg.style.color = 'var(--success)'; msg.textContent = L ? '✅ متطابقتان' : '✅ Passwords match'; }
+  else { msg.style.color = 'var(--danger)'; msg.textContent = L ? '❌ غير متطابقتان' : '❌ Passwords do not match'; }
+}
+
+/* FIX: Validate password form before submit */
+document.getElementById('pw-form')?.addEventListener('submit', function(e) {
+  const pw = document.getElementById('new-pw')?.value || '';
+  const cf = document.getElementById('conf-pw')?.value || '';
+  if (pw.length < 6) {
+    e.preventDefault();
+    alert(L ? '⚠️ كلمة المرور يجب 6 أحرف على الأقل' : '⚠️ Password must be at least 6 characters');
+    return;
+  }
+  if (/^\d+$/.test(pw)) {
+    e.preventDefault();
+    alert(L ? '⚠️ لا تستخدم أرقاماً فقط' : '⚠️ Password cannot be only digits');
+    return;
+  }
+  if (pw !== cf) {
+    e.preventDefault();
+    alert(L ? '⚠️ كلمات المرور غير متطابقة' : '⚠️ Passwords do not match');
+    return;
+  }
+});
+</script>
+{% endblock %}

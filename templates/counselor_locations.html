@@ -1,0 +1,146 @@
+{% extends "base.html" %}
+{% block title %}{{ 'مواقع الطلاب' if lang=='ar' else 'Student Locations' }}{% endblock %}
+{% block topbar_title %}{{ '📍 خريطة مواقع الطلاب' if lang=='ar' else '📍 Student Location Map' }}{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<style>
+#map{height:420px;border-radius:var(--r);border:1px solid var(--border);box-shadow:var(--sh-sm);}
+.loc-card{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--r-sm);padding:.85rem;margin-bottom:.5rem;display:flex;align-items:center;gap:.75rem;transition:all var(--tr);cursor:pointer;}
+.loc-card:hover{border-color:var(--border-h);box-shadow:var(--sh-sm);}
+.loc-dot{width:10px;height:10px;border-radius:50%;background:var(--success);animation:pulse 2s ease infinite;flex-shrink:0;}
+.leaflet-popup-content{font-family:'Cairo',sans-serif;font-size:.85rem;line-height:1.6;}
+.info-badge{display:inline-flex;align-items:center;gap:4px;background:rgba(16,185,129,.1);color:var(--success);border:1px solid rgba(16,185,129,.25);padding:.25rem .65rem;border-radius:12px;font-size:.75rem;font-weight:700;}
+</style>
+{% endblock %}
+
+{% block content %}
+
+<!-- Header info -->
+<div class="sm-card" style="margin-bottom:1rem;background:linear-gradient(135deg,rgba(16,185,129,.06),rgba(56,189,248,.04));border-color:rgba(16,185,129,.2)">
+  <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.5rem">
+    <div>
+      <div style="font-size:.95rem;font-weight:800;margin-bottom:.25rem;display:flex;align-items:center;gap:8px">
+        <i class="bi bi-geo-alt-fill" style="color:var(--success)"></i>
+        {{ 'المواقع المشارَكة' if lang=='ar' else 'Shared Locations' }}
+      </div>
+      <div style="font-size:.8rem;color:var(--muted)">{{ 'يظهر موقع الطالب فقط عند تفعيله يدوياً من قِبل الطالب نفسه' if lang=='ar' else 'Location only shows when manually activated by the student' }}</div>
+    </div>
+    <div style="display:flex;gap:.5rem;flex-wrap:wrap;align-items:center">
+      <span class="info-badge"><i class="bi bi-person-fill"></i> {{ locations|length }} {{ 'طالب' if lang=='ar' else 'students' }}</span>
+      <button onclick="refreshMap()" class="btn-out" style="font-size:.78rem;padding:.35rem .8rem"><i class="bi bi-arrow-clockwise"></i> {{ 'تحديث' if lang=='ar' else 'Refresh' }}</button>
+    </div>
+  </div>
+</div>
+
+<!-- Map -->
+<div id="map" style="margin-bottom:1rem"></div>
+
+<!-- Location List -->
+{% if locations %}
+<div style="font-size:.9rem;font-weight:800;margin-bottom:.6rem;display:flex;align-items:center;gap:8px">
+  <i class="bi bi-list-ul" style="color:var(--sky)"></i>
+  {{ 'قائمة الطلاب' if lang=='ar' else 'Student List' }}
+</div>
+<div>
+  {% for loc in locations %}
+  <div class="loc-card" onclick="flyTo({{ loc.latitude }},{{ loc.longitude }},16)" id="loc-card-{{ loc.user_id }}">
+    <div class="loc-dot"></div>
+    <div style="flex:1">
+      <div style="font-weight:700;font-size:.88rem">
+        {{ loc.anonymous_code or 'S-????' }}
+        {% if loc.grade %}
+        <span style="font-size:.73rem;color:var(--muted);font-weight:500">— {{ loc.grade }}</span>
+        {% endif %}
+      </div>
+      <div style="font-size:.75rem;color:var(--muted);margin-top:.15rem">
+        <i class="bi bi-clock"></i> {{ loc.shared_at[:16] if loc.shared_at else '' }}
+        {% if loc.city %} · {{ loc.city }}{% endif %}
+      </div>
+    </div>
+    <div style="text-align:center">
+      <a href="{{ url_for('student_detail', uid=loc.user_id) }}" class="btn-out" style="font-size:.72rem;padding:.25rem .6rem" onclick="event.stopPropagation()">
+        <i class="bi bi-person-fill"></i>{{ ' ملف' if lang=='ar' else ' Profile' }}
+      </a>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% else %}
+<div style="text-align:center;padding:2.5rem 1rem;color:var(--muted)">
+  <i class="bi bi-geo-alt" style="font-size:3rem;opacity:.3;display:block;margin-bottom:.75rem"></i>
+  <div style="font-weight:700;margin-bottom:.3rem">{{ 'لا مواقع مشارَكة حالياً' if lang=='ar' else 'No shared locations yet' }}</div>
+  <div style="font-size:.82rem">{{ 'يمكن للطلاب مشاركة موقعهم من لوحة التحكم' if lang=='ar' else 'Students can share their location from the dashboard' }}</div>
+</div>
+{% endif %}
+
+<!-- Privacy Note -->
+<div class="sm-card" style="margin-top:1rem;background:rgba(245,158,11,.04);border-color:rgba(245,158,11,.2)">
+  <div style="font-size:.82rem;color:var(--muted);line-height:1.75">
+    🔒 <strong>{{ 'ملاحظة الخصوصية:' if lang=='ar' else 'Privacy Note:' }}</strong>
+    {{ 'يُشارَك الموقع الجغرافي فقط بموافقة الطالب المسبقة. لا يتم تتبع الطالب باستمرار — فقط آخر موقع تم مشاركته.' if lang=='ar' else 'Location is shared only with the student\'s prior consent. The student is not continuously tracked — only the last shared location is shown.' }}
+  </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+const locsData = {{ locs_json | safe }};
+const L_AR = document.documentElement.lang === 'ar';
+
+// Init map centered on Jordan
+const map = L.map('map', {zoomControl: true}).setView([31.9539, 35.9106], 8);
+
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+  attribution: '© OpenStreetMap contributors',
+  maxZoom: 18
+}).addTo(map);
+
+// Custom marker icon
+function makeIcon(color='#10b981') {
+  return L.divIcon({
+    className: '',
+    html: `<div style="background:${color};width:14px;height:14px;border-radius:50%;border:3px solid white;box-shadow:0 2px 8px rgba(0,0,0,.3)"></div>`,
+    iconSize: [14, 14],
+    iconAnchor: [7, 7],
+    popupAnchor: [0, -10],
+  });
+}
+
+const markers = {};
+
+locsData.forEach(loc => {
+  const marker = L.marker([loc.lat, loc.lng], {icon: makeIcon()}).addTo(map);
+  const timeStr = loc.time || '';
+  const cityStr = loc.city ? ` · ${loc.city}` : '';
+  marker.bindPopup(`
+    <div style="text-align:center;min-width:140px">
+      <div style="font-weight:800;margin-bottom:4px">📍 ${loc.code}</div>
+      <div style="color:#6b7280;font-size:.78rem">${loc.grade}</div>
+      <div style="color:#6b7280;font-size:.75rem;margin-top:4px">${timeStr}${cityStr}</div>
+      <a href="/counselor/student/${loc.code ? '' : ''}" style="color:#10b981;font-size:.78rem">← ${L_AR ? 'الملف' : 'Profile'}</a>
+    </div>
+  `);
+  markers[`${loc.lat},${loc.lng}`] = marker;
+});
+
+if (locsData.length > 0) {
+  const bounds = L.latLngBounds(locsData.map(l => [l.lat, l.lng]));
+  map.fitBounds(bounds, {padding: [40, 40], maxZoom: 13});
+}
+
+function flyTo(lat, lng, zoom) {
+  map.flyTo([lat, lng], zoom, {duration: 1.2});
+  const key = `${lat},${lng}`;
+  if (markers[key]) markers[key].openPopup();
+  playClick();
+}
+
+function refreshMap() {
+  playClick();
+  window.location.reload();
+}
+</script>
+{% endblock %}

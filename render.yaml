@@ -1,0 +1,24 @@
+services:
+  - type: web
+    name: schoolmind-ai
+    env: python
+    region: oregon
+    plan: free
+    buildCommand: "pip install -r requirements.txt && python setup_demo.py"
+    startCommand: "gunicorn app:app --workers 2 --bind 0.0.0.0:$PORT --timeout 120"
+    healthCheckPath: /ping
+    envVars:
+      - key: SECRET_KEY
+        generateValue: true
+      - key: RENDER
+        value: "1"
+      - key: FLASK_DEBUG
+        value: "0"
+      - key: DB_PATH
+        value: "/data/schoolmind.db"
+      - key: GEMINI_API_KEY
+        sync: false  # Set manually in Render dashboard
+    disk:
+      name: schoolmind-db
+      mountPath: /data
+      sizeGB: 1

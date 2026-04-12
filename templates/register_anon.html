@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+{% block title %}{{ 'دخول مجهول الهوية' if lang=='ar' else 'Anonymous Access' }}{% endblock %}
+
+{% block auth_content %}
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html,body{height:auto;min-height:100vh;overflow-y:auto!important;}
+.scene{min-height:100vh;background:linear-gradient(145deg,#020d1c,#041e38,#0a3d62,#0ea5e9);display:flex;align-items:center;justify-content:center;padding:2rem 1rem;position:relative;overflow:hidden;}
+.blob{position:absolute;border-radius:50%;filter:blur(60px);pointer-events:none;opacity:.45;}
+.blob1{width:350px;height:350px;background:radial-gradient(circle,rgba(245,158,11,.35),transparent);top:-80px;right:-60px;animation:morph 12s ease-in-out infinite;}
+.blob2{width:280px;height:280px;background:radial-gradient(circle,rgba(14,165,233,.3),transparent);bottom:-60px;left:-50px;animation:morph 15s ease-in-out infinite reverse;}
+.card{background:rgba(255,255,255,.07);backdrop-filter:blur(28px);-webkit-backdrop-filter:blur(28px);border:1px solid rgba(245,158,11,.2);border-radius:24px;padding:2.4rem 2.1rem;width:100%;max-width:440px;box-shadow:0 30px 80px rgba(0,0,0,.4),inset 0 1px 0 rgba(255,255,255,.1);position:relative;z-index:1;animation:bounceIn .65s ease;}
+.warn-box{background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.25);border-radius:12px;padding:.85rem 1rem;margin-bottom:1.3rem;font-size:.81rem;color:rgba(251,191,36,.9);line-height:1.8;}
+.warn-box strong{color:rgba(251,191,36,.95);}
+.inp-label{display:block;font-size:.8rem;font-weight:700;color:rgba(255,255,255,.55);margin-bottom:.32rem;}
+.inp-field{width:100%;padding:.68rem 1rem;background:rgba(255,255,255,.07);border:1.5px solid rgba(245,158,11,.2);border-radius:11px;color:#fff;font-family:'Cairo','Poppins',sans-serif;font-size:.88rem;transition:.22s;}
+.inp-field::placeholder{color:rgba(255,255,255,.26);}
+.inp-field:focus{border-color:rgba(245,158,11,.6);background:rgba(255,255,255,.12);outline:none;box-shadow:0 0 0 4px rgba(245,158,11,.12);}
+.fselect{width:100%;padding:.68rem 1rem;background:rgba(255,255,255,.07);border:1.5px solid rgba(245,158,11,.2);border-radius:11px;color:#fff;font-family:'Cairo','Poppins',sans-serif;font-size:.88rem;appearance:none;cursor:pointer;}
+.fselect option{background:#0a3d62;}
+.btn-sub{width:100%;padding:.88rem;background:linear-gradient(135deg,#f59e0b,#f97316);color:#fff;border:none;border-radius:12px;font-family:'Cairo','Poppins',sans-serif;font-size:.98rem;font-weight:800;cursor:pointer;transition:.28s;box-shadow:0 6px 24px rgba(245,158,11,.4);margin-top:.5rem;display:flex;align-items:center;justify-content:center;gap:8px;}
+.btn-sub:hover{transform:translateY(-3px);box-shadow:0 10px 32px rgba(245,158,11,.55);}
+.btm{text-align:center;margin-top:.9rem;font-size:.8rem;color:rgba(255,255,255,.35);}
+.btm a{color:rgba(14,165,233,.7);text-decoration:none;font-weight:700;}
+.title{text-align:center;font-size:1.4rem;font-weight:900;color:#fff;margin-bottom:.3rem;}
+.sub{text-align:center;font-size:.79rem;color:rgba(255,255,255,.43);margin-bottom:1.3rem;}
+.fld{margin-bottom:.9rem;}
+</style>
+
+<div class="scene">
+  <div class="blob blob1"></div><div class="blob blob2"></div>
+  <div class="card">
+    <div style="text-align:center;font-size:2.5rem;margin-bottom:.7rem;animation:float 4s ease-in-out infinite">👤</div>
+    <div class="title">{{ 'الدخول المجهول' if lang=='ar' else 'Anonymous Access' }}</div>
+    <div class="sub">{{ 'يمكنك استخدام الموقع دون الكشف عن هويتك الحقيقية' if lang=='ar' else 'Use the site without revealing your real identity' }}</div>
+
+    <div class="warn-box">
+      <strong>⚠️ {{ 'يرجى القراءة قبل المتابعة:' if lang=='ar' else 'Please read before continuing:' }}</strong><br>
+      {% if lang=='ar' %}
+      في هذا الوضع يمكنك استخدام معظم ميزات الموقع للحصول على الدعم النفسي.
+      سيتم إنشاء <b>اسم مستخدم عشوائي</b> لك تلقائياً — احفظه لتتمكن من تسجيل الدخول مرة أخرى.
+      لا يمكن استرجاع الحساب إذا نسيت البيانات.
+      {% else %}
+      In this mode you can use most features to get support.
+      A <b>random username</b> will be generated automatically — save it to log in again.
+      Account cannot be recovered if you forget the credentials.
+      {% endif %}
+    </div>
+
+    <form method="POST" action="{{ url_for('register_anonymous') }}">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+      <div class="fld">
+        <label class="inp-label">{{ 'اسم مستعار (اختياري)' if lang=='ar' else 'Nickname (optional)' }}</label>
+        <input type="text" name="display_name" class="inp-field" placeholder="{{ 'مثال: طالب من القدس' if lang=='ar' else 'e.g. Curious Student' }}" maxlength="60">
+      </div>
+      <div class="fld">
+        <label class="inp-label">{{ 'الصف الدراسي' if lang=='ar' else 'Grade' }}</label>
+        <select name="grade" class="fselect">
+          {% for g in grades %}
+          <option value="{{ g }}">{{ g }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <button type="submit" class="btn-sub" onclick="playClick()">
+        <i class="bi bi-incognito"></i>
+        {{ 'دخول مجهول' if lang=='ar' else 'Enter Anonymously' }}
+      </button>
+    </form>
+
+    <div class="btm">
+      <a href="{{ url_for('login') }}" onclick="playClick()">{{ 'العودة لتسجيل الدخول' if lang=='ar' else 'Back to Sign In' }}</a>
+    </div>
+  </div>
+</div>
+{% endblock %}

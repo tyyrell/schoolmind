@@ -1,0 +1,335 @@
+{% extends "base.html" %}
+{% block title %}{{ 'المساعد الذكي نور' if lang=='ar' else 'Nour AI Companion' }}{% endblock %}
+{% block topbar_title %}{{ '🤖 نور — مساعدك الشخصي' if lang=='ar' else '🤖 Nour — Your Companion' }}{% endblock %}
+
+{% block extra_head %}
+<style>
+.nour-hdr{display:flex;align-items:center;gap:12px;margin-bottom:1rem;padding-bottom:1rem;border-bottom:1px solid var(--border);}
+.nour-av{width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,#5b21b6,#7c3aed,#a855f7);display:flex;align-items:center;justify-content:center;font-size:1.55rem;flex-shrink:0;box-shadow:0 4px 16px rgba(139,92,246,.45);animation:float 4s ease-in-out infinite,glowP 3s ease-in-out infinite;}
+.nour-dot{width:8px;height:8px;border-radius:50%;background:var(--success);animation:pulse 2s ease infinite;display:inline-block;flex-shrink:0;}
+.nour-status{display:flex;align-items:center;gap:5px;font-size:.74rem;color:var(--success);}
+.chat-wrap{background:var(--bg-muted);border-radius:var(--r);padding:1rem;min-height:260px;max-height:480px;overflow-y:auto;border:1px solid var(--border);scroll-behavior:smooth;}
+.chat-wrap::-webkit-scrollbar{width:4px;}.chat-wrap::-webkit-scrollbar-thumb{background:rgba(139,92,246,.25);border-radius:2px;}
+.msg-group{margin-bottom:.9rem;animation:fadeUp .3s ease;}
+.msg-time{font-size:.62rem;color:var(--muted);margin-top:3px;padding:0 .4rem;}
+.bot-bubble{background:var(--bg-card);border:1px solid var(--border);border-radius:4px 18px 18px 18px;padding:.75rem 1rem;max-width:85%;font-size:.87rem;line-height:1.7;word-break:break-word;box-shadow:var(--sh-sm);}
+.user-bubble{background:var(--grad-pri);color:#fff;border-radius:18px 4px 18px 18px;padding:.72rem 1rem;max-width:82%;font-size:.87rem;line-height:1.65;word-break:break-word;box-shadow:var(--sh-p);}
+.chat-av-bot{width:36px;height:36px;border-radius:50%;background:var(--grad-acc);display:flex;align-items:center;justify-content:center;font-size:1rem;flex-shrink:0;box-shadow:var(--sh-p);}
+.chat-av-user{width:34px;height:34px;border-radius:50%;background:var(--grad-pri);display:flex;align-items:center;justify-content:center;font-size:.9rem;flex-shrink:0;}
+.typing-wrap{display:flex;gap:9px;align-items:flex-start;padding:.4rem 0;}
+.typing-dots{display:flex;gap:4px;padding:.65rem .9rem;background:var(--bg-card);border:1px solid var(--border);border-radius:4px 18px 18px 18px;}
+.typing-dots span{width:7px;height:7px;border-radius:50%;background:var(--p200);animation:blink 1.2s ease infinite;}
+.typing-dots span:nth-child(2){animation-delay:.2s;}.typing-dots span:nth-child(3){animation-delay:.4s;}
+.cin-wrap{display:flex;gap:8px;align-items:flex-end;margin-top:.75rem;}
+.cin{flex:1;background:var(--bg-card);border:2px solid var(--border);border-radius:var(--r-sm);color:var(--text);font-family:var(--ff);padding:.65rem 1rem;font-size:.88rem;resize:none;transition:all .2s;min-height:46px;max-height:120px;line-height:1.5;}
+.cin:focus{border-color:var(--p300);outline:none;box-shadow:0 0 0 4px rgba(139,92,246,.12);background:var(--bg);}
+.send-btn{width:46px;height:46px;border-radius:var(--r-sm);background:var(--grad-pri);color:#fff;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0;transition:all .22s;box-shadow:var(--sh-p);}
+.send-btn:hover{transform:translateY(-2px) scale(1.06);box-shadow:0 6px 20px rgba(139,92,246,.5);}
+.send-btn:disabled{opacity:.6;transform:none;}
+.qbtn{font-size:.73rem;padding:.28rem .68rem;border:1.5px solid var(--border);border-radius:20px;background:transparent;color:var(--muted);cursor:pointer;font-family:var(--ff);transition:all .2s;white-space:nowrap;}
+.qbtn:hover{border-color:var(--p300);color:var(--p200);background:rgba(139,92,246,.07);transform:translateY(-1px);}
+.emotion-bar{display:flex;gap:.35rem;flex-wrap:wrap;margin-bottom:.6rem;}
+.emo-pill{padding:.2rem .6rem;border-radius:12px;font-size:.7rem;font-weight:700;cursor:pointer;transition:all .2s;border:1.5px solid transparent;}
+.emo-pill:hover,.emo-pill.active{transform:scale(1.08);}
+.char-indicator{font-size:.68rem;color:var(--muted);text-align:left;margin-top:3px;}
+[dir="rtl"] .char-indicator{text-align:right;}
+.history-msg{opacity:.7;font-size:.82rem;}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="two-col">
+  <!-- ── Chat Panel ── -->
+  <div>
+    <div class="sm-card">
+      <!-- Header -->
+      <div class="nour-hdr">
+        <div class="nour-av" aria-hidden="true">🧠</div>
+        <div style="flex:1;min-width:0">
+          <div style="font-weight:900;font-size:1.05rem">{{ 'نور' if lang=='ar' else 'Nour' }}</div>
+          <div class="nour-status">
+            <span class="nour-dot"></span>
+            <span>{{ 'يعمل محلياً · ذكاء اصطناعي متخصص 🧠' if lang=='ar' else 'Local AI · Specialized Engine 🧠' }}</span>
+          </div>
+        </div>
+        <div style="display:flex;gap:5px">
+          <!-- Emotion quick filter -->
+          <button class="btn-out" style="font-size:.72rem;padding:.25rem .6rem" onclick="showEmotionBar()" data-tip="{{ 'اختر موضوعاً' if lang=='ar' else 'Choose topic' }}">
+            <i class="bi bi-tag-fill"></i>
+          </button>
+          <button onclick="resetChat()" class="btn-out" style="font-size:.72rem;padding:.25rem .6rem" id="reset-btn" title="{{ 'محادثة جديدة' if lang=='ar' else 'New chat' }}">
+            <i class="bi bi-arrow-counterclockwise"></i>
+            <span class="d-none d-sm-inline">{{ 'جديد' if lang=='ar' else 'New' }}</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Emotion quick buttons (hidden by default) -->
+      <div id="emo-bar" style="display:none;margin-bottom:.7rem">
+        <div style="font-size:.75rem;font-weight:700;color:var(--muted);margin-bottom:.4rem">{{ 'اختر ما تشعر به:' if lang=='ar' else 'How are you feeling?' }}</div>
+        <div class="emotion-bar">
+          {% for emo_ar, emo_en, color in [
+            ('أشعر بالتنمر','I feel bullied','#fee2e2'),
+            ('أشعر بالحزن','I feel sad','#ede9fe'),
+            ('أشعر بالقلق','I feel anxious','#fef3c7'),
+            ('أشعر بالوحدة','I feel lonely','#e0f2fe'),
+            ('أشعر بالتعب','I feel tired','#fff7ed'),
+            ('أشعر بالسعادة','I feel happy','#d1fae5'),
+          ] %}
+          <button class="emo-pill" style="background:{{ color }}" onclick="sendQuick('{{ emo_ar if lang=='ar' else emo_en }}')">
+            {{ emo_ar if lang=='ar' else emo_en }}
+          </button>
+          {% endfor %}
+        </div>
+      </div>
+
+      <!-- Chat box -->
+      <div class="chat-wrap" id="chat-box" role="log" aria-live="polite" aria-atomic="false">
+        <!-- Welcome -->
+        <div class="msg-group" style="display:flex;gap:9px;align-items:flex-start">
+          <div class="chat-av-bot">🧠</div>
+          <div>
+            <div class="bot-bubble">
+              {{ 'أهلاً! أنا نور 😊 هنا لأستمع إليك وأدعمك. كيف تشعر اليوم؟' if lang=='ar'
+                 else "Hi! I'm Nour 😊 I'm here to listen and support you. How are you feeling today?" }}
+            </div>
+            <div class="msg-time">{{ 'الآن' if lang=='ar' else 'Just now' }}</div>
+          </div>
+        </div>
+
+        <!-- Previous chat history -->
+        {% if chat_history %}
+          {% for msg in chat_history %}
+          <div class="msg-group" style="display:flex;gap:9px;align-items:flex-start;{% if msg.role=='user' %}flex-direction:row-reverse{% endif %}">
+            {% if msg.role == 'user' %}
+            <div class="chat-av-user">👤</div>
+            <div>
+              <div class="user-bubble history-msg">{{ msg.content }}</div>
+            </div>
+            {% else %}
+            <div class="chat-av-bot">🧠</div>
+            <div>
+              <div class="bot-bubble history-msg">{{ msg.content }}</div>
+            </div>
+            {% endif %}
+          </div>
+          {% endfor %}
+        {% endif %}
+
+        <!-- Current response -->
+        {% if response %}
+        <div class="msg-group" style="display:flex;gap:9px;align-items:flex-start;flex-direction:row-reverse" id="user-msg">
+          <div class="chat-av-user">👤</div>
+          <div>
+            <div class="user-bubble">{{ request.form.get('message','') }}</div>
+          </div>
+        </div>
+        <div class="msg-group" style="display:flex;gap:9px;align-items:flex-start" id="bot-msg">
+          <div class="chat-av-bot">🧠</div>
+          <div>
+            <div class="bot-bubble" id="bot-response-text">{{ response }}</div>
+            <div class="msg-time">
+              {% if emotion and emotion not in ('positive','neutral') %}
+              <span class="badge-emo emo-{{ emotion }}" style="font-size:.65rem">{{ emotion }}</span> ·
+              {% endif %}
+              {{ 'الآن' if lang=='ar' else 'Just now' }}
+            </div>
+            {% if emotion and emotion not in ('positive','neutral') %}
+            <button onclick="showBreath()" class="qbtn" style="margin-top:.4rem;font-size:.7rem">
+              <i class="bi bi-lungs"></i> {{ 'تمرين تنفس' if lang=='ar' else 'Breathing' }}
+            </button>
+            {% endif %}
+          </div>
+        </div>
+        {% endif %}
+      </div>
+
+      <!-- Input form -->
+      <form method="POST" action="{{ url_for('companion') }}" id="cform" autocomplete="off">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+        <div class="cin-wrap">
+          <textarea id="msg-in" name="message" class="cin" rows="1" maxlength="1000"
+                    placeholder="{{ 'اكتب هنا... أنا أسمعك 💙' if lang=='ar' else 'Type here... I\'m listening 💙' }}"
+                    dir="auto" onkeydown="handleEnter(event)" oninput="updateCount(this)"
+                    aria-label="{{ 'رسالتك' if lang=='ar' else 'Your message' }}"></textarea>
+          <button type="button" class="send-btn" id="send-btn" onclick="submitMsg()"
+                  aria-label="{{ 'إرسال' if lang=='ar' else 'Send' }}">
+            <i class="bi bi-send-fill" id="send-icon"></i>
+          </button>
+        </div>
+        <div class="char-indicator" id="char-count">0 / 1000</div>
+      </form>
+
+      <!-- Quick prompts -->
+      <div style="margin-top:.7rem">
+        <div style="font-size:.72rem;font-weight:700;color:var(--muted);margin-bottom:.4rem">{{ 'اقتراحات سريعة:' if lang=='ar' else 'Quick prompts:' }}</div>
+        <div style="display:flex;flex-wrap:wrap;gap:5px">
+          {% for ar,en in [
+            ('أحتاج مساعدة','I need help'),
+            ('أشعر بالضغط','I feel stressed'),
+            ('يتنمر علي أحد','Being bullied'),
+            ('تمرين تنفس','Breathing exercise'),
+            ('أريد التحدث','I want to talk'),
+            ('لا أستطيع النوم','Can\'t sleep'),
+          ] %}
+          <button type="button" class="qbtn" onclick="sendQuick('{{ ar if lang=='ar' else en }}')">
+            {{ ar if lang=='ar' else en }}
+          </button>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Side Panel ── -->
+  <div>
+    <!-- Breathing exercise -->
+    <div class="sm-card" id="breath-card" {% if not breathing %}style="display:none"{% endif %} style="margin-bottom:.75rem">
+      <div style="font-size:.9rem;font-weight:800;margin-bottom:.75rem;display:flex;align-items:center;justify-content:space-between">
+        <span><i class="bi bi-lungs-fill" style="color:var(--sky)"></i> {{ 'تمرين التنفس 4-7-8' if lang=='ar' else '4-7-8 Breathing' }}</span>
+        <button onclick="document.getElementById('breath-card').style.display='none'" class="btn-out" style="padding:.2rem .5rem;font-size:.72rem">✕</button>
+      </div>
+      <div class="breathe-circle" id="bcircle" onclick="startBreath()" tabindex="0" role="button" aria-label="{{ 'بدء' if lang=='ar' else 'Start' }}">
+        <span id="btext">{{ 'تنفس' if lang=='ar' else 'Breathe' }}</span>
+      </div>
+      <div style="display:flex;gap:6px;justify-content:center;margin-bottom:.6rem">
+        <button class="btn-pri" style="width:auto;padding:.38rem .9rem;font-size:.78rem" onclick="startBreath()">
+          <i class="bi bi-play-fill"></i>{{ 'ابدأ' if lang=='ar' else 'Start' }}
+        </button>
+        <button class="btn-out" style="font-size:.78rem;padding:.38rem .8rem" onclick="stopBreath()">
+          <i class="bi bi-stop-fill"></i>{{ 'إيقاف' if lang=='ar' else 'Stop' }}
+        </button>
+      </div>
+      <ol style="font-size:.8rem;color:var(--muted);padding-right:1.1rem;line-height:2">
+        {% if lang=='ar' %}
+        <li>أغمض عينيك وضع يدك على صدرك</li><li>تنفس ببطء لمدة 4 ثوانٍ</li>
+        <li>احبس نفسك لمدة 7 ثوانٍ</li><li>أخرج الهواء ببطء لمدة 8 ثوانٍ</li><li>كرر 3 مرات</li>
+        {% else %}
+        <li>Close your eyes, hand on chest</li><li>Inhale slowly for 4 sec</li>
+        <li>Hold your breath for 7 sec</li><li>Exhale slowly for 8 sec</li><li>Repeat 3 times</li>
+        {% endif %}
+      </ol>
+    </div>
+
+    <!-- Emotion detected card -->
+    {% if emotion %}
+    <div class="sm-card" style="margin-bottom:.75rem;border:1.5px solid var(--border-h)">
+      <div style="font-size:.88rem;font-weight:800;margin-bottom:.6rem;display:flex;align-items:center;gap:7px">
+        <i class="bi bi-activity" style="color:var(--p200)"></i>
+        {{ 'المشاعر المكتشفة' if lang=='ar' else 'Detected Emotion' }}
+      </div>
+      <span class="badge-emo emo-{{ emotion }}" style="font-size:.85rem;padding:.35rem .9rem">
+        {% set emap = {'bullying':'⚠️ تنمر' if lang=='ar' else '⚠️ Bullying',
+                       'depression':'💜 اكتئاب' if lang=='ar' else '💜 Depression',
+                       'anxiety':'💛 قلق' if lang=='ar' else '💛 Anxiety',
+                       'isolation':'🔵 عزلة' if lang=='ar' else '🔵 Isolation',
+                       'physical_fatigue':'💤 إرهاق' if lang=='ar' else '💤 Fatigue',
+                       'positive':'💚 إيجابي' if lang=='ar' else '💚 Positive',
+                       'neutral':'⚪ طبيعي' if lang=='ar' else '⚪ Neutral'} %}
+        {{ emap.get(emotion, emotion) }}
+      </span>
+      {% if emotion in ('bullying','depression') %}
+      <div style="margin-top:.7rem;padding:.55rem .75rem;background:rgba(244,63,94,.06);border-radius:var(--r-sm);border:1px solid rgba(244,63,94,.15);font-size:.78rem;color:var(--danger)">
+        <i class="bi bi-exclamation-triangle-fill"></i>
+        {{ 'تم إرسال تنبيه مجهول للمرشد للاطمئنان عليك 🤝' if lang=='ar' else 'Anonymous alert sent to counselor to check on you 🤝' }}
+      </div>
+      {% endif %}
+    </div>
+    {% endif %}
+
+    <!-- About Nour -->
+    <div class="sm-card">
+      <div style="font-size:.9rem;font-weight:800;margin-bottom:.75rem;display:flex;align-items:center;gap:7px">
+        <i class="bi bi-info-circle-fill" style="color:var(--p200)"></i>
+        {{ 'عن نور' if lang=='ar' else 'About Nour' }}
+      </div>
+      <div style="font-size:.82rem;color:var(--muted);line-height:1.85">
+        <p>{{ 'نور مساعد ذكاء اصطناعي محلي متخصص مُصمَّم لدعم الطلاب نفسياً.' if lang=='ar' else 'Nour is a specialized local AI companion designed to support students emotionally.' }}</p>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:5px;margin:.6rem 0">
+          {% for icon, lbl in [('bi-heart-fill','دعم فوري' if lang=='ar' else 'Instant support'),
+                                ('bi-lungs','تمارين تنفس' if lang=='ar' else 'Breathing exercises'),
+                                ('bi-chat-dots-fill','1000+ رد ذكي' if lang=='ar' else '1000+ smart replies'),
+                                ('bi-shield-check-fill','خصوصية تامة' if lang=='ar' else 'Full privacy')] %}
+          <div style="display:flex;align-items:center;gap:5px;font-size:.76rem;padding:.35rem .5rem;background:var(--bg-muted);border-radius:var(--r-xs)">
+            <i class="bi {{ icon }}" style="color:var(--p200)"></i>{{ lbl }}
+          </div>
+          {% endfor %}
+        </div>
+        <div style="padding:.5rem .75rem;background:rgba(239,68,68,.05);border-radius:var(--r-sm);border:1px solid rgba(239,68,68,.12);font-size:.74rem;color:var(--danger)">
+          ⚠️ {{ 'نور ليس بديلاً عن الطبيب. في الطوارئ تواصل مع المرشد مباشرةً.' if lang=='ar' else "Nour isn't a substitute for a professional. In emergencies, contact your counselor directly." }}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+const L=document.documentElement.lang==='ar';
+/* ── Submit ── */
+function submitMsg(){
+  const inp=document.getElementById('msg-in');
+  if(!inp||!inp.value.trim())return;
+  const btn=document.getElementById('send-btn');
+  const ico=document.getElementById('send-icon');
+  if(btn){btn.disabled=true;ico.className='bi bi-hourglass-split';}
+  // Show typing indicator
+  const cb=document.getElementById('chat-box');
+  const tyDiv=document.createElement('div');
+  tyDiv.className='typing-wrap';tyDiv.id='typing-ind';
+  tyDiv.innerHTML='<div class="chat-av-bot">🧠</div><div class="typing-dots"><span></span><span></span><span></span></div>';
+  cb.appendChild(tyDiv);cb.scrollTop=cb.scrollHeight;
+  document.getElementById('cform').submit();
+}
+function handleEnter(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();playClick();submitMsg();}}
+function updateCount(ta){
+  const n=ta.value.length,el=document.getElementById('char-count');
+  if(el){el.textContent=n+' / 1000';el.style.color=n>900?'var(--danger)':n>700?'var(--warn)':'var(--muted)';}
+  // Auto-resize
+  ta.style.height='auto';ta.style.height=Math.min(ta.scrollHeight,120)+'px';
+}
+function sendQuick(t){document.getElementById('msg-in').value=t;updateCount(document.getElementById('msg-in'));playClick();submitMsg();}
+function showEmotionBar(){const b=document.getElementById('emo-bar');b.style.display=b.style.display==='none'?'block':'none';playClick();}
+function showBreath(){const c=document.getElementById('breath-card');c.style.display='block';c.scrollIntoView({behavior:'smooth'});startBreath();}
+/* ── Breathing ── */
+let _bi;
+const BS=[{t:L?'تنفس...':'Inhale...',d:4000},{t:L?'احبس...':'Hold...',d:7000},{t:L?'أخرج...':'Exhale...',d:8000}];
+function startBreath(){
+  stopBreath();let i=0;
+  const ci=document.getElementById('bcircle'),bt=document.getElementById('btext');
+  function step(){const s=BS[i%3];if(bt)bt.textContent=s.t;
+    if(ci){ci.style.transform=i%3===0?'scale(1.3)':i%3===1?'scale(1.35)':'scale(1)';}
+    i++;_bi=setTimeout(step,s.d);}
+  step();
+}
+function stopBreath(){clearTimeout(_bi);const ci=document.getElementById('bcircle'),bt=document.getElementById('btext');
+  if(ci)ci.style.transform='';if(bt)bt.textContent=L?'تنفس':'Breathe';}
+{% if breathing %}startBreath();{% endif %}
+/* ── Reset ── */
+function resetChat(){
+  if(!confirm(L?'بدء محادثة جديدة؟':'Start new conversation?'))return;
+  fetch('/companion/reset',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded','X-CSRF-Token':'{{ csrf_token }}'},body:'csrf_token={{ csrf_token }}'})
+    .then(()=>{playClick();location.reload();});
+}
+/* ── Scroll to bottom ── */
+document.addEventListener('DOMContentLoaded',()=>{
+  const cb=document.getElementById('chat-box');
+  if(cb)cb.scrollTop=cb.scrollHeight;
+  const inp=document.getElementById('msg-in');
+  if(inp)inp.focus();
+});
+{% if response %}
+/* ── Type-writer effect on bot response ── */
+document.addEventListener('DOMContentLoaded',()=>{
+  const el=document.getElementById('bot-response-text');
+  if(!el)return;
+  const txt=el.textContent;el.textContent='';
+  let i=0;
+  function type(){if(i<txt.length){el.textContent+=txt[i];i++;setTimeout(type,i<30?30:15);}
+    else{const cb=document.getElementById('chat-box');if(cb)cb.scrollTop=cb.scrollHeight;}}
+  setTimeout(type,200);
+});
+{% endif %}
+</script>
+{% endblock %}

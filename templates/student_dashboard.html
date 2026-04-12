@@ -1,0 +1,257 @@
+{% extends "base.html" %}
+{% block title %}{{ 'لوحة التحكم' if lang=='ar' else 'Dashboard' }} — SchoolMind AI{% endblock %}
+{% block topbar_title %}{{ '🏠 لوحة التحكم' if lang=='ar' else '🏠 Dashboard' }}{% endblock %}
+
+{% block extra_head %}
+<style>
+.quick-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:.5rem;margin-bottom:.75rem;}
+@media(max-width:480px){.quick-grid{grid-template-columns:repeat(4,1fr);gap:.35rem;}}
+.quick-card{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--r-sm);padding:.7rem .3rem;text-align:center;text-decoration:none;color:var(--text);transition:all var(--tr);display:block;}
+.quick-card:hover{transform:translateY(-3px);box-shadow:var(--sh);border-color:var(--border-h);}
+.quick-card.sos{border-color:rgba(239,68,68,.35);}
+.quick-card.sos:hover{border-color:rgba(239,68,68,.7);box-shadow:0 4px 16px rgba(239,68,68,.2);}
+.risk-ring{width:72px;height:72px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:1rem;font-weight:900;position:relative;}
+.mood-opt-label{flex:1;cursor:pointer;text-align:center;}
+.mood-opt{padding:.45rem .2rem;border-radius:var(--r-sm);border:2px solid var(--border);transition:all .15s;font-size:1.3rem;}
+input[type=radio]:checked ~ .mood-opt,input[type=radio]:checked + .mood-opt{border-color:var(--p300)!important;background:rgba(139,92,246,.08)}
+.mood-opt:hover{border-color:var(--sky)!important;transform:scale(1.08)}
+.loc-btn{border:1.5px solid rgba(16,185,129,.3);background:rgba(16,185,129,.06);color:var(--success);border-radius:8px;padding:.4rem .8rem;font-family:var(--ff);font-size:.78rem;font-weight:700;cursor:pointer;transition:all .2s;display:inline-flex;align-items:center;gap:5px;}
+.loc-btn:hover{background:rgba(16,185,129,.12);}
+.loc-btn.done{background:rgba(16,185,129,.12);border-color:var(--success);}
+</style>
+{% endblock %}
+
+{% block content %}
+{% with msgs=get_flashed_messages(with_categories=true) %}
+  {% if msgs %}{% for cat,msg in msgs %}
+  <div class="alert alert-{{cat}}">{{msg}}</div>
+  {% endfor %}{% endif %}
+{% endwith %}
+
+<!-- Welcome Banner -->
+<div class="sm-card" style="background:var(--grad-hero);border:none;color:#fff;margin-bottom:.75rem;position:relative;overflow:hidden">
+  <div style="position:absolute;width:200px;height:200px;border-radius:50%;background:rgba(255,255,255,.04);top:-60px;right:-40px;animation:float 7s ease-in-out infinite"></div>
+  <div style="position:relative;z-index:1;display:flex;align-items:center;gap:.75rem;flex-wrap:wrap">
+    <div style="width:46px;height:46px;border-radius:50%;background:rgba(255,255,255,.15);display:flex;align-items:center;justify-content:center;font-size:1.3rem;flex-shrink:0;overflow:hidden">
+      {% if session.avatar_b64 %}<img src="{{ session.avatar_b64 }}" style="width:100%;height:100%;border-radius:50%;object-fit:cover">{% else %}{{ (session.display_name or '?')[0] }}{% endif %}
+    </div>
+    <div style="flex:1">
+      <div style="font-size:.95rem;font-weight:900">{{ 'مرحباً،' if lang=='ar' else 'Hello,' }} {{ session.display_name or session.username }} 👋</div>
+      {% if session.grade %}<div style="font-size:.76rem;opacity:.8">{{ session.grade }}</div>{% endif %}
+    </div>
+    <a href="{{ url_for('student_stats') }}" style="color:rgba(255,255,255,.8);font-size:.75rem;text-decoration:none">{{ 'إحصائياتي ←' if lang=='ar' else '→ Stats' }}</a>
+  </div>
+</div>
+
+<!-- Streak Widget -->
+{% if streak and streak.current > 0 %}
+<a href="{{ url_for('achievements') }}" style="text-decoration:none;display:block;margin-bottom:.6rem" onclick="playClick()">
+<div style="background:linear-gradient(135deg,#7c2d12,#ea580c,#f97316);border-radius:var(--r);padding:.85rem 1.1rem;color:#fff;display:flex;align-items:center;gap:.75rem;box-shadow:0 6px 20px rgba(249,115,22,.3)">
+  <div style="font-size:2.5rem;line-height:1;animation:float 2s ease-in-out infinite">🔥</div>
+  <div style="flex:1">
+    <div style="font-size:.78rem;opacity:.85">{{ 'شعلتك اليومية' if lang=='ar' else 'Daily Streak' }}</div>
+    <div style="font-size:1.6rem;font-weight:900;line-height:1.1">{{ streak.current }} {{ 'يوم' if lang=='ar' else 'days' }}</div>
+  </div>
+  <div style="text-align:center">
+    <div style="font-size:.68rem;opacity:.8">{{ 'الأطول' if lang=='ar' else 'Best' }}</div>
+    <div style="font-size:1.1rem;font-weight:800">{{ streak.longest }}</div>
+  </div>
+  {% if achievements %}
+  <div style="display:flex;gap:.2rem">
+    {% for a in achievements[:3] %}<div style="font-size:1.3rem" title="{{ a.label_ar if lang=='ar' else a.label_en }}">{{ a.icon }}</div>{% endfor %}
+  </div>
+  {% endif %}
+</div>
+</a>
+{% else %}
+<a href="{{ url_for('journal') }}" style="text-decoration:none;display:block;margin-bottom:.6rem" onclick="playClick()">
+<div style="background:var(--bg-card);border:1px dashed rgba(249,115,22,.4);border-radius:var(--r);padding:.75rem 1rem;display:flex;align-items:center;gap:.6rem">
+  <div style="font-size:1.8rem">🔥</div>
+  <div style="flex:1">
+    <div style="font-size:.8rem;font-weight:700">{{ 'ابدأ شعلتك اليوم!' if lang=='ar' else 'Start your streak today!' }}</div>
+    <div style="font-size:.72rem;color:var(--muted)">{{ 'اكتب يومية أو سجّل حالتك للبدء' if lang=='ar' else 'Write a journal or check in to begin' }}</div>
+  </div>
+  <i class="bi bi-chevron-left" style="color:var(--warn)"></i>
+</div>
+</a>
+{% endif %}
+
+<!-- Quick Actions (8 cards, 4 per row) -->
+<div class="quick-grid">
+  {% for icon, label_ar, label_en, href, extra_class in [
+    ('📔','يوميتي','Journal','journal',''),
+    ('🤖','نور','Nour AI','companion',''),
+    ('🎮','ألعاب','Games','games',''),
+    ('🏆','أهدافي','Goals','goals',''),
+    ('📊','استبيان','Survey','survey',''),
+    ('🫁','تنفس','Breathe','breathing_center',''),
+    ('📚','موارد','Resources','resources',''),
+    ('🆘','طوارئ','SOS','emergency','sos'),
+  ] %}
+  <a href="{{ url_for(href) }}" class="quick-card {{ extra_class }}" onclick="playClick()">
+    <div style="font-size:1.5rem;margin-bottom:.2rem">{{ icon }}</div>
+    <div style="font-size:.7rem;font-weight:700;{{ 'color:var(--danger)' if extra_class=='sos' else '' }}">{{ label_ar if lang=='ar' else label_en }}</div>
+  </a>
+  {% endfor %}
+</div>
+
+<div class="two-col">
+  <!-- Left -->
+  <div>
+    <!-- State Card -->
+    <div class="sm-card" style="margin-bottom:.75rem">
+      <div style="font-size:.88rem;font-weight:800;margin-bottom:.7rem;display:flex;align-items:center;gap:7px">
+        <i class="bi bi-activity" style="color:var(--p300)"></i>
+        {{ 'حالتك النفسية' if lang=='ar' else 'Your Mental State' }}
+      </div>
+      <div style="display:flex;align-items:center;gap:.9rem;flex-wrap:wrap">
+        {% set rc = {'low':'#10b981','medium':'#f59e0b','high':'#ef4444','critical':'#9d174d'}.get(risk_level,'#10b981') %}
+        <div class="risk-ring" style="background:conic-gradient({{ rc }} {{ latest_risk*10 }}%,var(--border) 0)">
+          <div style="width:54px;height:54px;border-radius:50%;background:var(--bg-card);display:flex;align-items:center;justify-content:center;color:{{ rc }}">{{ latest_risk }}</div>
+        </div>
+        <div style="flex:1">
+          <div style="margin-bottom:.35rem">
+            <span class="risk-badge risk-{{ risk_level }}">
+              {{ {'low':'✅ منخفض','medium':'⚠️ متوسط','high':'🔴 مرتفع','critical':'🆘 حرج'}.get(risk_level,'—') if lang=='ar' else {'low':'✅ Low','medium':'⚠️ Medium','high':'🔴 High','critical':'🆘 Critical'}.get(risk_level,'—') }}
+            </span>
+          </div>
+          <div style="height:8px;background:var(--border);border-radius:4px;overflow:hidden;margin:.3rem 0">
+            <div style="height:100%;border-radius:4px;width:{{ latest_risk*10 }}%;background:{{ rc }};transition:width 1s ease"></div>
+          </div>
+          {% if prediction %}
+          <div style="font-size:.74rem;color:var(--muted)">
+            {{ 'الاتجاه: ' if lang=='ar' else 'Trend: ' }}
+            <b style="color:{{ '#10b981' if prediction.trend=='improving' else '#ef4444' if prediction.trend=='worsening' else 'var(--muted)' }}">
+              {{ {'improving':'↑ تحسّن','stable':'→ مستقر','worsening':'↓ تراجع'}.get(prediction.trend,'') if lang=='ar' else prediction.trend }}
+            </b>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    <!-- Check-in -->
+    <div class="sm-card" style="margin-bottom:.75rem">
+      <div style="font-size:.88rem;font-weight:800;margin-bottom:.65rem;display:flex;align-items:center;gap:7px">
+        <i class="bi bi-heart-pulse-fill" style="color:var(--danger)"></i>
+        {{ 'كيف حالك اليوم؟' if lang=='ar' else "How are you today?" }}
+      </div>
+      <form method="POST" action="{{ url_for('checkin') }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+        <div style="display:flex;gap:.3rem;margin-bottom:.6rem">
+          {% for emoji,val,la,le in [('😊',5,'ممتاز','Great'),('🙂',4,'جيد','Good'),('😐',3,'عادي','OK'),('😕',2,'تعبان','Bad'),('😰',1,'سيئ','Awful')] %}
+          <label class="mood-opt-label">
+            <input type="radio" name="mood_score" value="{{ val }}" {% if val==3 %}checked{% endif %} style="display:none">
+            <div class="mood-opt" onclick="this.parentNode.querySelector('input').checked=true;document.querySelectorAll('.mood-opt').forEach(o=>o.style.borderColor='var(--border)');this.style.borderColor='var(--p300)';playClick()">{{ emoji }}</div>
+            <div style="font-size:.62rem;color:var(--muted);margin-top:.15rem">{{ la if lang=='ar' else le }}</div>
+          </label>
+          {% endfor %}
+        </div>
+        <button type="submit" class="btn-em" style="width:100%;padding:.5rem;font-size:.83rem">
+          <i class="bi bi-check-circle-fill"></i>{{ ' سجّل حالتي' if lang=='ar' else ' Submit' }}
+        </button>
+      </form>
+    </div>
+
+    <!-- Location Share -->
+    <div class="sm-card" style="margin-bottom:.75rem">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:.5rem">
+        <div>
+          <div style="font-size:.85rem;font-weight:800;display:flex;align-items:center;gap:6px">
+            <i class="bi bi-geo-alt-fill" style="color:var(--success);font-size:.9rem"></i>
+            {{ 'مشاركة موقعي' if lang=='ar' else 'Share My Location' }}
+          </div>
+          <div style="font-size:.73rem;color:var(--muted);margin-top:.1rem" id="loc-status">
+            {{ 'للتواصل الطارئ مع المرشد' if lang=='ar' else 'For emergency contact with counselor' }}
+          </div>
+        </div>
+        <button class="loc-btn" onclick="shareLocation(this)" id="loc-btn">
+          <i class="bi bi-geo-alt-fill"></i>{{ 'مشاركة' if lang=='ar' else 'Share' }}
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Right -->
+  <div>
+    <!-- Risk Chart -->
+    {% if chart_scores and chart_scores != '[]' %}
+    <div class="sm-card" style="margin-bottom:.75rem">
+      <div style="font-size:.88rem;font-weight:800;margin-bottom:.65rem;display:flex;align-items:center;gap:7px">
+        <i class="bi bi-graph-up" style="color:var(--sky)"></i>
+        {{ 'مؤشر الحالة' if lang=='ar' else 'State Index' }}
+      </div>
+      <canvas id="riskChart" height="150"></canvas>
+    </div>
+    {% endif %}
+
+    <!-- Today's Lecture -->
+    {% if lecture %}
+    <div class="sm-card" style="margin-bottom:.75rem;background:linear-gradient(135deg,rgba(245,158,11,.06),rgba(249,115,22,.03));border-color:rgba(245,158,11,.2)">
+      <div style="font-size:.82rem;font-weight:800;margin-bottom:.4rem;display:flex;align-items:center;gap:6px">
+        <i class="bi bi-play-circle-fill" style="color:var(--warn);font-size:.9rem"></i>
+        {{ 'محاضرة اليوم' if lang=='ar' else "Today's Lecture" }}
+      </div>
+      <a href="{{ lecture.url }}" target="_blank" rel="noopener noreferrer"
+         style="font-size:.83rem;font-weight:700;color:var(--text);text-decoration:none;display:block;line-height:1.5" onclick="playClick()">
+        📺 {{ lecture.title_ar if lang=='ar' else lecture.title_en }}
+        <i class="bi bi-box-arrow-up-right" style="font-size:.68rem;color:var(--muted)"></i>
+      </a>
+      <div style="font-size:.7rem;color:var(--muted);margin-top:.25rem">{{ lecture.id }}/100</div>
+    </div>
+    {% endif %}
+
+    <!-- Recent Journals -->
+    {% if journals %}
+    <div class="sm-card">
+      <div style="font-size:.88rem;font-weight:800;margin-bottom:.65rem;display:flex;align-items:center;justify-content:space-between">
+        <span style="display:flex;align-items:center;gap:6px"><i class="bi bi-journal-text" style="color:var(--p200)"></i>{{ 'آخر اليوميات' if lang=='ar' else 'Recent Journals' }}</span>
+        <a href="{{ url_for('journal') }}" style="font-size:.73rem;color:var(--p200);text-decoration:none">{{ '← اكتب' if lang=='ar' else 'Write →' }}</a>
+      </div>
+      {% for j in journals[:3] %}
+      <div style="display:flex;align-items:center;gap:.6rem;padding:.5rem 0;border-bottom:1px solid var(--border)">
+        <div style="font-size:.95rem;flex-shrink:0">
+          {{ {'happy':'😊','sad':'😢','angry':'😠','anxious':'😰','lonely':'😔','bullying':'🚨','neutral':'😐'}.get(j.dominant_emotion or 'neutral','😐') }}
+        </div>
+        <div style="flex:1;min-width:0">
+          <div style="font-size:.78rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ j.content[:50] }}...</div>
+          <div style="font-size:.68rem;color:var(--muted)">{{ j.created_at[:10] if j.created_at else '' }}</div>
+        </div>
+        <div style="font-size:.73rem;font-weight:700;flex-shrink:0;color:{{ '#ef4444' if j.risk_score and j.risk_score>=5 else '#f59e0b' if j.risk_score and j.risk_score>=2.5 else '#10b981' }}">
+          {{ '%.1f'|format(j.risk_score or 0) }}
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+const CSRF='{{ csrf_token }}';
+const L=document.documentElement.lang==='ar';
+
+{% if chart_scores and chart_scores != '[]' %}
+const sc={{ chart_scores }}, lb={{ chart_labels }};
+new Chart(document.getElementById('riskChart').getContext('2d'),{
+  type:'line',
+  data:{labels:lb,datasets:[{data:sc,borderColor:'#7c3aed',backgroundColor:'rgba(139,92,246,.1)',tension:.4,fill:true,pointRadius:3,pointBackgroundColor:sc.map(s=>s>=7.5?'#9d174d':s>=5?'#ef4444':s>=2.5?'#f59e0b':'#10b981')}]},
+  options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{min:0,max:10,ticks:{stepSize:2.5,color:'var(--muted)',font:{size:9}},grid:{color:'rgba(0,0,0,.04)'}},x:{ticks:{color:'var(--muted)',font:{size:8},maxTicksLimit:6},grid:{display:false}}},animation:{duration:900}}
+});
+{% endif %}
+
+function shareLocation(btn) {
+  if (!navigator.geolocation) {toast(L?'متصفحك لا يدعم تحديد الموقع':'Geolocation not supported','error');return;}
+  btn.innerHTML=`<span style="display:inline-block;width:12px;height:12px;border:2px solid currentColor;border-top-color:transparent;border-radius:50%;animation:spin 1s linear infinite"></span>`;
+  btn.disabled=true;
+  navigator.geolocation.getCurrentPosition(pos=>{
+    const {latitude:lat,longitude:lng,accuracy}=pos.coords;
+    const doSave=(city='')=>fetch('/api/location',{method:'POST',headers:{'Content-Type':'application/json','X-CSRF-Token':CSRF},body:JSON.stringify({latitude:lat,longitude:lng,accuracy,city})}).then(r=>r.json()).then(d=>{if(d.ok){btn.innerHTML=`<i class="bi bi-check-circle-fill"></i>${L?'تم':'Done'}`;btn.classList.add('done');document.getElementById('loc-status').textContent=L?'✅ تم مشاركة موقعك':'✅ Location shared';toast(L?'📍 تم مشاركة موقعك':'📍 Location shared','success');}btn.disabled=false;});
+    fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`).then(r=>r.json()).then(g=>doSave(g.address?.city||g.address?.town||'')).catch(()=>doSave());
+  },err=>{btn.innerHTML=`<i class="bi bi-geo-alt-fill"></i>${L?'مشاركة':'Share'}`;btn.disabled=false;const m={1:L?'ارفض الإذن':'Permission denied',2:L?'غير متاح':'Unavailable',3:L?'انتهت المهلة':'Timeout'};toast(m[err.code]||'Error','error');},{enableHighAccuracy:true,timeout:10000,maximumAge:0});
+}
+</script>
+{% endblock %}

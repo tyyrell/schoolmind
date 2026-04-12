@@ -1,0 +1,249 @@
+{% extends "base.html" %}
+{% block title %}{{ 'إحصائياتي' if lang=='ar' else 'My Statistics' }}{% endblock %}
+{% block topbar_title %}{{ '📊 إحصائياتي الشخصية' if lang=='ar' else '📊 My Personal Statistics' }}{% endblock %}
+
+{% block content %}
+{% set streak_cur = stats.current_streak if stats else 0 %}
+{% set streak_best = stats.longest_streak if stats else 0 %}
+<div class="sm-card" style="background:linear-gradient(135deg,#7c2d12,#ea580c,#f97316);color:#fff;margin-bottom:.75rem;border:none">
+  <div style="display:flex;align-items:center;gap:.9rem;flex-wrap:wrap">
+    <div style="font-size:2.5rem">🔥</div>
+    <div style="flex:1">
+      <div style="font-size:.78rem;opacity:.85">{{ 'الشعلة اليومية' if lang=='ar' else 'Daily Streak' }}</div>
+      <div style="font-size:1.8rem;font-weight:900;line-height:1.1">{{ streak_cur }}</div>
+    </div>
+    <div style="text-align:center">
+      <div style="font-size:.68rem;opacity:.8">{{ 'الأطول' if lang=='ar' else 'Best' }}</div>
+      <div style="font-size:1.2rem;font-weight:800">{{ streak_best }}</div>
+    </div>
+    <a href="{{ url_for('achievements') }}" style="background:rgba(255,255,255,.2);color:#fff;padding:.4rem .9rem;border-radius:20px;text-decoration:none;font-size:.78rem;font-weight:700">
+      <i class="bi bi-award-fill"></i> {{ 'إنجازاتي' if lang=='ar' else 'Achievements' }}
+    </a>
+  </div>
+</div>
+{% if stats.total_journals == 0 %}
+<div class="sm-card" style="text-align:center;padding:3rem 1rem;margin-bottom:1rem">
+  <span style="font-size:3.5rem;display:block;margin-bottom:.8rem;animation:float 3s ease-in-out infinite">📊</span>
+  <div style="font-size:1rem;font-weight:800;margin-bottom:.4rem">{{ 'لا توجد بيانات بعد' if lang=='ar' else 'No data yet' }}</div>
+  <div style="font-size:.84rem;color:var(--muted);margin-bottom:1.2rem">{{ 'ابدأ بكتابة يومياتك وسيظهر تحليلك النفسي هنا 💙' if lang=='ar' else 'Start journaling and your personal analysis will appear here 💙' }}</div>
+  <a href="{{ url_for('journal') }}" class="btn-acc" style="display:inline-flex;width:auto;padding:.6rem 1.5rem">
+    <i class="bi bi-pencil-square"></i>
+    {{ 'اكتب أول يومية' if lang=='ar' else 'Write First Journal' }}
+  </a>
+</div>
+{% else %}
+<div class="stats-grid mb-4">
+  <div class="stat-card info">
+    <span class="stat-icon">📔</span>
+    <div class="stat-number" data-count="{{ stats.total_journals }}">{{ stats.total_journals }}</div>
+    <div class="stat-label">{{ 'إجمالي اليوميات' if lang=='ar' else 'Total Journals' }}</div>
+  </div>
+  <div class="stat-card {% if stats.latest_level in ('high','critical') %}danger{% elif stats.latest_level=='medium' %}warning{% else %}success{% endif %}">
+    <span class="stat-icon">🎯</span>
+    <div class="stat-number">{{ stats.avg_risk }}</div>
+    <div class="stat-label">{{ 'متوسط الخطر /10' if lang=='ar' else 'Avg. Risk /10' }}</div>
+  </div>
+  <div class="stat-card success">
+    <span class="stat-icon">🔥</span>
+    <div class="stat-number" data-count="{{ stats.weekly_streak }}">{{ stats.weekly_streak }}</div>
+    <div class="stat-label">{{ 'أيام هذا الأسبوع' if lang=='ar' else 'Days This Week' }}</div>
+  </div>
+  <div class="stat-card info">
+    <span class="stat-icon">😊</span>
+    <div class="stat-number">{{ stats.checkin_avg_mood }}<span style="font-size:.8rem">/5</span></div>
+    <div class="stat-label">{{ 'متوسط المزاج' if lang=='ar' else 'Avg. Mood' }}</div>
+  </div>
+</div>
+{% endif %}
+
+<div class="two-col">
+  <!-- Risk chart -->
+  <div>
+    <div class="sm-card h-100">
+      <div style="font-size:.95rem;font-weight:800;margin-bottom:.8rem;display:flex;align-items:center;gap:8px">
+        <i class="bi bi-graph-up-arrow" style="color:var(--sky)"></i>
+        {{ 'تاريخ مؤشر الخطر' if lang=='ar' else 'Risk Score History' }}
+      </div>
+      {% if chart_scores and chart_scores != '[]' %}
+      <div class="chart-wrap" style="height:220px"><canvas id="riskChart"></canvas></div>
+      {% else %}
+      <div style="text-align:center;padding:3rem 1rem;color:var(--muted)">
+        <span style="font-size:2.5rem;display:block;margin-bottom:.4rem;animation:float 3s ease-in-out infinite">📔</span>
+        {{ 'ابدأ بكتابة يومياتك' if lang=='ar' else 'Start journaling to see data' }}
+      </div>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Emotion breakdown -->
+  <div>
+    <div class="sm-card h-100">
+      <div style="font-size:.95rem;font-weight:800;margin-bottom:.8rem;display:flex;align-items:center;gap:8px">
+        <i class="bi bi-heart-pulse-fill" style="color:var(--sky)"></i>
+        {{ 'توزيع المشاعر' if lang=='ar' else 'Emotion Breakdown' }}
+      </div>
+      {% if stats.emotion_counts %}
+      <div class="chart-wrap" style="height:200px"><canvas id="emoChart"></canvas></div>
+      <!-- Emotion legend -->
+      <div style="display:flex;flex-wrap:wrap;gap:5px;margin-top:.7rem">
+        {% for ec in stats.emotion_counts[:5] %}
+        <span class="badge-emo emo-{{ ec.emotion }}" style="font-size:.7rem">
+          {{ ec.emotion }}: {{ ec.count }}
+        </span>
+        {% endfor %}
+      </div>
+      {% else %}
+      <div style="text-align:center;padding:2rem;color:var(--muted)">
+        <span style="font-size:2.5rem;display:block;margin-bottom:.4rem;animation:float 3s ease-in-out infinite">📔</span>
+        {{ 'ابدأ بكتابة يومياتك' if lang=='ar' else 'Start journaling' }}
+      </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+<!-- Current level card -->
+{% if stats.total_journals > 0 %}
+<div class="sm-card" style="margin-top:.75rem">
+  <div style="font-size:.95rem;font-weight:800;margin-bottom:1rem">
+    <i class="bi bi-activity" style="color:var(--sky)"></i>
+    {{ ' حالتك الحالية' if lang=='ar' else ' Current State' }}
+  </div>
+  <div style="display:flex;align-items:center;gap:1.5rem;flex-wrap:wrap">
+    <div>
+      <div style="font-size:.78rem;color:var(--muted);margin-bottom:.4rem">{{ 'مستوى الخطر الحالي' if lang=='ar' else 'Current Risk Level' }}</div>
+      <span class="risk-badge risk-{{ stats.latest_level }}" style="font-size:.9rem;padding:.3rem .9rem">
+        {% if lang=='ar' %}{% if stats.latest_level=='low' %}✅ منخفض{% elif stats.latest_level=='medium' %}⚠️ متوسط{% elif stats.latest_level=='high' %}🔴 مرتفع{% else %}🚨 حرج{% endif %}
+        {% else %}{% if stats.latest_level=='low' %}✅ Low{% elif stats.latest_level=='medium' %}⚠️ Medium{% elif stats.latest_level=='high' %}🔴 High{% else %}🚨 Critical{% endif %}{% endif %}
+      </span>
+    </div>
+    <div style="flex:1;min-width:160px">
+      <div style="font-size:.78rem;color:var(--muted);margin-bottom:.4rem">{{ 'درجة الخطر الأخيرة' if lang=='ar' else 'Latest Risk Score' }}</div>
+      <div class="rbar-wrap"><div class="rbar-fill" data-score="{{ stats.latest_risk }}"></div></div>
+      <div style="font-size:.78rem;font-weight:700;margin-top:.2rem;color:var(--sky)">{{ stats.latest_risk }}/10</div>
+    </div>
+  </div>
+
+  <!-- Advice -->
+  <div style="margin-top:1rem;padding:.9rem;border-radius:var(--r-sm);border:1px solid var(--border);background:var(--bg-muted);font-size:.85rem;line-height:1.75">
+    <strong>💡 {{ 'نصيحة لك:' if lang=='ar' else 'Tip for you:' }}</strong><br>
+    {% if stats.latest_level == 'low' %}
+      {{ 'أنت في حالة جيدة! استمر في الكتابة يومياً وحافظ على مزاجك الإيجابي. 💚' if lang=='ar' else "You're doing great! Keep journaling daily and maintain your positive mood. 💚" }}
+    {% elif stats.latest_level == 'medium' %}
+      {{ 'هناك بعض المؤشرات التي تستحق الاهتمام. جرّب تمارين التنفس والتحدث مع المساعد نور. 💛' if lang=='ar' else 'Some indicators need attention. Try breathing exercises and chat with Nour. 💛' }}
+    {% elif stats.latest_level == 'high' %}
+      {{ 'يُنصح بالتحدث مع المرشد المدرسي. أنت لست وحدك وهناك من يهتم بك. 🔴' if lang=='ar' else 'Consider talking to your school counselor. You are not alone. 🔴' }}
+    {% else %}
+      {{ 'يُرجى التواصل مع المرشد المدرسي في أقرب وقت. صحتك النفسية هي الأولوية. 🚨' if lang=='ar' else 'Please reach out to your school counselor as soon as possible. 🚨' }}
+    {% endif %}
+  </div>
+</div>
+{% endif %}
+
+<div style="margin-top:.75rem;display:flex;gap:.6rem;flex-wrap:wrap">
+  <a href="{{ url_for('journal') }}" class="btn-pri" onclick="playClick()">
+    <i class="bi bi-pencil-square"></i>{{ 'اكتب يومية' if lang=='ar' else 'Write Journal' }}
+  </a>
+  <a href="{{ url_for('companion') }}" class="btn-acc" style="width:auto;padding:.52rem 1.1rem" onclick="playClick()">
+    <i class="bi bi-chat-heart-fill"></i>{{ 'تحدث مع نور' if lang=='ar' else 'Chat with Nour' }}
+  </a>
+  <a href="{{ url_for('survey') }}" class="btn-out" onclick="playClick()">
+    <i class="bi bi-clipboard-check-fill"></i>{{ 'استبيان' if lang=='ar' else 'Survey' }}
+  </a>
+</div>
+{% endblock %}
+
+{% block chartjs %}{% endblock %}
+{% block scripts %}
+<script>
+const sc = {{ chart_scores|safe }}, lb = {{ chart_labels|safe }};
+if (sc && sc.length) {
+  const ctx = document.getElementById('riskChart')?.getContext('2d');
+  if (ctx && typeof Chart !== 'undefined') {
+    const grad = ctx.createLinearGradient(0, 0, 0, 200);
+    grad.addColorStop(0, 'rgba(14,165,233,.3)');
+    grad.addColorStop(1, 'rgba(14,165,233,.02)');
+    new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: lb,
+        datasets: [{
+          data: sc,
+          borderColor: '#0ea5e9',
+          backgroundColor: grad,
+          borderWidth: 2.5,
+          fill: true,
+          tension: .4,
+          pointRadius: 5,
+          // FIX CRITICAL: Use /10 thresholds (2.5, 5, 7.5) not /100 (25, 50, 75)
+          pointBackgroundColor: sc.map(s =>
+            s < 2.5 ? '#10b981' :
+            s < 5   ? '#f59e0b' :
+            s < 7.5 ? '#ef4444' : '#9d174d'
+          ),
+          pointBorderColor: '#fff',
+          pointBorderWidth: 2,
+          pointHoverRadius: 7,
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            callbacks: {
+              label: c => ` ${c.parsed.y.toFixed(1)}/10`
+            }
+          }
+        },
+        scales: {
+          // FIX: Y axis max = 10 (not 100)
+          y: { min: 0, max: 10, grid: { color: 'rgba(0,0,0,.04)' }, ticks: { callback: v => v } },
+          x: { grid: { display: false }, ticks: { maxTicksLimit: 6 } }
+        }
+      }
+    });
+  }
+}
+
+{% set emo_data = stats.emotion_counts %}
+{% if emo_data %}
+const emoCtx = document.getElementById('emoChart')?.getContext('2d');
+if (emoCtx && typeof Chart !== 'undefined') {
+  const emoColors = {
+    bullying:        '#ef4444',
+    depression:      '#8b5cf6',
+    anxiety:         '#f59e0b',
+    isolation:       '#3b82f6',
+    physical_fatigue:'#f97316',
+    positive:        '#10b981',
+    neutral:         '#94a3b8',
+  };
+  const emoLabels = {{ emo_data|map(attribute='emotion')|list|tojson }};
+  const emoCounts = {{ emo_data|map(attribute='count')|list|tojson }};
+  new Chart(emoCtx, {
+    type: 'doughnut',
+    data: {
+      labels: emoLabels,
+      datasets: [{
+        data: emoCounts,
+        backgroundColor: emoLabels.map(e => emoColors[e] || '#94a3b8'),
+        borderColor: 'var(--bg-card)',
+        borderWidth: 4,
+        hoverOffset: 8,
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      cutout: '65%',
+      plugins: {
+        legend: { position: 'bottom', labels: { padding: 12, font: { size: 11 } } }
+      }
+    }
+  });
+}
+{% endif %}
+</script>
+{% endblock %}

@@ -1,0 +1,243 @@
+{% extends "base.html" %}
+{% block title %}{{ 'أرقام الطوارئ' if lang=='ar' else 'Emergency Numbers' }} — SchoolMind AI{% endblock %}
+{% block topbar_title %}{{ '🆘 أرقام الطوارئ والمساعدة' if lang=='ar' else '🆘 Emergency & Help Numbers' }}{% endblock %}
+
+{% block extra_head %}
+<style>
+.emer-hero{background:linear-gradient(135deg,#7f1d1d,#dc2626,#ef4444);border-radius:var(--r);padding:2rem 1.6rem;color:#fff;text-align:center;margin-bottom:1rem;position:relative;overflow:hidden;box-shadow:0 12px 40px rgba(239,68,68,.4);}
+.emer-hero::before{content:'';position:absolute;width:300px;height:300px;border-radius:50%;background:rgba(255,255,255,.06);top:-80px;right:-60px;animation:float 7s ease-in-out infinite;}
+.pulse-ring{width:80px;height:80px;border-radius:50%;background:rgba(255,255,255,.15);border:3px solid rgba(255,255,255,.4);display:flex;align-items:center;justify-content:center;font-size:2.2rem;margin:0 auto .9rem;animation:pulse 1.5s ease infinite;}
+.emer-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:.75rem;margin-bottom:1rem;}
+.emer-card{background:var(--bg-card);border-radius:var(--r);border:2px solid var(--border);padding:1.4rem;display:flex;align-items:center;gap:1rem;transition:all var(--tr);cursor:pointer;text-decoration:none;color:var(--text);position:relative;overflow:hidden;}
+.emer-card::before{content:'';position:absolute;inset:0;opacity:0;transition:opacity var(--tr);}
+.emer-card:hover{transform:translateY(-4px);box-shadow:var(--sh);}
+.emer-card.danger{border-color:rgba(239,68,68,.4);}
+.emer-card.danger::before{background:linear-gradient(135deg,rgba(239,68,68,.06),transparent);}
+.emer-card.danger:hover{border-color:rgba(239,68,68,.7);box-shadow:0 8px 28px rgba(239,68,68,.2);}
+.emer-card.danger::before{opacity:1;}
+.emer-card.warn{border-color:rgba(245,158,11,.4);}
+.emer-card.warn:hover{border-color:rgba(245,158,11,.7);box-shadow:0 8px 28px rgba(245,158,11,.2);}
+.emer-card.success{border-color:rgba(16,185,129,.4);}
+.emer-card.success:hover{border-color:rgba(16,185,129,.7);box-shadow:0 8px 28px rgba(16,185,129,.2);}
+.emer-card.sky{border-color:rgba(56,189,248,.4);}
+.emer-card.sky:hover{border-color:rgba(56,189,248,.7);box-shadow:0 8px 28px rgba(56,189,248,.2);}
+.emer-icon{width:60px;height:60px;border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:1.8rem;flex-shrink:0;}
+.emer-icon.red{background:linear-gradient(135deg,#dc2626,#ef4444);}
+.emer-icon.orange{background:linear-gradient(135deg,#d97706,#f59e0b);}
+.emer-icon.green{background:linear-gradient(135deg,#059669,#10b981);}
+.emer-icon.blue{background:linear-gradient(135deg,#0284c7,#38bdf8);}
+.emer-icon.purple{background:linear-gradient(135deg,#5b21b6,#7c3aed);}
+.emer-icon.pink{background:linear-gradient(135deg,#be185d,#f43f5e);}
+.num-display{font-size:1.8rem;font-weight:900;letter-spacing:2px;font-family:monospace;}
+.call-btn{display:inline-flex;align-items:center;gap:6px;padding:.4rem .9rem;border-radius:20px;font-size:.8rem;font-weight:700;text-decoration:none;transition:all .2s;margin-top:.5rem;}
+.call-btn.red{background:rgba(239,68,68,.12);color:var(--danger);border:1.5px solid rgba(239,68,68,.3);}
+.call-btn.red:hover{background:var(--danger);color:#fff;}
+.call-btn.green{background:rgba(16,185,129,.12);color:var(--success);border:1.5px solid rgba(16,185,129,.3);}
+.call-btn.green:hover{background:var(--success);color:#fff;}
+.tip-card{background:linear-gradient(135deg,rgba(245,158,11,.08),rgba(249,115,22,.05));border:1px solid rgba(245,158,11,.25);border-radius:var(--r);padding:1.25rem;margin-bottom:.75rem;}
+.step-item{display:flex;gap:10px;align-items:flex-start;padding:.6rem 0;border-bottom:1px solid var(--border);}
+.step-item:last-child{border-bottom:none;}
+.step-num{width:28px;height:28px;border-radius:50%;background:var(--danger);color:#fff;display:flex;align-items:center;justify-content:center;font-size:.75rem;font-weight:800;flex-shrink:0;}
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Hero -->
+<div class="emer-hero">
+  <div style="position:relative;z-index:1">
+    <div class="pulse-ring">🆘</div>
+    <div style="font-size:1.4rem;font-weight:900;margin-bottom:.4rem">
+      {{ 'أرقام الطوارئ والدعم النفسي' if lang=='ar' else 'Emergency & Support Numbers' }}
+    </div>
+    <div style="opacity:.85;font-size:.88rem;margin-bottom:1rem">
+      {{ 'المملكة الأردنية الهاشمية — متاحة 24 ساعة طوال أيام الأسبوع' if lang=='ar' else 'Hashemite Kingdom of Jordan — Available 24/7' }}
+    </div>
+    <div style="background:rgba(255,255,255,.15);border-radius:12px;padding:.6rem 1rem;display:inline-block;font-size:.85rem;font-weight:700">
+      ⚠️ {{ 'في حالة خطر مباشر — اتصل فوراً بالإسعاف: 911' if lang=='ar' else 'In immediate danger — Call ambulance: 911' }}
+    </div>
+  </div>
+</div>
+
+<!-- Main Emergency Numbers -->
+<div style="font-size:.95rem;font-weight:800;margin-bottom:.75rem;display:flex;align-items:center;gap:8px">
+  <i class="bi bi-telephone-fill" style="color:var(--danger)"></i>
+  {{ 'أرقام الطوارئ الرئيسية' if lang=='ar' else 'Main Emergency Numbers' }}
+</div>
+<div class="emer-grid">
+
+  <a href="tel:911" class="emer-card danger" onclick="playClick()">
+    <div class="emer-icon red">🚑</div>
+    <div style="flex:1">
+      <div style="font-weight:800;font-size:.95rem;margin-bottom:.2rem">{{ 'الإسعاف والطوارئ' if lang=='ar' else 'Ambulance & Emergency' }}</div>
+      <div class="num-display" style="color:var(--danger)">911</div>
+      <div style="font-size:.75rem;color:var(--muted);margin-top:.2rem">{{ 'متاح 24/7 — مجاني من كل الشبكات' if lang=='ar' else '24/7 — Free from all networks' }}</div>
+      <span class="call-btn red"><i class="bi bi-telephone-fill"></i>{{ 'اتصل الآن' if lang=='ar' else 'Call Now' }}</span>
+    </div>
+  </a>
+
+  <a href="tel:110" class="emer-card danger" onclick="playClick()">
+    <div class="emer-icon red">👮</div>
+    <div style="flex:1">
+      <div style="font-weight:800;font-size:.95rem;margin-bottom:.2rem">{{ 'الشرطة والأمن العام' if lang=='ar' else 'Police & Public Security' }}</div>
+      <div class="num-display" style="color:var(--danger)">110</div>
+      <div style="font-size:.75rem;color:var(--muted);margin-top:.2rem">{{ 'للإبلاغ عن الجرائم والحوادث' if lang=='ar' else 'Report crimes and incidents' }}</div>
+      <span class="call-btn red"><i class="bi bi-telephone-fill"></i>{{ 'اتصل الآن' if lang=='ar' else 'Call Now' }}</span>
+    </div>
+  </a>
+
+  <a href="tel:199" class="emer-card danger" onclick="playClick()">
+    <div class="emer-icon red">🔥</div>
+    <div style="flex:1">
+      <div style="font-weight:800;font-size:.95rem;margin-bottom:.2rem">{{ 'الدفاع المدني والإطفاء' if lang=='ar' else 'Civil Defense & Fire' }}</div>
+      <div class="num-display" style="color:var(--danger)">199</div>
+      <div style="font-size:.75rem;color:var(--muted);margin-top:.2rem">{{ 'حرائق وكوارث وإنقاذ' if lang=='ar' else 'Fire, disasters, rescue' }}</div>
+      <span class="call-btn red"><i class="bi bi-telephone-fill"></i>{{ 'اتصل الآن' if lang=='ar' else 'Call Now' }}</span>
+    </div>
+  </a>
+
+</div>
+
+<!-- Mental Health Support Numbers -->
+<div style="font-size:.95rem;font-weight:800;margin:.9rem 0 .75rem;display:flex;align-items:center;gap:8px">
+  <i class="bi bi-heart-fill" style="color:#a855f7"></i>
+  {{ 'خطوط الدعم النفسي والاجتماعي' if lang=='ar' else 'Mental Health & Social Support Lines' }}
+</div>
+<div class="emer-grid">
+
+  <a href="tel:110" class="emer-card success" onclick="playClick()">
+    <div class="emer-icon purple" style="background:linear-gradient(135deg,#5b21b6,#7c3aed)">💜</div>
+    <div style="flex:1">
+      <div style="font-weight:800;font-size:.95rem;margin-bottom:.2rem">{{ 'خط مساندة للصحة النفسية' if lang=='ar' else 'Mental Health Support Line' }}</div>
+      <div class="num-display" style="color:var(--p300)">110</div>
+      <div style="font-size:.75rem;color:var(--muted);margin-top:.2rem">{{ 'دعم نفسي مجاني — متاح طوال اليوم' if lang=='ar' else 'Free psychological support — all day' }}</div>
+      <span class="call-btn green"><i class="bi bi-chat-heart-fill"></i>{{ 'تواصل الآن' if lang=='ar' else 'Contact Now' }}</span>
+    </div>
+  </a>
+
+  <a href="tel:08008880" class="emer-card sky" onclick="playClick()">
+    <div class="emer-icon blue">🧠</div>
+    <div style="flex:1">
+      <div style="font-weight:800;font-size:.95rem;margin-bottom:.2rem">{{ 'خط أنت مش لحالك' if lang=='ar' else "You're Not Alone Line" }}</div>
+      <div class="num-display" style="color:var(--sky);font-size:1.3rem">0800-8880</div>
+      <div style="font-size:.75rem;color:var(--muted);margin-top:.2rem">{{ 'منظمة إيمان — دعم نفسي مجاني مجهول' if lang=='ar' else 'Eman Organization — free anonymous support' }}</div>
+      <span class="call-btn green"><i class="bi bi-telephone-fill"></i>{{ 'اتصل مجاناً' if lang=='ar' else 'Free Call' }}</span>
+    </div>
+  </a>
+
+  <a href="tel:0096264840555" class="emer-card success" onclick="playClick()">
+    <div class="emer-icon green">👨‍👩‍👧</div>
+    <div style="flex:1">
+      <div style="font-weight:800;font-size:.95rem;margin-bottom:.2rem">{{ 'المجلس الوطني لشؤون الأسرة' if lang=='ar' else 'National Family Affairs Council' }}</div>
+      <div class="num-display" style="color:var(--success);font-size:1.1rem">4840555</div>
+      <div style="font-size:.75rem;color:var(--muted);margin-top:.2rem">{{ 'دعم الأسرة والأطفال' if lang=='ar' else 'Family and children support' }}</div>
+      <span class="call-btn green"><i class="bi bi-telephone-fill"></i>{{ 'اتصل' if lang=='ar' else 'Call' }}</span>
+    </div>
+  </a>
+
+  <a href="tel:0096264648840" class="emer-card warn" onclick="playClick()">
+    <div class="emer-icon orange">👧</div>
+    <div style="flex:1">
+      <div style="font-weight:800;font-size:.95rem;margin-bottom:.2rem">{{ 'خط نجدة الطفل' if lang=='ar' else "Child Rescue Line" }}</div>
+      <div class="num-display" style="color:var(--warn);font-size:1.1rem">4648840</div>
+      <div style="font-size:.75rem;color:var(--muted);margin-top:.2rem">{{ 'وزارة التنمية الاجتماعية — حماية الأطفال' if lang=='ar' else 'Social Development Ministry — child protection' }}</div>
+      <span class="call-btn red"><i class="bi bi-telephone-fill"></i>{{ 'اتصل' if lang=='ar' else 'Call' }}</span>
+    </div>
+  </a>
+
+  <a href="tel:0096264617776" class="emer-card sky" onclick="playClick()">
+    <div class="emer-icon pink">🌸</div>
+    <div style="flex:1">
+      <div style="font-weight:800;font-size:.95rem;margin-bottom:.2rem">{{ 'خط دعم النساء والفتيات' if lang=='ar' else "Women & Girls Support Line" }}</div>
+      <div class="num-display" style="color:var(--sky);font-size:1.1rem">4617776</div>
+      <div style="font-size:.75rem;color:var(--muted);margin-top:.2rem">{{ 'منظمة UNFPA — سري ومجاني' if lang=='ar' else 'UNFPA — confidential and free' }}</div>
+      <span class="call-btn green"><i class="bi bi-telephone-fill"></i>{{ 'اتصل' if lang=='ar' else 'Call' }}</span>
+    </div>
+  </a>
+
+  <a href="tel:0096264625025" class="emer-card success" onclick="playClick()">
+    <div class="emer-icon green">🏥</div>
+    <div style="flex:1">
+      <div style="font-weight:800;font-size:.95rem;margin-bottom:.2rem">{{ 'مستشفى الأمراض النفسية — عمّان' if lang=='ar' else 'Mental Health Hospital — Amman' }}</div>
+      <div class="num-display" style="color:var(--success);font-size:1.1rem">4625025</div>
+      <div style="font-size:.75rem;color:var(--muted);margin-top:.2rem">{{ 'طوارئ نفسية وعيادات خارجية' if lang=='ar' else 'Psychiatric emergency & outpatient' }}</div>
+      <span class="call-btn green"><i class="bi bi-telephone-fill"></i>{{ 'اتصل' if lang=='ar' else 'Call' }}</span>
+    </div>
+  </a>
+
+</div>
+
+<!-- School-Specific Support -->
+<div style="font-size:.95rem;font-weight:800;margin:.9rem 0 .75rem;display:flex;align-items:center;gap:8px">
+  <i class="bi bi-mortarboard-fill" style="color:var(--sky)"></i>
+  {{ 'الدعم المدرسي والتربوي' if lang=='ar' else 'School & Educational Support' }}
+</div>
+<div class="emer-grid">
+  <div class="emer-card sky" style="cursor:default">
+    <div class="emer-icon blue">📚</div>
+    <div style="flex:1">
+      <div style="font-weight:800;font-size:.95rem;margin-bottom:.2rem">{{ 'وزارة التربية والتعليم' if lang=='ar' else 'Ministry of Education' }}</div>
+      <div class="num-display" style="color:var(--sky);font-size:1.3rem">0800-22000</div>
+      <div style="font-size:.75rem;color:var(--muted);margin-top:.2rem">{{ 'الخط الساخن للشكاوى التعليمية' if lang=='ar' else 'Educational complaints hotline' }}</div>
+    </div>
+  </div>
+  <div class="emer-card success" style="cursor:default">
+    <div class="emer-icon green">🛡</div>
+    <div style="flex:1">
+      <div style="font-weight:800;font-size:.95rem;margin-bottom:.2rem">{{ 'المرشد المدرسي' if lang=='ar' else 'School Counselor' }}</div>
+      <div style="font-size:1rem;font-weight:700;color:var(--success);margin:.2rem 0">{{ 'في مدرستك مباشرةً' if lang=='ar' else 'Directly at your school' }}</div>
+      <div style="font-size:.75rem;color:var(--muted)">{{ 'تحدث مع المرشد في المدرسة في أي وقت' if lang=='ar' else 'Talk to your school counselor anytime' }}</div>
+    </div>
+  </div>
+</div>
+
+<!-- Emergency Steps -->
+<div class="sm-card" style="margin-top:.75rem;border-right:4px solid var(--danger)">
+  <div style="font-size:.95rem;font-weight:800;margin-bottom:1rem;color:var(--danger)">
+    <i class="bi bi-exclamation-triangle-fill"></i>
+    {{ ' ماذا تفعل في حالة الطوارئ؟' if lang=='ar' else ' What to do in an emergency?' }}
+  </div>
+  {% for step_ar, step_en in [
+    ('ابقَ هادئاً وتنفس ببطء','Stay calm and breathe slowly'),
+    ('اتصل فوراً بأقرب رقم طوارئ','Call the nearest emergency number immediately'),
+    ('أخبر شخصاً بالغاً موثوقاً به','Tell a trusted adult nearby'),
+    ('لا تواجه الخطر وحدك','Do not face danger alone'),
+    ('إذا كنت في المدرسة، توجه للمرشد أو الإدارة فوراً','If at school, go to the counselor or administration immediately'),
+  ] %}
+  <div class="step-item">
+    <div class="step-num">{{ loop.index }}</div>
+    <div style="font-size:.87rem;padding-top:.25rem">{{ step_ar if lang=='ar' else step_en }}</div>
+  </div>
+  {% endfor %}
+</div>
+
+<!-- Tip Card -->
+<div class="tip-card">
+  <div style="font-size:.9rem;font-weight:800;margin-bottom:.6rem;display:flex;align-items:center;gap:8px">
+    <i class="bi bi-lightbulb-fill" style="color:var(--warn)"></i>
+    {{ 'تذكر دائماً' if lang=='ar' else 'Always remember' }}
+  </div>
+  <div style="font-size:.85rem;color:var(--muted);line-height:1.85">
+    {{ 'طلب المساعدة شجاعة وليس ضعفاً. أنت لست وحدك، وهناك دائماً من يهتم بك ويريد مساعدتك 💙' if lang=='ar' else 'Asking for help is courage, not weakness. You are never alone — there is always someone who cares and wants to help you 💙' }}
+  </div>
+</div>
+
+<div style="display:flex;gap:.6rem;flex-wrap:wrap;margin-top:.5rem">
+  <a href="{{ url_for('companion') }}" class="btn-pri" onclick="playClick()">
+    <i class="bi bi-chat-heart-fill"></i>{{ 'تحدث مع نور' if lang=='ar' else 'Chat with Nour' }}
+  </a>
+  <a href="{{ url_for('resources') }}" class="btn-out" onclick="playClick()">
+    <i class="bi bi-book-fill"></i>{{ 'موارد المساعدة' if lang=='ar' else 'Help Resources' }}
+  </a>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Pulse animation for emergency numbers
+document.querySelectorAll('.emer-card.danger').forEach(card => {
+  card.addEventListener('click', function() {
+    playCelebrate();
+  });
+});
+</script>
+{% endblock %}

@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% block title %}{{ 'إدارة حسابي' if lang=='ar' else 'My Account' }}{% endblock %}
+{% block topbar_title %}{{ '👤 إدارة الحساب' if lang=='ar' else '👤 Account Settings' }}{% endblock %}
+
+{% block content %}
+<div class="two-col">
+  <div>
+    <div class="sm-card" style="text-align:center">
+      <div style="width:80px;height:80px;border-radius:50%;background:var(--grad-sky);display:flex;align-items:center;justify-content:center;font-size:2rem;margin:0 auto 1rem;box-shadow:var(--sh-sky);animation:float 4s ease-in-out infinite">👤</div>
+      <div style="font-size:1rem;font-weight:800">{{ user.display_name }}</div>
+      <div style="font-size:.78rem;color:var(--muted)">@{{ user.username }}</div>
+      <div style="margin-top:.5rem"><span class="risk-badge risk-low">{{ 'مرشد / معلم' if lang=='ar' else 'Counselor' }}</span></div>
+    </div>
+    <div class="sm-card" style="margin-top:.75rem">
+      <div style="font-size:.9rem;font-weight:800;margin-bottom:.8rem"><i class="bi bi-info-circle-fill" style="color:var(--sky)"></i> {{ ' معلومات الحساب' if lang=='ar' else ' Account Info' }}</div>
+      {% for la, le, v in [('الرقم الوطني','National ID',user.national_id or '—'),('تاريخ الميلاد','Birthdate',user.birthdate or '—'),('تاريخ الإنشاء','Created',(user.created_at or '')[:10])] %}
+      <div style="display:flex;justify-content:space-between;padding:.5rem 0;border-bottom:1px solid var(--border);font-size:.84rem;">
+        <span style="color:var(--muted)">{{ la if lang=='ar' else le }}</span>
+        <span style="font-weight:600">{{ v }}</span>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+  <div>
+    <div class="sm-card" style="margin-bottom:.75rem">
+      <div style="font-size:.9rem;font-weight:800;margin-bottom:.9rem"><i class="bi bi-pencil-fill" style="color:var(--sky)"></i> {{ ' تعديل المعلومات' if lang=='ar' else ' Edit Info' }}</div>
+      <form method="POST" action="{{ url_for('counselor_profile') }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+        <input type="hidden" name="action" value="update_info">
+        <div style="margin-bottom:.9rem">
+          <label style="font-size:.8rem;font-weight:700;display:block;margin-bottom:.35rem">{{ 'الاسم الكامل' if lang=='ar' else 'Full Name' }}</label>
+          <input type="text" name="display_name" class="form-control" value="{{ user.display_name }}" required>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:.8rem;margin-bottom:.9rem">
+          <div>
+            <label style="font-size:.8rem;font-weight:700;display:block;margin-bottom:.35rem">{{ 'الرقم الوطني' if lang=='ar' else 'National ID' }}</label>
+            <input type="text" name="national_id" class="form-control" value="{{ user.national_id or '' }}" maxlength="20">
+          </div>
+          <div>
+            <label style="font-size:.8rem;font-weight:700;display:block;margin-bottom:.35rem">{{ 'تاريخ الميلاد' if lang=='ar' else 'Birthdate' }}</label>
+            <input type="date" name="birthdate" class="form-control" value="{{ user.birthdate or '' }}">
+          </div>
+        </div>
+        <button type="submit" class="btn-acc" onclick="playOk()"><i class="bi bi-check-circle-fill"></i> {{ 'حفظ التغييرات' if lang=='ar' else 'Save Changes' }}</button>
+      </form>
+    </div>
+    <div class="sm-card">
+      <div style="font-size:.9rem;font-weight:800;margin-bottom:.9rem"><i class="bi bi-key-fill" style="color:var(--warn)"></i> {{ ' تغيير كلمة المرور' if lang=='ar' else ' Change Password' }}</div>
+      <form method="POST" action="{{ url_for('counselor_profile') }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+        <input type="hidden" name="action" value="change_password">
+        {% for nm, la, le, ac in [('old_password','كلمة المرور الحالية','Current Password','current-password'),('new_password','كلمة المرور الجديدة','New Password','new-password'),('confirm_new_password','تأكيد كلمة المرور','Confirm Password','new-password')] %}
+        <div style="margin-bottom:.85rem">
+          <label style="font-size:.8rem;font-weight:700;display:block;margin-bottom:.32rem">{{ la if lang=='ar' else le }}</label>
+          <input type="password" name="{{ nm }}" class="form-control" placeholder="••••••••" required autocomplete="{{ ac }}">
+        </div>
+        {% endfor %}
+        <button type="submit" class="btn-warm" onclick="playClick()"><i class="bi bi-key-fill"></i> {{ 'تغيير كلمة المرور' if lang=='ar' else 'Change Password' }}</button>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

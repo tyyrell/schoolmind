@@ -1,0 +1,266 @@
+{% extends "base.html" %}
+{% block title %}{{ 'عن المشروع' if lang=='ar' else 'About' }} — SchoolMind AI{% endblock %}
+{% block topbar_title %}{{ '💡 عن مشروع SchoolMind AI' if lang=='ar' else '💡 About SchoolMind AI' }}{% endblock %}
+
+{% block extra_head %}
+<style>
+.about-page{max-width:900px;margin:0 auto;}
+.about-hero{background:var(--grad-hero);border-radius:var(--r);padding:2.5rem 2rem;color:#fff;margin-bottom:1rem;position:relative;overflow:hidden;box-shadow:var(--sh-lg);}
+.about-hero::before{content:'';position:absolute;width:400px;height:400px;border-radius:50%;background:rgba(192,132,252,.1);top:-100px;right:-80px;animation:float 7s ease-in-out infinite;}
+.about-hero::after{content:'';position:absolute;width:250px;height:250px;border-radius:50%;background:rgba(56,189,248,.06);bottom:-60px;left:-40px;animation:float 9s ease-in-out infinite reverse;}
+.hero-content{position:relative;z-index:1;}
+.about-logo{width:80px;height:80px;border-radius:50%;background:rgba(255,255,255,.15);display:flex;align-items:center;justify-content:center;font-size:2.5rem;margin-bottom:1rem;animation:float 4s ease-in-out infinite;box-shadow:0 8px 28px rgba(0,0,0,.3);}
+.feature-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:.8rem;margin-bottom:1rem;}
+.feat-card{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--r);padding:1.25rem;transition:all var(--tr);position:relative;overflow:hidden;}
+.feat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;}
+.feat-card.c1::before{background:var(--grad-pri);}
+.feat-card.c2::before{background:var(--grad-em);}
+.feat-card.c3::before{background:var(--grad-warm);}
+.feat-card.c4::before{background:var(--grad-sky);}
+.feat-card.c5::before{background:var(--grad-rose);}
+.feat-card.c6::before{background:var(--grad-acc);}
+.feat-card:hover{transform:translateY(-4px);box-shadow:var(--sh);border-color:var(--border-h);}
+.feat-icon{font-size:2rem;margin-bottom:.6rem;display:block;animation:float 4s ease-in-out infinite;}
+.feat-card:nth-child(2) .feat-icon{animation-delay:.5s;}
+.feat-card:nth-child(3) .feat-icon{animation-delay:1s;}
+.feat-card:nth-child(4) .feat-icon{animation-delay:1.5s;}
+.feat-card:nth-child(5) .feat-icon{animation-delay:2s;}
+.feat-card:nth-child(6) .feat-icon{animation-delay:2.5s;}
+.team-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:.75rem;}
+.team-card{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--r);padding:1.5rem 1rem;text-align:center;transition:all var(--tr);}
+.team-card:hover{transform:translateY(-4px);box-shadow:var(--sh);}
+.team-avatar{width:64px;height:64px;border-radius:50%;background:var(--grad-pri);display:flex;align-items:center;justify-content:center;font-size:1.8rem;margin:0 auto .8rem;box-shadow:var(--sh-p);}
+.tech-badge{display:inline-flex;align-items:center;gap:5px;background:var(--bg-muted);border:1px solid var(--border);border-radius:20px;padding:.28rem .75rem;font-size:.75rem;font-weight:600;color:var(--text);margin:.2rem;}
+.tech-badge i{color:var(--p200);}
+.stat-row{display:grid;grid-template-columns:repeat(4,1fr);gap:.75rem;margin-bottom:1rem;}
+.s-card{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--r);padding:1.1rem;text-align:center;box-shadow:var(--sh-sm);}
+.s-num{font-size:2rem;font-weight:900;background:var(--grad-pri);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.s-lbl{font-size:.72rem;color:var(--muted);margin-top:.2rem;font-weight:600;}
+.timeline{position:relative;padding-right:2rem;}
+.timeline::before{content:'';position:absolute;right:.6rem;top:0;bottom:0;width:2px;background:var(--grad-pri);border-radius:2px;}
+.tl-item{position:relative;margin-bottom:1.1rem;padding-right:.5rem;}
+.tl-dot{position:absolute;right:-1.95rem;top:.3rem;width:14px;height:14px;border-radius:50%;background:var(--p300);border:3px solid var(--bg);box-shadow:0 0 0 2px var(--p300);}
+.privacy-box{background:linear-gradient(135deg,rgba(16,185,129,.08),rgba(56,189,248,.05));border:1px solid rgba(16,185,129,.25);border-radius:var(--r);padding:1.25rem;}
+@media(max-width:600px){.stat-row{grid-template-columns:repeat(2,1fr);}.feature-grid{grid-template-columns:1fr;}}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="about-page">
+
+  <!-- ─── HERO ─── -->
+  <div class="about-hero">
+    <div class="hero-content">
+      <div class="about-logo">🧠</div>
+      <div style="font-size:1.6rem;font-weight:900;margin-bottom:.5rem">SchoolMind AI</div>
+      <div style="font-size:1rem;font-weight:700;opacity:.85;margin-bottom:.6rem">
+        {{ 'نظام الكشف المبكر عن التنمر والضغوط النفسية بالذكاء الاصطناعي' if lang=='ar'
+           else 'AI-Powered Early Detection of Bullying & Psychological Stress' }}
+      </div>
+      <div style="font-size:.82rem;opacity:.65;margin-bottom:1rem">
+        {{ 'مشروع T354 · معرض علماء الغد JoYS 2026' if lang=='ar'
+           else 'Project T354 · JoYS Scientists of Tomorrow 2026' }}
+      </div>
+      <div style="display:flex;gap:.5rem;flex-wrap:wrap">
+        <span style="background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.25);border-radius:20px;padding:.25rem .8rem;font-size:.75rem;font-weight:700">🤖 {{ 'ذكاء اصطناعي محلي' if lang=='ar' else 'Local AI Engine' }}</span>
+        <span style="background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.25);border-radius:20px;padding:.25rem .8rem;font-size:.75rem;font-weight:700">🔐 {{ 'مجهول الهوية' if lang=='ar' else 'Anonymous' }}</span>
+        <span style="background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.25);border-radius:20px;padding:.25rem .8rem;font-size:.75rem;font-weight:700">🌐 {{ 'عربي + إنجليزي' if lang=='ar' else 'Arabic + English' }}</span>
+        <span style="background:rgba(16,185,129,.3);border:1px solid rgba(16,185,129,.5);border-radius:20px;padding:.25rem .8rem;font-size:.75rem;font-weight:700">© 2026</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── STATS ─── -->
+  <div class="stat-row">
+    {% for num, lbl_ar, lbl_en in [
+      ('3000+','كلمة مفتاحية','Keywords'),
+      ('1000+','رد ذكي لنور','Smart Responses'),
+      ('6','فئات عاطفية','Emotion Classes'),
+      ('100%','دقة كشف الأفكار الحرجة','Critical Detection'),
+    ] %}
+    <div class="s-card">
+      <div class="s-num" data-count="{{ num.replace('+','') }}">{{ num }}</div>
+      <div class="s-lbl">{{ lbl_ar if lang=='ar' else lbl_en }}</div>
+    </div>
+    {% endfor %}
+  </div>
+
+  <!-- ─── MISSION ─── -->
+  <div class="sm-card mb-3">
+    <div style="font-size:.95rem;font-weight:800;margin-bottom:.9rem;display:flex;align-items:center;gap:8px">
+      <i class="bi bi-bullseye" style="color:var(--pri)"></i>
+      {{ 'رسالة المشروع' if lang=='ar' else 'Our Mission' }}
+    </div>
+    <div style="font-size:.88rem;line-height:1.9;color:var(--text)">
+      {% if lang=='ar' %}
+      يهدف مشروع <strong>SchoolMind AI</strong> إلى بناء نظام ذكاء اصطناعي محلي متكامل
+      يُمكّن الطلاب من التعبير عن مشاعرهم بحرية وأمان، ويُتيح للمرشد المدرسي
+      رصد حالات الخطر النفسي في وقت مبكر قبل أن تتفاقم.
+      يعمل النظام بالكامل على نموذج ذكاء اصطناعي محلي من تطويرنا — بقاعدة بيانات
+      دلالية تضم أكثر من <strong>3000 عبارة</strong> بالعربية الفصحى والعامية الأردنية والشامية
+      والإنجليزية — دون الحاجة لأي خدمة خارجية.
+      {% else %}
+      <strong>SchoolMind AI</strong> is a locally-powered AI system that enables students
+      to express their feelings freely and safely, while allowing school counselors
+      to detect psychological risk early — before it escalates. The system runs entirely
+      on our own custom AI engine with over <strong>3,000 phrases</strong> in formal Arabic,
+      Levantine dialect, and English — requiring no external API.
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- ─── FEATURES ─── -->
+  <div class="sm-card mb-3">
+    <div style="font-size:.95rem;font-weight:800;margin-bottom:.9rem;display:flex;align-items:center;gap:8px">
+      <i class="bi bi-stars" style="color:var(--p200)"></i>
+      {{ 'ميزات النظام' if lang=='ar' else 'System Features' }}
+    </div>
+    <div class="feature-grid">
+      {% for icon, title_ar, title_en, desc_ar, desc_en, cls in [
+        ('🧠','محرك الذكاء الاصطناعي المحلي','Local AI Engine',
+         'تحليل لغوي يستخدم 3000+ عبارة مع كشف النفي والسياق',
+         'NLP analysis with 3000+ phrases, negation & context detection','c1'),
+        ('📔','اليوميات النفسية','Psychological Journal',
+         'كتابة حرة بالعربية أو الإنجليزية مع تحليل فوري',
+         'Free writing in Arabic or English with instant analysis','c2'),
+        ('🤖','المساعد نور','Nour AI Companion',
+         'أكثر من 1000 رد ذكي مخصص لكل حالة عاطفية',
+         '1000+ smart responses tailored to every emotional state','c3'),
+        ('📊','استبيان الصحة النفسية','Mental Health Survey',
+         '5 محاور يومية مع تقرير تفصيلي ومؤشر خطر',
+         '5 daily dimensions with detailed report & risk indicator','c4'),
+        ('🛡️','لوحة تحكم المرشد','Counselor Dashboard',
+         'رصد مجهول الهوية والتنبيهات الفورية للحالات الحرجة',
+         'Anonymous monitoring & instant alerts for critical cases','c5'),
+        ('♿','إمكانية الوصول الكاملة','Full Accessibility',
+         'دعم ذوي الاحتياجات الخاصة مع 6 إعدادات قابلة للحفظ',
+         'Full disability support with 6 persistent settings','c6'),
+      ] %}
+      <div class="feat-card {{ cls }}">
+        <span class="feat-icon">{{ icon }}</span>
+        <div style="font-weight:800;font-size:.9rem;margin-bottom:.35rem">{{ title_ar if lang=='ar' else title_en }}</div>
+        <div style="font-size:.78rem;color:var(--muted)">{{ desc_ar if lang=='ar' else desc_en }}</div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- ─── HOW IT WORKS ─── -->
+  <div class="sm-card mb-3">
+    <div style="font-size:.95rem;font-weight:800;margin-bottom:.9rem;display:flex;align-items:center;gap:8px">
+      <i class="bi bi-diagram-3-fill" style="color:var(--sky)"></i>
+      {{ 'كيف يعمل النظام؟' if lang=='ar' else 'How Does It Work?' }}
+    </div>
+    <div class="timeline">
+      {% for icon, step_ar, step_en, desc_ar, desc_en in [
+        ('✍️','يكتب الطالب','Student writes','يومية نفسية أو يملأ الاستبيان اليومي','A journal entry or completes the daily survey'),
+        ('⚡','تحليل فوري','Instant analysis','يحلل النظام النص بنموذج الذكاء الاصطناعي المحلي ويصنف المشاعر إلى 6 فئات','The local AI engine classifies emotions into 6 categories'),
+        ('📏','قياس الخطر','Risk measurement','يحسب درجة خطر من 0 إلى 10 مع مراعاة السياق والتاريخ','Calculates risk score 0-10 considering context & history'),
+        ('🔔','تنبيه مجهول','Anonymous alert','عند تجاوز درجة 5 يُرسَل تنبيه مجهول الهوية للمرشد','When score exceeds 5, an anonymous alert is sent to counselor'),
+        ('🤝','تدخل فوري','Immediate intervention','يتدخل المرشد المدرسي في الوقت المناسب لدعم الطالب','Counselor intervenes at the right time to support the student'),
+      ] %}
+      <div class="tl-item">
+        <div class="tl-dot"></div>
+        <div style="display:flex;align-items:flex-start;gap:10px">
+          <span style="font-size:1.3rem;flex-shrink:0">{{ icon }}</span>
+          <div>
+            <div style="font-weight:700;font-size:.88rem">{{ step_ar if lang=='ar' else step_en }}</div>
+            <div style="font-size:.78rem;color:var(--muted)">{{ desc_ar if lang=='ar' else desc_en }}</div>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- ─── TECH STACK ─── -->
+  <div class="sm-card mb-3">
+    <div style="font-size:.95rem;font-weight:800;margin-bottom:.9rem;display:flex;align-items:center;gap:8px">
+      <i class="bi bi-code-slash" style="color:var(--p200)"></i>
+      {{ 'التقنيات المستخدمة' if lang=='ar' else 'Technology Stack' }}
+    </div>
+    <div>
+      {% for icon, name in [
+        ('bi-filetype-py','Python 3.11'),
+        ('bi-lightning-fill','Flask'),
+        ('bi-database-fill','SQLite WAL'),
+        ('bi-graph-up','Chart.js'),
+        ('bi-bootstrap-fill','Bootstrap Icons'),
+        ('bi-cloud-fill','Render.com'),
+        ('bi-github','GitHub'),
+        ('bi-shield-lock-fill','CSRF Protection'),
+        ('bi-phone-fill','Mobile Responsive'),
+        ('bi-universal-access','A11y Support'),
+      ] %}
+      <span class="tech-badge"><i class="bi {{ icon }}"></i>{{ name }}</span>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- ─── AI ENGINE ─── -->
+  <div class="sm-card mb-3">
+    <div style="font-size:.95rem;font-weight:800;margin-bottom:.9rem;display:flex;align-items:center;gap:8px">
+      <i class="bi bi-cpu-fill" style="color:var(--p200)"></i>
+      {{ 'محرك الذكاء الاصطناعي المحلي' if lang=='ar' else 'Local AI Engine' }}
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:.75rem">
+      {% for n, label_ar, label_en, col in [
+        ('3000+','كلمة مفتاحية عربية وإنجليزية','Arabic & English keywords','var(--p200)'),
+        ('6','فئات عاطفية','Emotion categories','var(--success)'),
+        ('1000+','رد ذكي لنور','Smart Nour responses','var(--sky)'),
+        ('97%','دقة كشف النفي','Negation detection accuracy','var(--warn)'),
+        ('100%','كشف الأفكار الحرجة','Critical thought detection','var(--danger)'),
+        ('<200ms','زمن استجابة التحليل','Analysis response time','var(--p100)'),
+      ] %}
+      <div style="background:var(--bg);border:1px solid var(--border);border-radius:var(--r-sm);padding:.9rem;text-align:center">
+        <div style="font-size:1.6rem;font-weight:900;color:{{ col }}">{{ n }}</div>
+        <div style="font-size:.74rem;color:var(--muted);margin-top:.2rem">{{ label_ar if lang=='ar' else label_en }}</div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- ─── PRIVACY ─── -->
+  <div class="privacy-box mb-3">
+    <div style="font-size:.95rem;font-weight:800;margin-bottom:.75rem;display:flex;align-items:center;gap:8px">
+      <i class="bi bi-shield-check-fill" style="color:var(--success)"></i>
+      {{ 'الخصوصية والأمان' if lang=='ar' else 'Privacy & Security' }}
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:.5rem;font-size:.83rem">
+      {% for icon, txt_ar, txt_en in [
+        ('bi-incognito','تجهيل هوية الطالب — رمز سري فقط','Anonymous student identity — code only'),
+        ('bi-shield-lock','تشفير CSRF لجميع النماذج','CSRF protection on all forms'),
+        ('bi-person-x','لا يُحفظ اسم الطالب في التنبيهات','No student name in alerts'),
+        ('bi-clock','قاعدة بيانات محلية — لا بيانات خارجية','Local database — no external data'),
+      ] %}
+      <div style="display:flex;align-items:flex-start;gap:7px;padding:.5rem;background:rgba(16,185,129,.06);border-radius:var(--r-sm)">
+        <i class="bi {{ icon }}" style="color:var(--success);flex-shrink:0;margin-top:2px"></i>
+        <span style="color:var(--text)">{{ txt_ar if lang=='ar' else txt_en }}</span>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- ─── FOOTER ─── -->
+  <div class="sm-card" style="text-align:center;padding:1.5rem">
+    <div style="font-size:2rem;margin-bottom:.5rem">🧠</div>
+    <div style="font-weight:900;font-size:1rem;background:var(--grad-pri);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">SchoolMind AI</div>
+    <div style="font-size:.78rem;color:var(--muted);margin-top:.3rem">
+      {{ 'مشروع T354 — معرض علماء الغد JoYS 2026 · جميع الحقوق محفوظة © 2026' if lang=='ar'
+         else 'Project T354 — JoYS Scientists of Tomorrow 2026 · All Rights Reserved © 2026' }}
+    </div>
+    <div style="margin-top:.8rem;display:flex;justify-content:center;gap:.5rem;flex-wrap:wrap">
+      <a href="{{ url_for('journal') }}" class="btn-pri" style="padding:.35rem .9rem;font-size:.78rem" onclick="playClick()">
+        <i class="bi bi-pencil-square"></i>{{ 'يومية' if lang=='ar' else 'Journal' }}
+      </a>
+      <a href="{{ url_for('companion') }}" class="btn-acc" style="width:auto;padding:.35rem .9rem;font-size:.78rem" onclick="playClick()">
+        <i class="bi bi-chat-heart-fill"></i>{{ 'نور AI' if lang=='ar' else 'Nour AI' }}
+      </a>
+      <a href="{{ url_for('survey') }}" class="btn-warm" style="padding:.35rem .9rem;font-size:.78rem" onclick="playClick()">
+        <i class="bi bi-clipboard-check-fill"></i>{{ 'استبيان' if lang=='ar' else 'Survey' }}
+      </a>
+    </div>
+  </div>
+
+</div>
+{% endblock %}

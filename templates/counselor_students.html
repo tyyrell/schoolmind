@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+{% block title %}{{ 'إدارة الطلاب' if lang=='ar' else 'Student Management' }}{% endblock %}
+{% block topbar_title %}{{ '👥 إدارة حسابات الطلاب' if lang=='ar' else '👥 Student Account Management' }}{% endblock %}
+
+{% block content %}
+<div class="sm-card">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;flex-wrap:wrap;gap:.5rem">
+    <span><i class="bi bi-people-fill" style="color:var(--sky)"></i> {{ ' قائمة الطلاب' if lang=='ar' else ' Students List' }}</span>
+    <div style="display:flex;align-items:center;gap:.5rem">
+      <input type="text" id="stu-search" class="form-control" style="width:200px;padding:.35rem .7rem;font-size:.8rem"
+             placeholder="{{ '🔍 بحث بالاسم أو الرمز...' if lang=='ar' else '🔍 Search name or code...' }}"
+             oninput="filterStudents(this.value)">
+      <span style="font-size:.78rem;color:var(--muted);font-weight:500">{{ students|length }} {{ 'طالب' if lang=='ar' else 'students' }}</span>
+    </div>
+  </div>
+  {% if students %}
+  <div class="table-responsive">
+    <table class="sm-tbl" id="stu-tbl">
+      <thead><tr>
+        <th>{{ 'الرمز' if lang=='ar' else 'Code' }}</th>
+        <th>{{ 'الاسم' if lang=='ar' else 'Name' }}</th>
+        <th>{{ 'اسم المستخدم' if lang=='ar' else 'Username' }}</th>
+        <th>{{ 'الصف' if lang=='ar' else 'Grade' }}</th>
+        <th>{{ 'الخطر' if lang=='ar' else 'Risk' }}</th>
+        <th>{{ 'يوميات' if lang=='ar' else 'Journals' }}</th>
+        <th>{{ 'تعديل' if lang=='ar' else 'Edit' }}</th>
+      </tr></thead>
+      <tbody>
+        {% for s in students %}
+        <tr style="animation:fadeUp .3s ease {{ loop.index*0.05 }}s both">
+          <td><span style="font-family:monospace;font-weight:800;font-size:.82rem;color:var(--sky)">{{ s.anonymous_code }}</span></td>
+          <td style="font-weight:600;font-size:.85rem">{{ s.display_name }}</td>
+          <td style="font-size:.8rem;color:var(--muted)">@{{ s.username }}</td>
+          <td style="font-size:.8rem;color:var(--muted)">{{ s.grade or '—' }}</td>
+          <td>
+            <div style="display:flex;align-items:center;gap:5px">
+              <div class="rbar-wrap" style="width:45px"><div class="rbar-fill" data-score="{{ s.latest_risk or 0 }}"></div></div>
+              <span style="font-size:.78rem;font-weight:700">{{ (s.latest_risk or 0)|round(0)|int }}</span>
+            </div>
+          </td>
+          <td style="font-size:.82rem">{{ s.journal_count or 0 }}</td>
+          <td>
+            <a href="{{ url_for('counselor_edit_student', uid=s.id) }}" class="btn-pri" style="padding:.28rem .65rem;font-size:.74rem" onclick="playClick()">
+              <i class="bi bi-pencil-fill"></i>
+            </a>
+            <a href="{{ url_for('student_detail', uid=s.id) }}" class="btn-out" style="padding:.28rem .65rem;font-size:.74rem;margin-right:4px" onclick="playClick()">
+              <i class="bi bi-eye-fill"></i>
+            </a>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div style="text-align:center;padding:2rem;color:var(--muted)">
+    <span style="font-size:2.5rem;display:block;margin-bottom:.5rem;animation:float 3s ease-in-out infinite">👥</span>
+    {{ 'لا يوجد طلاب' if lang=='ar' else 'No students found' }}
+  </div>
+  {% endif %}
+</div>
+{% block scripts %}
+<script>
+function filterStudents(q) {
+  q = q.toLowerCase();
+  document.querySelectorAll('#stu-tbl tbody tr').forEach(row => {
+    row.style.display = row.textContent.toLowerCase().includes(q) ? '' : 'none';
+  });
+}
+</script>
+{% endblock %}
+{% endblock %}

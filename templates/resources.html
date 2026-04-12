@@ -1,0 +1,203 @@
+{% extends "base.html" %}
+{% block title %}{{ 'موارد الدعم' if lang=='ar' else 'Support Resources' }}{% endblock %}
+{% block topbar_title %}{{ '📚 موارد الدعم النفسي' if lang=='ar' else '📚 Mental Health Resources' }}{% endblock %}
+
+{% block extra_head %}
+<style>
+.res-hero{background:var(--grad-hero);border-radius:var(--r);padding:1.8rem 1.6rem;color:#fff;position:relative;overflow:hidden;box-shadow:var(--sh-lg);margin-bottom:1rem;}
+.res-hero::before{content:'';position:absolute;width:300px;height:300px;border-radius:50%;background:rgba(192,132,252,.1);top:-80px;right:-60px;animation:float 7s ease-in-out infinite;}
+.res-category{display:flex;align-items:center;gap:10px;font-size:1rem;font-weight:800;margin:1.1rem 0 .75rem;padding-bottom:.5rem;border-bottom:2px solid var(--border);}
+.res-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:.7rem;}
+.res-card{background:var(--bg-card);border-radius:var(--r);border:1px solid var(--border);padding:1.2rem;transition:all var(--tr);position:relative;overflow:hidden;}
+.res-card:hover{transform:translateY(-3px);box-shadow:var(--sh);border-color:var(--border-h);}
+.res-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;}
+.res-card.c1::before{background:var(--grad-pri);}
+.res-card.c2::before{background:var(--grad-sky);}
+.res-card.c3::before{background:var(--grad-em);}
+.res-card.c4::before{background:var(--grad-warm);}
+.res-card.c5::before{background:var(--grad-rose);}
+.res-icon{font-size:2rem;margin-bottom:.6rem;display:block;}
+.res-title{font-weight:800;font-size:.92rem;margin-bottom:.35rem;}
+.res-body{font-size:.82rem;color:var(--muted);line-height:1.75;}
+.tip-box{background:var(--bg-muted);border-radius:var(--r-sm);padding:.9rem 1rem;margin-top:.7rem;border:1px solid var(--border);font-size:.81rem;color:var(--muted);line-height:1.8;}
+.tip-step{display:flex;gap:8px;align-items:flex-start;padding:.4rem 0;}
+.tip-step .dot{width:8px;height:8px;border-radius:50%;background:var(--p300);flex-shrink:0;margin-top:6px;}
+.accordion{border:1px solid var(--border);border-radius:var(--r-sm);overflow:hidden;margin-bottom:.5rem;}
+.acc-header{padding:.85rem 1.1rem;font-weight:700;font-size:.9rem;cursor:pointer;display:flex;align-items:center;justify-content:space-between;background:var(--bg-muted);transition:background var(--tr);}
+.acc-header:hover{background:var(--bg);}
+.acc-body{padding:0 1.1rem;max-height:0;overflow:hidden;transition:max-height .35s ease,padding .35s;}
+.acc-body.open{max-height:400px;padding:.85rem 1.1rem;}
+.acc-icon{transition:transform .3s;}
+.acc-body.open + .acc-header .acc-icon, .accordion.open .acc-icon{transform:rotate(180deg);}
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Hero -->
+<div class="res-hero">
+  <div style="position:relative;z-index:1">
+    <div style="font-size:2.5rem;margin-bottom:.5rem;animation:float 4s ease-in-out infinite">📚</div>
+    <div style="font-size:1.2rem;font-weight:900;margin-bottom:.3rem">{{ 'موارد الدعم النفسي' if lang=='ar' else 'Mental Health Resources' }}</div>
+    <div style="font-size:.83rem;opacity:.75">{{ 'معلومات وأدوات للمساعدة في حياة أفضل' if lang=='ar' else 'Information and tools for a better life' }}</div>
+  </div>
+</div>
+
+<!-- Bullying Resources -->
+<div class="res-category">
+  <i class="bi bi-shield-exclamation-fill" style="color:var(--danger);font-size:1.2rem"></i>
+  {{ 'التعامل مع التنمر' if lang=='ar' else 'Dealing with Bullying' }}
+</div>
+<div class="res-grid">
+  <div class="res-card c5">
+    <span class="res-icon">🛡️</span>
+    <div class="res-title">{{ 'ما هو التنمر؟' if lang=='ar' else 'What is Bullying?' }}</div>
+    <div class="res-body">{{ 'التنمر هو أي سلوك متعمد ومتكرر يهدف إلى إيذاء شخص آخر جسدياً أو نفسياً. يشمل التنمر اللفظي والجسدي والإلكتروني.' if lang=='ar' else 'Bullying is any intentional, repeated behavior aimed at harming another person physically or psychologically. It includes verbal, physical, and cyberbullying.' }}</div>
+    <div class="tip-box">
+      <div style="font-weight:700;margin-bottom:.4rem">{{ '⚡ كيف تتصرف؟' if lang=='ar' else '⚡ What to do?' }}</div>
+      {% for ar_t, en_t in [('لا تبق صامتاً — أخبر شخصاً بالغاً','Do not stay silent — tell an adult'),('احتفظ بدليل (لقطات شاشة)','Keep evidence (screenshots)'),('ابتعد عن المتنمر وتجنب مواجهته','Avoid confrontation with the bully'),('تحدث مع المرشد المدرسي فوراً','Talk to school counselor immediately')] %}
+      <div class="tip-step"><div class="dot"></div><span>{{ ar_t if lang=='ar' else en_t }}</span></div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <div class="res-card c1">
+    <span class="res-icon">💻</span>
+    <div class="res-title">{{ 'التنمر الإلكتروني' if lang=='ar' else 'Cyberbullying' }}</div>
+    <div class="res-body">{{ 'التنمر عبر الإنترنت خطير جداً. يشمل الرسائل المسيئة وانتحال الشخصية ونشر الإشاعات والصور بدون إذن.' if lang=='ar' else 'Online bullying is very dangerous. It includes abusive messages, impersonation, spreading rumors, and sharing photos without permission.' }}</div>
+    <div class="tip-box">
+      {% for ar_t, en_t in [('لا ترد على الرسائل المسيئة','Do not reply to abusive messages'),('احجب المتنمر وابلّغ عنه في المنصة','Block and report on the platform'),('احفظ الدليل قبل الحذف','Save evidence before deleting'),('أخبر والديك أو المرشد','Tell your parents or counselor')] %}
+      <div class="tip-step"><div class="dot"></div><span>{{ ar_t if lang=='ar' else en_t }}</span></div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <div class="res-card c3">
+    <span class="res-icon">🤝</span>
+    <div class="res-title">{{ 'إذا رأيت تنمراً...' if lang=='ar' else 'If you witness bullying...' }}</div>
+    <div class="res-body">{{ 'أنت تستطيع إنقاذ شخص ما! الشهود لهم دور مهم جداً في إيقاف التنمر.' if lang=='ar' else 'You can save someone! Bystanders play a very important role in stopping bullying.' }}</div>
+    <div class="tip-box">
+      {% for ar_t, en_t in [('لا تضحك ولا تشجع المتنمر','Do not laugh or encourage the bully'),('ادعم الضحية وكن معها','Support the victim and stand with them'),('أبلغ معلماً أو مرشداً فوراً','Report to a teacher or counselor immediately'),('لا تسجل ولا تنشر الفيديوهات','Do not record or share videos')] %}
+      <div class="tip-step"><div class="dot"></div><span>{{ ar_t if lang=='ar' else en_t }}</span></div>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+
+<!-- Anxiety & Stress -->
+<div class="res-category">
+  <i class="bi bi-activity" style="color:var(--warn);font-size:1.2rem"></i>
+  {{ 'القلق والتوتر' if lang=='ar' else 'Anxiety & Stress' }}
+</div>
+<div class="res-grid">
+  <div class="res-card c4">
+    <span class="res-icon">😰</span>
+    <div class="res-title">{{ 'علامات القلق' if lang=='ar' else 'Signs of Anxiety' }}</div>
+    <div class="res-body">{{ 'القلق الطبيعي مؤقت، لكن إذا أثّر على يومياتك فهو يحتاج اهتماماً. العلامات تشمل: صعوبة النوم، التوتر المستمر، الخوف غير المبرر.' if lang=='ar' else 'Normal anxiety is temporary, but if it affects your daily life, it needs attention. Signs include: difficulty sleeping, constant tension, unexplained fear.' }}</div>
+  </div>
+
+  <div class="res-card c2">
+    <span class="res-icon">🧘</span>
+    <div class="res-title">{{ 'تقنية 5-4-3-2-1 للتهدئة' if lang=='ar' else '5-4-3-2-1 Grounding Technique' }}</div>
+    <div class="res-body">{{ 'عندما تشعر بالقلق الشديد، جرّب هذه التقنية:' if lang=='ar' else 'When feeling severe anxiety, try this technique:' }}</div>
+    <div class="tip-box">
+      {% for ar_t, en_t in [('5 أشياء تراها حولك','5 things you can see'),('4 أشياء تلمسها','4 things you can touch'),('3 أشياء تسمعها','3 things you can hear'),('2 شيء تشمهما','2 things you can smell'),('1 شيء تتذوقه','1 thing you can taste')] %}
+      <div class="tip-step"><div class="dot"></div><span>{{ ar_t if lang=='ar' else en_t }}</span></div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <div class="res-card c3">
+    <span class="res-icon">💪</span>
+    <div class="res-title">{{ 'مواجهة ضغط الامتحانات' if lang=='ar' else 'Dealing with Exam Stress' }}</div>
+    <div class="res-body"></div>
+    <div class="tip-box">
+      {% for ar_t, en_t in [('نظّم جدول مذاكرة مسبقاً','Organize your study schedule in advance'),('خذ استراحات كل 45 دقيقة','Take breaks every 45 minutes'),('نم 8 ساعات قبل الامتحان','Sleep 8 hours before the exam'),('اشرب ماء وتجنب الكافيين الزائد','Drink water, avoid excess caffeine'),('تذكر أن الامتحان ليس نهاية العالم','Remember exams are not the end of the world')] %}
+      <div class="tip-step"><div class="dot"></div><span>{{ ar_t if lang=='ar' else en_t }}</span></div>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+
+<!-- Depression / Sadness -->
+<div class="res-category">
+  <i class="bi bi-cloud-rain-heavy-fill" style="color:#8b5cf6;font-size:1.2rem"></i>
+  {{ 'الحزن والاكتئاب' if lang=='ar' else 'Sadness & Depression' }}
+</div>
+<div class="res-grid">
+  <div class="res-card c1">
+    <span class="res-icon">☁️</span>
+    <div class="res-title">{{ 'الفرق بين الحزن والاكتئاب' if lang=='ar' else 'Sadness vs Depression' }}</div>
+    <div class="res-body">{{ 'الحزن مشاعر طبيعية مؤقتة تمر مع الوقت. أما الاكتئاب فهو حالة تستمر أسبوعين أو أكثر وتؤثر على كل جوانب حياتك وتحتاج مساعدة متخصصة.' if lang=='ar' else 'Sadness is normal temporary emotions that pass with time. Depression is a condition that lasts two weeks or more and affects all aspects of your life, requiring professional help.' }}</div>
+  </div>
+
+  <div class="res-card c5">
+    <span class="res-icon">🌱</span>
+    <div class="res-title">{{ 'خطوات للتحسن' if lang=='ar' else 'Steps to Feel Better' }}</div>
+    <div class="res-body"></div>
+    <div class="tip-box">
+      {% for ar_t, en_t in [('تحدث مع شخص تثق به','Talk to someone you trust'),('اخرج للهواء الطلق كل يوم','Go outside for fresh air daily'),('مارس نشاطاً جسدياً بسيطاً','Do simple physical activity'),('حافظ على روتين ثابت','Maintain a consistent routine'),('تجنب العزل وابق متواصلاً','Avoid isolation, stay connected')] %}
+      <div class="tip-step"><div class="dot"></div><span>{{ ar_t if lang=='ar' else en_t }}</span></div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <div class="res-card c3">
+    <span class="res-icon">🆘</span>
+    <div class="res-title" style="color:var(--danger)">{{ 'متى تطلب مساعدة فورية؟' if lang=='ar' else 'When to seek immediate help?' }}</div>
+    <div class="res-body" style="color:var(--danger)">{{ 'إذا فكّرت في إيذاء نفسك، اتصل فوراً بـ 911 أو توجه لأقرب مستشفى أو تحدث مع أي شخص بالغ موثوق.' if lang=='ar' else 'If you are thinking of harming yourself, call 911 immediately, go to the nearest hospital, or talk to any trusted adult.' }}</div>
+    <a href="{{ url_for('emergency') }}" class="btn-warm" style="margin-top:.6rem;display:inline-flex;align-items:center;gap:6px;font-size:.82rem" onclick="playClick()">
+      <i class="bi bi-telephone-fill"></i>{{ 'أرقام الطوارئ' if lang=='ar' else 'Emergency Numbers' }}
+    </a>
+  </div>
+</div>
+
+<!-- FAQ -->
+<div class="res-category">
+  <i class="bi bi-question-circle-fill" style="color:var(--sky);font-size:1.2rem"></i>
+  {{ 'أسئلة شائعة' if lang=='ar' else 'Frequently Asked Questions' }}
+</div>
+<div>
+  {% set faqs = [
+    ('هل الذهاب للمرشد يعني أنني ضعيف؟','Does going to a counselor mean I am weak?','بالعكس تماماً! طلب المساعدة يتطلب شجاعة كبيرة. المرشد موجود لمساعدتك وكل ما تقوله سري.','Absolutely not! Asking for help takes great courage. The counselor is there to help and everything you say is confidential.'),
+    ('هل يمكنني الكتابة باللغة العامية الأردنية في اليومية؟','Can I write in Jordanian dialect in my journal?','نعم بالتأكيد! يمكنك الكتابة بأي لغة أو لهجة تريحك. النظام يفهم العربية الفصحى والعامية الأردنية والشامية والإنجليزية.','Yes of course! You can write in any language or dialect you are comfortable with. The system understands formal Arabic, Jordanian dialect, Levantine, and English.'),
+    ('هل معلوماتي الشخصية محفوظة؟','Is my personal information secure?','نعم، كل بياناتك مشفرة. فقط رمزك المجهول يُرسل للمرشد عند الحاجة، بدون اسمك أو أي معلومات شخصية.','Yes, all your data is encrypted. Only your anonymous code is sent to the counselor when needed, without your name or any personal information.'),
+    ('ما الفرق بين اليومية والاستبيان؟','What is the difference between a journal and a survey?','اليومية للتعبير الحر عن مشاعرك بأسلوبك الخاص. الاستبيان أسئلة محددة لتقييم حالتك بسرعة وتحديد إذا كنت تحتاج مساعدة.','The journal is for freely expressing your feelings in your own way. The survey is specific questions to quickly assess your state and determine if you need help.'),
+  ] %}
+  {% for q_ar, q_en, a_ar, a_en in faqs %}
+  <div class="accordion" id="acc{{ loop.index }}">
+    <div class="acc-header" onclick="toggleAcc('acc{{ loop.index }}')">
+      <span>{{ q_ar if lang=='ar' else q_en }}</span>
+      <i class="bi bi-chevron-down acc-icon"></i>
+    </div>
+    <div class="acc-body" id="body{{ loop.index }}">
+      <div style="font-size:.86rem;color:var(--muted);line-height:1.8">{{ a_ar if lang=='ar' else a_en }}</div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+
+<div style="display:flex;gap:.6rem;flex-wrap:wrap;margin-top:1rem">
+  <a href="{{ url_for('companion') }}" class="btn-pri" onclick="playClick()">
+    <i class="bi bi-chat-heart-fill"></i>{{ 'تحدث مع نور' if lang=='ar' else 'Chat with Nour' }}
+  </a>
+  <a href="{{ url_for('breathing_center') }}" class="btn-acc" style="width:auto;padding:.55rem 1.1rem" onclick="playClick()">
+    <i class="bi bi-lungs-fill"></i>{{ 'مركز التنفس' if lang=='ar' else 'Breathing Center' }}
+  </a>
+  <a href="{{ url_for('emergency') }}" class="btn-out" onclick="playClick()">
+    <i class="bi bi-telephone-fill"></i>{{ 'أرقام الطوارئ' if lang=='ar' else 'Emergency' }}
+  </a>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function toggleAcc(id) {
+  const el = document.getElementById(id);
+  const body = el.querySelector('.acc-body');
+  const isOpen = body.classList.toggle('open');
+  el.classList.toggle('open', isOpen);
+  el.querySelector('.acc-icon').style.transform = isOpen ? 'rotate(180deg)' : '';
+  playClick();
+}
+</script>
+{% endblock %}

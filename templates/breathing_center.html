@@ -1,0 +1,245 @@
+{% extends "base.html" %}
+{% block title %}{{ 'مركز التنفس' if lang=='ar' else 'Breathing Center' }}{% endblock %}
+{% block topbar_title %}{{ '🫁 مركز التنفس والاسترخاء' if lang=='ar' else '🫁 Breathing & Relaxation Center' }}{% endblock %}
+
+{% block extra_head %}
+<style>
+.breath-hero{background:linear-gradient(135deg,#0c4a6e,#0369a1,#0ea5e9,#38bdf8);border-radius:var(--r);padding:2rem 1.6rem;color:#fff;text-align:center;margin-bottom:1rem;position:relative;overflow:hidden;box-shadow:var(--sh-sky);}
+.bubble-wrap{display:flex;flex-direction:column;align-items:center;margin:1.5rem 0;}
+.main-bubble{width:200px;height:200px;border-radius:50%;background:radial-gradient(circle at 35% 35%,rgba(56,189,248,.6),rgba(14,165,233,.15));border:4px solid rgba(56,189,248,.5);display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;transition:transform var(--tr);box-shadow:0 0 60px rgba(56,189,248,.25),inset 0 0 40px rgba(56,189,248,.1);position:relative;}
+.main-bubble::after{content:'';position:absolute;width:60px;height:60px;border-radius:50%;background:rgba(255,255,255,.15);top:25%;left:25%;filter:blur(4px);}
+.tech-card{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--r);padding:1.1rem;cursor:pointer;transition:all var(--tr);border-left:4px solid transparent;text-align:right;}
+.tech-card:hover,.tech-card.active{box-shadow:var(--sh);transform:translateY(-2px);}
+.tech-card.active{border-color:var(--sky)!important;background:rgba(56,189,248,.04);}
+.step-dot{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.82rem;font-weight:800;flex-shrink:0;}
+.mood-btn{border:2px solid var(--border);background:transparent;border-radius:12px;padding:.4rem .8rem;font-size:1.2rem;cursor:pointer;transition:all .2s;}
+.mood-btn.selected,.mood-btn:hover{border-color:var(--sky);transform:scale(1.2);}
+.stat-row{display:flex;gap:.6rem;flex-wrap:wrap;}
+.stat-b{flex:1;min-width:80px;background:var(--bg-muted);border-radius:var(--r-sm);padding:.7rem .5rem;text-align:center;border:1px solid var(--border);}
+.stat-b .sn{font-size:1.4rem;font-weight:900;color:var(--sky);}
+.stat-b .sl{font-size:.7rem;color:var(--muted);}
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Hero -->
+<div class="breath-hero">
+  <div style="position:relative;z-index:1">
+    <div style="font-size:2.5rem;margin-bottom:.4rem;animation:float 4s ease-in-out infinite">🫁</div>
+    <div style="font-size:1.2rem;font-weight:900;margin-bottom:.25rem">{{ 'مركز التنفس والاسترخاء' if lang=='ar' else 'Breathing & Relaxation Center' }}</div>
+    <div style="font-size:.83rem;opacity:.8">{{ 'تنفّس بوعي وهدّئ عقلك خلال دقائق' if lang=='ar' else 'Breathe mindfully and calm your mind in minutes' }}</div>
+  </div>
+</div>
+
+<!-- Stats -->
+<div class="stat-row" style="margin-bottom:1rem">
+  <div class="stat-b">
+    <div class="sn">{{ stats.total_sessions }}</div>
+    <div class="sl">{{ 'جلسة' if lang=='ar' else 'Sessions' }}</div>
+  </div>
+  <div class="stat-b">
+    <div class="sn">{{ stats.total_cycles }}</div>
+    <div class="sl">{{ 'دورة' if lang=='ar' else 'Cycles' }}</div>
+  </div>
+  <div class="stat-b">
+    <div class="sn">{{ ((stats.total_duration or 0)//60) }}</div>
+    <div class="sl">{{ 'دقيقة' if lang=='ar' else 'Minutes' }}</div>
+  </div>
+</div>
+
+<!-- Technique Selector -->
+<div style="font-size:.92rem;font-weight:800;margin-bottom:.6rem;display:flex;align-items:center;gap:8px">
+  <i class="bi bi-sliders" style="color:var(--sky)"></i>
+  {{ 'اختر تقنية التنفس' if lang=='ar' else 'Choose Breathing Technique' }}
+</div>
+<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:.6rem;margin-bottom:1rem">
+  {% for tid, t_ar, t_en, desc_ar, desc_en, steps_ar, steps_en, c1, c2, c3 in [
+    ('4-7-8','تنفس 4-7-8','4-7-8 Breathing','للاسترخاء العميق والنوم','For deep relaxation and sleep',['تنفّس: 4 ثوانٍ','احبس: 7 ثوانٍ','أخرج: 8 ثوانٍ'],['Inhale: 4s','Hold: 7s','Exhale: 8s'],4,7,8),
+    ('box','التنفس المربع','Box Breathing','لتهدئة التوتر الفوري','For immediate stress relief',['تنفّس: 4 ثوانٍ','احبس: 4 ثوانٍ','أخرج: 4 ثوانٍ','احبس: 4 ثوانٍ'],['Inhale: 4s','Hold: 4s','Exhale: 4s','Hold: 4s'],4,4,4),
+    ('calm','التنفس الهادئ','Calm Breathing','للتهدئة السريعة','For quick calming',['تنفّس: 4 ثوانٍ','أخرج: 6 ثوانٍ'],['Inhale: 4s','Exhale: 6s'],4,0,6),
+  ] %}
+  <div class="tech-card {{ 'active' if loop.first else '' }}" id="tech-{{ tid }}" onclick="selectTech('{{ tid }}','{{ c1 }}','{{ c2 }}','{{ c3 }}','{{ t_ar if lang=='ar' else t_en }}')" {% if lang=='ar' %}dir="rtl"{% endif %}>
+    <div style="font-weight:800;font-size:.88rem;margin-bottom:.2rem">{{ t_ar if lang=='ar' else t_en }}</div>
+    <div style="font-size:.76rem;color:var(--muted);margin-bottom:.5rem">{{ desc_ar if lang=='ar' else desc_en }}</div>
+    {% for s in (steps_ar if lang=='ar' else steps_en) %}
+    <div style="font-size:.73rem;color:var(--sky);margin:.15rem 0">● {{ s }}</div>
+    {% endfor %}
+  </div>
+  {% endfor %}
+</div>
+
+<!-- Mood Before -->
+<div class="sm-card" style="margin-bottom:1rem">
+  <div style="font-size:.9rem;font-weight:700;margin-bottom:.6rem">{{ 'كيف حالك الآن؟ (قبل التنفس)' if lang=='ar' else 'How do you feel now? (before)' }}</div>
+  <div style="display:flex;gap:.4rem;flex-wrap:wrap" id="mood-before-wrap">
+    {% for e,v in [('😰',1),('😕',2),('😐',3),('🙂',4),('😊',5)] %}
+    <button class="mood-btn" onclick="setMood('before',{{ v }},this)">{{ e }}</button>
+    {% endfor %}
+  </div>
+</div>
+
+<!-- Bubble -->
+<div class="bubble-wrap">
+  <div id="main-bubble" class="main-bubble" onclick="if(!isRunning)startBreath();else stopBreath()">
+    <div style="font-size:2.2rem;margin-bottom:.2rem;position:relative;z-index:1">🫁</div>
+    <div id="bubble-phase" style="font-size:.8rem;font-weight:700;color:rgba(255,255,255,.9);position:relative;z-index:1">{{ 'اضغط للبدء' if lang=='ar' else 'Tap to Start' }}</div>
+    <div id="bubble-count" style="font-size:2rem;font-weight:900;color:#fff;position:relative;z-index:1;min-height:40px"></div>
+  </div>
+
+  <div style="display:flex;gap:1.5rem;margin-top:1rem;text-align:center">
+    <div>
+      <div style="font-size:.72rem;color:var(--muted)">{{ 'الدورات' if lang=='ar' else 'Cycles' }}</div>
+      <div id="cycle-count" style="font-size:1.4rem;font-weight:900;color:var(--sky)">0</div>
+    </div>
+    <div>
+      <div style="font-size:.72rem;color:var(--muted)">{{ 'الوقت' if lang=='ar' else 'Time' }}</div>
+      <div id="time-display" style="font-size:1.4rem;font-weight:900;color:var(--p200)">0:00</div>
+    </div>
+  </div>
+
+  <div id="phase-indicator" style="margin-top:.8rem;font-size:.88rem;font-weight:700;color:var(--sky);min-height:22px"></div>
+
+  <div style="display:flex;gap:.6rem;margin-top:.9rem;flex-wrap:wrap;justify-content:center">
+    <button class="btn-pri" onclick="startBreath()" id="start-btn" style="width:auto">▶ {{ 'ابدأ' if lang=='ar' else 'Start' }}</button>
+    <button class="btn-out" onclick="stopBreath()" id="stop-btn" style="display:none">⏹ {{ 'إنهاء' if lang=='ar' else 'Stop' }}</button>
+  </div>
+</div>
+
+<!-- Session Done (hidden) -->
+<div id="session-done" style="display:none" class="sm-card">
+  <div style="text-align:center;padding:.5rem">
+    <div style="font-size:2rem;margin-bottom:.4rem">✨</div>
+    <div style="font-weight:800;font-size:.95rem;margin-bottom:.3rem">{{ 'أحسنت! أتممت الجلسة' if lang=='ar' else 'Well done! Session complete' }}</div>
+    <div id="session-summary" style="font-size:.83rem;color:var(--muted);margin-bottom:.7rem"></div>
+    <!-- Mood After -->
+    <div style="font-size:.88rem;font-weight:700;margin-bottom:.5rem">{{ 'كيف تشعر الآن؟ (بعد التنفس)' if lang=='ar' else 'How do you feel now? (after)' }}</div>
+    <div style="display:flex;gap:.4rem;justify-content:center;margin-bottom:.7rem" id="mood-after-wrap">
+      {% for e,v in [('😰',1),('😕',2),('😐',3),('🙂',4),('😊',5)] %}
+      <button class="mood-btn" onclick="setMood('after',{{ v }},this)">{{ e }}</button>
+      {% endfor %}
+    </div>
+    <button class="btn-acc" onclick="saveSession()" style="width:auto;padding:.5rem 1.2rem">
+      <i class="bi bi-check-circle-fill"></i>{{ 'حفظ الجلسة' if lang=='ar' else 'Save Session' }}
+    </button>
+  </div>
+</div>
+
+<!-- Tips -->
+<div style="font-size:.92rem;font-weight:800;margin:1rem 0 .6rem;display:flex;align-items:center;gap:8px">
+  <i class="bi bi-lightbulb-fill" style="color:var(--warn)"></i>
+  {{ 'فوائد التنفس الواعي' if lang=='ar' else 'Benefits of Mindful Breathing' }}
+</div>
+<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:.6rem">
+  {% for icon, ar, en in [
+    ('🧠','يهدّئ الدماغ ويقلل التوتر','Calms the brain and reduces stress'),
+    ('❤️','يُنظّم ضربات القلب','Regulates heart rate'),
+    ('😴','يُحسّن جودة النوم','Improves sleep quality'),
+    ('💪','يزيد الطاقة والتركيز','Boosts energy and focus'),
+    ('😌','يُخفّف الغضب والقلق','Reduces anger and anxiety'),
+    ('🌟','يُعزّز الوضوح الذهني','Enhances mental clarity'),
+  ] %}
+  <div class="sm-card" style="padding:.8rem;display:flex;align-items:center;gap:.6rem">
+    <div style="font-size:1.4rem">{{ icon }}</div>
+    <div style="font-size:.8rem;color:var(--muted)">{{ ar if lang=='ar' else en }}</div>
+  </div>
+  {% endfor %}
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+const L = document.documentElement.lang==='ar';
+const CSRF = '{{ csrf_token }}';
+let isRunning=false, cycles=0, phaseTimer=null, sessionTimer=null, sessionStart=null;
+let moodBefore=null, moodAfter=null;
+let currentTech={id:'4-7-8',steps:[{phase:L?'تنفّس...':'Inhale...',dur:4,scale:1.5,color:'rgba(56,189,248,.7)'},{phase:L?'احبس...':'Hold...',dur:7,scale:1.5,color:'rgba(139,92,246,.7)'},{phase:L?'أخرج...':'Exhale...',dur:8,scale:.85,color:'rgba(16,185,129,.5)'}],name:'4-7-8'};
+const techs={
+  '4-7-8':[{phase:L?'تنفّس...':'Inhale...',dur:4,scale:1.5,color:'rgba(56,189,248,.7)'},{phase:L?'احبس...':'Hold...',dur:7,scale:1.5,color:'rgba(139,92,246,.7)'},{phase:L?'أخرج...':'Exhale...',dur:8,scale:.85,color:'rgba(16,185,129,.5)'}],
+  'box':[{phase:L?'تنفّس...':'Inhale...',dur:4,scale:1.4,color:'rgba(56,189,248,.7)'},{phase:L?'احبس...':'Hold...',dur:4,scale:1.4,color:'rgba(139,92,246,.7)'},{phase:L?'أخرج...':'Exhale...',dur:4,scale:.9,color:'rgba(16,185,129,.5)'},{phase:L?'احبس...':'Hold...',dur:4,scale:.9,color:'rgba(245,158,11,.5)'}],
+  'calm':[{phase:L?'تنفّس...':'Inhale...',dur:4,scale:1.4,color:'rgba(56,189,248,.7)'},{phase:L?'أخرج...':'Exhale...',dur:6,scale:.85,color:'rgba(16,185,129,.5)'}],
+};
+
+function selectTech(id,c1,c2,c3,name){
+  document.querySelectorAll('.tech-card').forEach(c=>c.classList.remove('active'));
+  document.getElementById('tech-'+id).classList.add('active');
+  currentTech={id,steps:techs[id],name};
+  playClick();
+}
+
+function setMood(type,val,btn){
+  const wrap=document.getElementById('mood-'+type+'-wrap');
+  wrap.querySelectorAll('.mood-btn').forEach(b=>b.classList.remove('selected'));
+  btn.classList.add('selected');
+  if(type==='before')moodBefore=val; else moodAfter=val;
+  playClick();
+}
+
+let stepIdx=0;
+function startBreath(){
+  if(isRunning)return;
+  isRunning=true; cycles=0; stepIdx=0;
+  document.getElementById('start-btn').style.display='none';
+  document.getElementById('stop-btn').style.display='inline-flex';
+  document.getElementById('session-done').style.display='none';
+  document.getElementById('cycle-count').textContent='0';
+  sessionStart=Date.now();
+  sessionTimer=setInterval(()=>{const s=Math.floor((Date.now()-sessionStart)/1000);document.getElementById('time-display').textContent=`${Math.floor(s/60)}:${String(s%60).padStart(2,'0')}`;},1000);
+  runStep();
+}
+
+function runStep(){
+  if(!isRunning)return;
+  const step=currentTech.steps[stepIdx];
+  const bubble=document.getElementById('main-bubble');
+  const phaseEl=document.getElementById('bubble-phase');
+  const countEl=document.getElementById('bubble-count');
+  const indEl=document.getElementById('phase-indicator');
+  bubble.style.transform=`scale(${step.scale})`;
+  bubble.style.borderColor=step.color;
+  bubble.style.boxShadow=`0 0 60px ${step.color},inset 0 0 40px rgba(56,189,248,.1)`;
+  phaseEl.textContent=step.phase;
+  indEl.textContent=step.phase;
+  let elapsed=0;
+  const iv=setInterval(()=>{
+    if(!isRunning){clearInterval(iv);return;}
+    elapsed++;
+    countEl.textContent=step.dur-elapsed;
+    if(elapsed>=step.dur){
+      clearInterval(iv);
+      stepIdx++;
+      if(stepIdx>=currentTech.steps.length){
+        stepIdx=0; cycles++;
+        document.getElementById('cycle-count').textContent=cycles;
+        if(cycles%3===0)toast(L?`💙 ${cycles} دورات! عمل رائع!`:`💙 ${cycles} cycles! Great job!`,'success',2000);
+      }
+      if(isRunning)setTimeout(runStep,300);
+    }
+  },1000);
+  phaseTimer=iv;
+}
+
+function stopBreath(){
+  isRunning=false;
+  clearInterval(phaseTimer); clearInterval(sessionTimer);
+  document.getElementById('start-btn').style.display='inline-flex';
+  document.getElementById('stop-btn').style.display='none';
+  const bubble=document.getElementById('main-bubble');
+  bubble.style.transform='scale(1)';
+  bubble.style.borderColor='rgba(56,189,248,.5)';
+  document.getElementById('bubble-phase').textContent=L?'اضغط للبدء':'Tap to Start';
+  document.getElementById('bubble-count').textContent='';
+  document.getElementById('phase-indicator').textContent='';
+  if(cycles>0){
+    const dur=Math.floor((Date.now()-sessionStart)/1000);
+    document.getElementById('session-summary').textContent=L?`${cycles} دورة · ${Math.floor(dur/60)} دقيقة و${dur%60} ثانية`:`${cycles} cycles · ${Math.floor(dur/60)}m ${dur%60}s`;
+    document.getElementById('session-done').style.display='block';
+    playCelebrate();
+  }
+}
+
+function saveSession(){
+  const dur=Math.floor((Date.now()-(sessionStart||Date.now()))/1000);
+  fetch('/api/breathing-done',{method:'POST',headers:{'Content-Type':'application/json','X-CSRF-Token':CSRF},body:JSON.stringify({technique:currentTech.id,cycles,duration:dur,mood_before:moodBefore,mood_after:moodAfter})}).then(r=>r.json()).then(d=>{if(d.ok){document.getElementById('session-done').style.display='none';toast(L?'✅ تم حفظ الجلسة!':'✅ Session saved!','success',2500);}}).catch(()=>{});
+}
+</script>
+{% endblock %}
