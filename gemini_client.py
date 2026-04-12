@@ -210,7 +210,7 @@ CRITICAL RULES:
 FORBIDDEN: medical diagnoses, prescriptions, discouraging professional help.
 """
 
-_NOUR_SYSTEM_EN
+_NOUR_SYSTEM_EN = """You are "Nour" — a smart, empathetic AI mental health companion for school students."""
 
 _NOUR_SYSTEM_EN = """You are "Nour" — a smart, empathetic AI mental health companion for school students.
 
