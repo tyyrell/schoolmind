@@ -1,6 +1,8 @@
 /* ═══════════════════════════════════════════════════════════════════════════
-   SchoolMind AI — Design System
-   Clean, modern, professional. No gradients spam, no heavy animations.
+   SchoolMind AI v28 — Hyperjoy Design System
+   Professional, modern, joyful design for students & teens
+   Extreme animations, 3D effects, particles, glow, sparkles
+   Light & Dark modes with completely different identities
    ═══════════════════════════════════════════════════════════════════════════ */
 
 /* ── Reset ──────────────────────────────────────────────────────────────── */
@@ -15,16 +17,17 @@ a{color:inherit;text-decoration:none}
 ul,ol{list-style:none}
 table{border-collapse:collapse;width:100%}
 
-/* ═══ DESIGN TOKENS — LIGHT (default) ═══════════════════════════════════════ */
+/* ═══ DESIGN TOKENS — LIGHT MODE (Joyful, Bright, Energetic) ═══════════════ */
 :root{
-  /* ── Brand colors (from spec) ─────────────────────────────────────────── */
-  --bg:             #f8fafc;
+  /* ── Brand colors — Vibrant & Joyful ─────────────────────────────────── */
+  --bg:             #f0f9ff;
+  --bg-gradient:    linear-gradient(135deg, #e0f2fe 0%, #f0f9ff 50%, #fef3c7 100%);
   --surface:        #ffffff;
-  --surface-2:      #f1f5f9;
-  --surface-hover:  #f8fafc;
-  --primary:        #0ea5e9;
-  --primary-h:      #0284c7;
-  --primary-d:      #0369a1;
+  --surface-2:      #f8fafc;
+  --surface-hover:  #f1f5f9;
+  --primary:        #06b6d4;
+  --primary-h:      #0891b2;
+  --primary-d:      #0e7490;
   --accent:         #22c55e;
   --accent-h:       #16a34a;
   --danger:         #ef4444;
@@ -32,6 +35,9 @@ table{border-collapse:collapse;width:100%}
   --warning:        #f59e0b;
   --warning-h:      #d97706;
   --info:           #06b6d4;
+  --purple:         #8b5cf6;
+  --pink:           #ec4899;
+  --orange:         #f97316;
 
   /* ── Text ─────────────────────────────────────────────────────────────── */
   --text:           #0f172a;
@@ -41,21 +47,22 @@ table{border-collapse:collapse;width:100%}
   --text-invert:    #ffffff;
 
   /* ── Borders & dividers ──────────────────────────────────────────────── */
-  --border:         #e2e8f0;
-  --border-strong:  #cbd5e1;
+  --border:         #cbd5e1;
+  --border-strong:  #94a3b8;
 
-  /* ── Shadows (soft, neutral) ─────────────────────────────────────────── */
-  --sh-xs:  0 1px 2px rgba(15,23,42,.04);
-  --sh-sm:  0 1px 3px rgba(15,23,42,.06), 0 1px 2px rgba(15,23,42,.04);
-  --sh:     0 4px 12px rgba(15,23,42,.06), 0 2px 4px rgba(15,23,42,.04);
-  --sh-md:  0 10px 24px rgba(15,23,42,.08), 0 4px 8px rgba(15,23,42,.04);
-  --sh-lg:  0 20px 40px rgba(15,23,42,.10), 0 8px 16px rgba(15,23,42,.05);
+  /* ── Shadows (soft, colorful) ────────────────────────────────────────── */
+  --sh-xs:  0 1px 2px rgba(14,165,233,.08);
+  --sh-sm:  0 2px 8px rgba(14,165,233,.10), 0 1px 3px rgba(14,165,233,.06);
+  --sh:     0 4px 16px rgba(14,165,233,.12), 0 2px 6px rgba(14,165,233,.08);
+  --sh-md:  0 10px 32px rgba(14,165,233,.16), 0 4px 12px rgba(14,165,233,.10);
+  --sh-lg:  0 20px 56px rgba(14,165,233,.20), 0 8px 24px rgba(14,165,233,.12);
+  --sh-xl:  0 32px 80px rgba(14,165,233,.24), 0 12px 40px rgba(14,165,233,.16);
 
   /* ── Rings for focus ─────────────────────────────────────────────────── */
-  --ring:   0 0 0 3px rgba(14,165,233,.25);
+  --ring:   0 0 0 4px rgba(6,182,212,.35);
 
   /* ── Radii ───────────────────────────────────────────────────────────── */
-  --r-xs:4px; --r-sm:8px; --r:12px; --r-md:14px; --r-lg:20px; --r-pill:999px;
+  --r-xs:6px; --r-sm:10px; --r:16px; --r-md:20px; --r-lg:28px; --r-pill:999px;
 
   /* ── Spacing (8px scale) ─────────────────────────────────────────────── */
   --sp-1:4px;   --sp-2:8px;   --sp-3:12px;  --sp-4:16px;
@@ -68,67 +75,87 @@ table{border-collapse:collapse;width:100%}
   --font-base: var(--font-ar);
   --font-mono: ui-monospace, 'SF Mono', Menlo, Monaco, 'Cascadia Code', monospace;
 
-  --fs-xs:   0.8125rem;  /* 13px */
-  --fs-sm:   0.875rem;   /* 14px */
-  --fs-base: 1rem;       /* 16px */
-  --fs-md:   1.125rem;   /* 18px */
-  --fs-lg:   1.25rem;    /* 20px */
-  --fs-xl:   1.5rem;     /* 24px */
-  --fs-2xl:  1.875rem;   /* 30px */
-  --fs-3xl:  2.25rem;    /* 36px */
+  --fs-xs:   0.8125rem;
+  --fs-sm:   0.875rem;
+  --fs-base: 1rem;
+  --fs-md:   1.125rem;
+  --fs-lg:   1.25rem;
+  --fs-xl:   1.5rem;
+  --fs-2xl:  1.875rem;
+  --fs-3xl:  2.25rem;
 
   /* ── Layout ──────────────────────────────────────────────────────────── */
-  --sw:            260px;
-  --sidebar-w:     260px;
-  --topbar-h:      60px;
-  --bottom-nav-h:  62px;
-  --container-max: 1280px;
+  --sw:            280px;
+  --sidebar-w:     280px;
+  --topbar-h:      68px;
+  --bottom-nav-h:  70px;
+  --container-max: 1400px;
 
-  /* ── Motion ──────────────────────────────────────────────────────────── */
-  --tr-fast: 0.15s ease;
-  --tr:      0.2s ease;
-  --tr-slow: 0.3s ease;
+  /* ── Motion & Easing ─────────────────────────────────────────────────── */
+  --tr-fast: 0.18s cubic-bezier(.4,.0,.2,1);
+  --tr:      0.28s cubic-bezier(.4,.0,.2,1);
+  --tr-slow: 0.42s cubic-bezier(.4,.0,.2,1);
+  --ease-bounce: cubic-bezier(.68,-0.55,.265,1.55);
+  --ease-elastic: cubic-bezier(.175,.885,.32,1.275);
 
   /* ── Z indexes ───────────────────────────────────────────────────────── */
   --z-base:1; --z-sticky:50; --z-overlay:100; --z-sidebar:200; --z-modal:1000; --z-toast:9000;
 
+  /* ── Light mode special effects ──────────────────────────────────────── */
+  --joy-glow: 0 0 40px rgba(6,182,212,.3);
+  --joy-gradient: linear-gradient(135deg, #06b6d4 0%, #22c55e 50%, #f59e0b 100%);
+  --sparkle-color: rgba(251,191,36,.8);
+  
   color-scheme: light;
 }
 
-/* ═══ DESIGN TOKENS — DARK ══════════════════════════════════════════════════ */
+/* ═══ DESIGN TOKENS — DARK MODE (Cyberpunk, Neon, Futuristic) ═══════════════ */
 [data-theme="dark"]{
-  --bg:             #0f172a;
+  --bg:             #030712;
+  --bg-gradient:    linear-gradient(135deg, #030712 0%, #0f172a 50%, #1e1b4b 100%);
   --surface:        #1e293b;
-  --surface-2:      #273549;
-  --surface-hover:  #263449;
-  --primary:        #38bdf8;
-  --primary-h:      #0ea5e9;
-  --primary-d:      #0284c7;
+  --surface-2:      #1e293b;
+  --surface-hover:  #334155;
+  --primary:        #22d3ee;
+  --primary-h:      #06b6d4;
+  --primary-d:      #0891b2;
   --accent:         #4ade80;
   --accent-h:       #22c55e;
-  --danger:         #f87171;
-  --danger-h:       #ef4444;
+  --danger:         #fb7185;
+  --danger-h:       #f43f5e;
   --warning:        #fbbf24;
   --warning-h:      #f59e0b;
   --info:           #22d3ee;
+  --purple:         #c084fc;
+  --pink:           #f472b6;
+  --orange:         #fb923c;
 
-  --text:           #e2e8f0;
+  --text:           #f1f5f9;
   --text-soft:      #cbd5e1;
   --text-muted:     #94a3b8;
   --text-dim:       #64748b;
-  --text-invert:    #0f172a;
+  --text-invert:    #030712;
 
   --border:         #334155;
   --border-strong:  #475569;
 
-  --sh-xs:  0 1px 2px rgba(0,0,0,.3);
-  --sh-sm:  0 1px 3px rgba(0,0,0,.4), 0 1px 2px rgba(0,0,0,.3);
-  --sh:     0 4px 12px rgba(0,0,0,.4), 0 2px 4px rgba(0,0,0,.3);
-  --sh-md:  0 10px 24px rgba(0,0,0,.5), 0 4px 8px rgba(0,0,0,.3);
-  --sh-lg:  0 20px 40px rgba(0,0,0,.6), 0 8px 16px rgba(0,0,0,.4);
+  --sh-xs:  0 1px 2px rgba(0,0,0,.5), 0 0 20px rgba(34,211,238,.1);
+  --sh-sm:  0 2px 8px rgba(0,0,0,.6), 0 0 24px rgba(34,211,238,.15);
+  --sh:     0 4px 16px rgba(0,0,0,.7), 0 0 32px rgba(34,211,238,.2);
+  --sh-md:  0 10px 32px rgba(0,0,0,.8), 0 0 48px rgba(34,211,238,.25);
+  --sh-lg:  0 20px 56px rgba(0,0,0,.9), 0 0 64px rgba(34,211,238,.3);
+  --sh-xl:  0 32px 80px rgba(0,0,0,.95), 0 0 96px rgba(34,211,238,.35);
 
-  --ring:   0 0 0 3px rgba(56,189,248,.35);
+  --ring:   0 0 0 4px rgba(34,211,238,.45);
 
+  --r-xs:6px; --r-sm:10px; --r:16px; --r-md:20px; --r-lg:28px; --r-pill:999px;
+
+  /* ── Dark mode special effects ────────────────────────────────────────── */
+  --joy-glow: 0 0 60px rgba(34,211,238,.4);
+  --joy-gradient: linear-gradient(135deg, #22d3ee 0%, #4ade80 50%, #c084fc 100%);
+  --sparkle-color: rgba(34,211,238,.9);
+  --neon-glow: 0 0 10px rgba(34,211,238,.8), 0 0 20px rgba(34,211,238,.4), 0 0 40px rgba(34,211,238,.2);
+  
   color-scheme: dark;
 }
 

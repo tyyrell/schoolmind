@@ -1,0 +1,7 @@
+```
+# Compressed files
+*.zip
+
+# Logs and temp files
+*.tmp
+```
