@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% block title %}{{ 'تعديل طالب' if lang=='ar' else 'Edit Student' }} · SchoolMind AI{% endblock %}
+{% block topbar_title %}{{ '✏️ تعديل طالب' if lang=='ar' else '✏️ Edit Student' }}{% endblock %}
+
+{% block content %}
+<div class="card mb-3" style="background:linear-gradient(135deg,rgba(20,184,166,.05),transparent);border-color:var(--border-h)">
+  <div style="display:flex;gap:var(--sp-3);align-items:center">
+    <div style="width:54px;height:54px;border-radius:50%;background:var(--grad-pri);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:var(--fs-lg)">
+      {{ (student.anonymous_code or 'S')[0] }}
+    </div>
+    <div>
+      <div style="font-weight:800;font-size:var(--fs-md)">{{ student.anonymous_code }}</div>
+      <div style="font-size:var(--fs-sm);color:var(--text-muted)">{{ student.grade or '—' }}</div>
+    </div>
+  </div>
+</div>
+
+<div class="card">
+<form method="post" action="{{ url_for('counselor_edit_student', uid=student.id) }}">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+
+  <div class="form-group">
+    <label class="form-label">{{ 'اسم المستخدم' if lang=='ar' else 'Username' }}</label>
+    <input type="text" name="username" value="{{ student.username }}" class="form-control" maxlength="40">
+  </div>
+
+  <div class="form-group">
+    <label class="form-label">{{ 'الاسم الظاهر' if lang=='ar' else 'Display name' }}</label>
+    <input type="text" name="display_name" value="{{ student.display_name }}" class="form-control" maxlength="120">
+  </div>
+
+  <div class="form-group">
+    <label class="form-label">{{ 'إعادة تعيين كلمة المرور' if lang=='ar' else 'Reset password' }}</label>
+    <div class="input-pw">
+      <input type="password" name="new_password" class="form-control" placeholder="{{ 'اتركها فارغة للإبقاء' if lang=='ar' else 'Leave empty to keep' }}" minlength="6">
+      <button type="button" class="pw-toggle"><i class="bi bi-eye"></i></button>
+    </div>
+    <small class="form-help">{{ 'احفظها واعطها للطالب' if lang=='ar' else 'Save it and give to the student' }}</small>
+  </div>
+
+  <div style="display:flex;gap:var(--sp-2)">
+    <button type="submit" class="btn btn-pri">
+      <i class="bi bi-check-circle"></i> {{ 'حفظ' if lang=='ar' else 'Save' }}
+    </button>
+    <a href="{{ url_for('counselor_students') }}" class="btn btn-ghost">
+      <i class="bi bi-arrow-{{ 'right' if lang=='ar' else 'left' }}"></i> {{ 'رجوع' if lang=='ar' else 'Back' }}
+    </a>
+  </div>
+</form>
+</div>
+{% endblock %}

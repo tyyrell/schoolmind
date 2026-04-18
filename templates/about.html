@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+{% block title %}{{ 'عن المشروع' if lang=='ar' else 'About' }} · SchoolMind AI{% endblock %}
+{% block topbar_title %}{{ 'ℹ️ عن المشروع' if lang=='ar' else 'ℹ️ About' }}{% endblock %}
+
+{% block content %}
+<div class="hero">
+  <div style="text-align:center">
+    <div style="font-size:4rem;margin-bottom:var(--sp-3)">🌟</div>
+    <h1 style="color:#fff;font-size:var(--fs-3xl)">SchoolMind AI</h1>
+    <p style="font-size:var(--fs-md);opacity:.92">{{ 'منصة ذكية لدعم الصحة النفسية للطلاب' if lang=='ar' else 'Smart platform for student mental health' }}</p>
+    <div style="display:inline-flex;gap:var(--sp-2);margin-top:var(--sp-3);flex-wrap:wrap;justify-content:center">
+      <span style="background:rgba(255,255,255,.2);padding:.4rem 1rem;border-radius:var(--r-pill);font-weight:700">T354</span>
+      <span style="background:rgba(255,255,255,.2);padding:.4rem 1rem;border-radius:var(--r-pill);font-weight:700">JoYS 2026</span>
+      <span style="background:rgba(255,255,255,.2);padding:.4rem 1rem;border-radius:var(--r-pill);font-weight:700">v21</span>
+    </div>
+  </div>
+</div>
+
+<div class="card mb-4">
+  <div class="card-title mb-3"><i class="bi bi-bullseye"></i> {{ 'رسالتنا' if lang=='ar' else 'Our Mission' }}</div>
+  <p style="line-height:2;font-size:var(--fs-md)">
+    {% if lang == 'ar' %}
+    نؤمن بأن كل طالب يستحق مساحة آمنة للتعبير عن مشاعره، ومساعدة ذكية حين يحتاج، وشعوراً بأنه مسموع. SchoolMind AI يجمع بين تحليل النصوص الذكي ودعم المرشدين لبناء بيئة مدرسية أكثر صحة نفسية.
+    {% else %}
+    We believe every student deserves a safe space to express themselves, smart help when they need it, and a feeling of being heard. SchoolMind AI combines smart text analysis with counselor support to build a healthier school environment.
+    {% endif %}
+  </p>
+</div>
+
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:var(--sp-4);margin-bottom:var(--sp-4)">
+  <div class="card">
+    <div style="font-size:2.5rem;margin-bottom:var(--sp-2)">🤖</div>
+    <h3>{{ 'نور AI' if lang=='ar' else 'Nour AI' }}</h3>
+    <p class="text-muted" style="font-size:var(--fs-sm)">
+      {{ 'محرك ذكي يفهم العربية والإنجليزية ويرد بتعاطف' if lang=='ar' else 'Smart engine understanding Arabic and English, responding with empathy' }}
+    </p>
+  </div>
+  <div class="card">
+    <div style="font-size:2.5rem;margin-bottom:var(--sp-2)">📝</div>
+    <h3>{{ 'يوميات ذكية' if lang=='ar' else 'Smart Journaling' }}</h3>
+    <p class="text-muted" style="font-size:var(--fs-sm)">
+      {{ 'تحليل فوري للمشاعر وكشف مبكر لعلامات الخطر' if lang=='ar' else 'Instant emotion analysis and early risk detection' }}
+    </p>
+  </div>
+  <div class="card">
+    <div style="font-size:2.5rem;margin-bottom:var(--sp-2)">🎯</div>
+    <h3>{{ 'أهداف وإنجازات' if lang=='ar' else 'Goals & Achievements' }}</h3>
+    <p class="text-muted" style="font-size:var(--fs-sm)">
+      {{ 'تتبّع تقدمك واحتفل بخطواتك الصغيرة' if lang=='ar' else 'Track your progress and celebrate small wins' }}
+    </p>
+  </div>
+  <div class="card">
+    <div style="font-size:2.5rem;margin-bottom:var(--sp-2)">🎮</div>
+    <h3>{{ 'ألعاب تفاعلية' if lang=='ar' else 'Interactive Games' }}</h3>
+    <p class="text-muted" style="font-size:var(--fs-sm)">
+      {{ 'تعلّم وتمتع في نفس الوقت مع ألعاب نفسية' if lang=='ar' else 'Learn and have fun with mental health games' }}
+    </p>
+  </div>
+  <div class="card">
+    <div style="font-size:2.5rem;margin-bottom:var(--sp-2)">🫁</div>
+    <h3>{{ 'تمارين التنفس' if lang=='ar' else 'Breathing Exercises' }}</h3>
+    <p class="text-muted" style="font-size:var(--fs-sm)">
+      {{ 'تقنيات علمية لتهدئة فورية في وقت التوتر' if lang=='ar' else 'Scientific techniques for instant calm' }}
+    </p>
+  </div>
+  <div class="card">
+    <div style="font-size:2.5rem;margin-bottom:var(--sp-2)">🔒</div>
+    <h3>{{ 'خصوصية تامة' if lang=='ar' else 'Total Privacy' }}</h3>
+    <p class="text-muted" style="font-size:var(--fs-sm)">
+      {{ 'رموز مجهولة لحمايتك — المرشد يُنبَّه فقط عند الخطر' if lang=='ar' else 'Anonymous codes to protect you — counselor notified only when needed' }}
+    </p>
+  </div>
+</div>
+
+<div class="card text-center">
+  <div style="font-size:3rem;margin-bottom:var(--sp-2)">💙</div>
+  <h3>{{ 'شكراً لاستخدامك SchoolMind' if lang=='ar' else 'Thanks for using SchoolMind' }}</h3>
+  <p class="text-muted">{{ 'رأيك يهمّنا — ساعدنا نكون أفضل' if lang=='ar' else 'Your feedback matters — help us improve' }}</p>
+</div>
+{% endblock %}

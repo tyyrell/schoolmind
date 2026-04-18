@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% block title %}{{ 'حسابي' if lang=='ar' else 'My Account' }} · SchoolMind AI{% endblock %}
+{% block topbar_title %}{{ '👤 حسابي' if lang=='ar' else '👤 My Account' }}{% endblock %}
+
+{% block content %}
+<div class="hero" style="background:var(--grad-ocean)">
+  <div style="display:flex;align-items:center;gap:var(--sp-4);flex-wrap:wrap">
+    <div style="width:80px;height:80px;border-radius:50%;background:rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;font-size:2rem;font-weight:900">
+      {{ (user.display_name or '?')[0]|upper }}
+    </div>
+    <div>
+      <h1 style="color:#fff;margin-bottom:var(--sp-1)">{{ user.display_name }}</h1>
+      <p style="opacity:.9">{{ 'مرشد مدرسي' if lang=='ar' else 'School Counselor' }} · {{ user.anonymous_code }}</p>
+    </div>
+  </div>
+</div>
+
+<div class="card mb-3">
+  <div class="card-title mb-3"><i class="bi bi-person"></i> {{ 'المعلومات الشخصية' if lang=='ar' else 'Personal Info' }}</div>
+  <form method="post" action="{{ url_for('counselor_profile') }}">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+    <input type="hidden" name="action" value="update_info">
+    <div class="form-group">
+      <label class="form-label">{{ 'الاسم الكامل' if lang=='ar' else 'Full name' }}</label>
+      <input type="text" name="display_name" value="{{ user.display_name }}" class="form-control" required>
+    </div>
+    <button type="submit" class="btn btn-pri"><i class="bi bi-check-circle"></i> {{ 'حفظ' if lang=='ar' else 'Save' }}</button>
+  </form>
+</div>
+
+<div class="card">
+  <div class="card-title mb-3"><i class="bi bi-key"></i> {{ 'تغيير كلمة المرور' if lang=='ar' else 'Change Password' }}</div>
+  <form method="post" action="{{ url_for('counselor_profile') }}">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+    <input type="hidden" name="action" value="change_password">
+    <div class="form-group">
+      <label class="form-label">{{ 'الحالية' if lang=='ar' else 'Current' }}</label>
+      <div class="input-pw">
+        <input type="password" name="old_password" class="form-control" required>
+        <button type="button" class="pw-toggle"><i class="bi bi-eye"></i></button>
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">{{ 'الجديدة' if lang=='ar' else 'New' }}</label>
+      <div class="input-pw">
+        <input type="password" name="new_password" class="form-control" required minlength="6">
+        <button type="button" class="pw-toggle"><i class="bi bi-eye"></i></button>
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">{{ 'تأكيد' if lang=='ar' else 'Confirm' }}</label>
+      <div class="input-pw">
+        <input type="password" name="confirm_new_password" class="form-control" required>
+        <button type="button" class="pw-toggle"><i class="bi bi-eye"></i></button>
+      </div>
+    </div>
+    <button type="submit" class="btn btn-pri"><i class="bi bi-shield-lock"></i> {{ 'تغيير' if lang=='ar' else 'Change' }}</button>
+  </form>
+</div>
+{% endblock %}

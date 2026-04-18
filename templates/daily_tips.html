@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% block title %}{{ 'نصائح يومية' if lang=='ar' else 'Daily Tips' }} · SchoolMind AI{% endblock %}
+{% block topbar_title %}{{ '💡 نصائح' if lang=='ar' else '💡 Tips' }}{% endblock %}
+
+{% block extra_head %}
+<style>
+.tip-card{
+  background:var(--bg-card);border:1px solid var(--border);
+  border-radius:var(--r);padding:var(--sp-4) var(--sp-5);
+  margin-bottom:var(--sp-3);position:relative;
+  border-inline-start:4px solid var(--amber-400);
+  transition:all var(--tr);
+}
+.tip-card:hover{transform:translateY(-2px);box-shadow:var(--sh-sm)}
+.tip-cat{display:inline-block;padding:.2rem .6rem;border-radius:var(--r-pill);font-size:var(--fs-xs);font-weight:700;margin-bottom:var(--sp-2)}
+.cat-general{background:rgba(20,184,166,.15);color:var(--teal-700)}
+.cat-stress{background:rgba(239,68,68,.15);color:var(--danger-d)}
+.cat-study{background:rgba(139,92,246,.15);color:#6d28d9}
+.cat-health{background:rgba(34,197,94,.15);color:var(--green-600)}
+.cat-social{background:rgba(245,158,11,.15);color:var(--amber-600)}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="hero" style="background:linear-gradient(135deg,#fbbf24,#f97316,#fb7185);background-size:200% 200%;animation:gradientFlow 10s ease infinite">
+  <div style="display:flex;align-items:center;gap:var(--sp-3)">
+    <div style="font-size:3rem">💡</div>
+    <div>
+      <h1 style="color:#fff">{{ 'نصائح يومية' if lang=='ar' else 'Daily Tips' }}</h1>
+      <p>{{ 'من المجتمع، للمجتمع' if lang=='ar' else 'From the community, for the community' }}</p>
+    </div>
+  </div>
+</div>
+
+{% if tips %}
+  {% for tip in tips %}
+  <div class="tip-card">
+    <span class="tip-cat cat-{{ tip.category or 'general' }}">
+      {% if tip.category == 'stress' %}{{ 'ضغط' if lang=='ar' else 'Stress' }}
+      {% elif tip.category == 'study' %}{{ 'دراسة' if lang=='ar' else 'Study' }}
+      {% elif tip.category == 'health' %}{{ 'صحة' if lang=='ar' else 'Health' }}
+      {% elif tip.category == 'social' %}{{ 'اجتماعي' if lang=='ar' else 'Social' }}
+      {% else %}{{ 'عام' if lang=='ar' else 'General' }}{% endif %}
+    </span>
+    <div style="font-size:var(--fs-md);line-height:1.7;margin-bottom:var(--sp-2)">{{ tip.tip_ar }}</div>
+    <div style="display:flex;justify-content:space-between;align-items:center;font-size:var(--fs-xs);color:var(--text-muted)">
+      <span><i class="bi bi-person-circle"></i> {{ tip.anonymous_code or 'Anonymous' }}</span>
+      <span><i class="bi bi-hand-thumbs-up"></i> {{ tip.likes }}</span>
+    </div>
+  </div>
+  {% endfor %}
+{% else %}
+<div class="empty-state">
+  <i class="bi bi-lightbulb"></i>
+  <h3>{{ 'لا توجد نصائح بعد' if lang=='ar' else 'No tips yet' }}</h3>
+  <p>{{ 'قريباً ستجد نصائح من طلاب آخرين' if lang=='ar' else 'Tips from other students coming soon' }}</p>
+</div>
+{% endif %}
+{% endblock %}

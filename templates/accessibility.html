@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+{% block title %}{{ 'إمكانية الوصول' if lang=='ar' else 'Accessibility' }} · SchoolMind AI{% endblock %}
+{% block topbar_title %}{{ '♿ إمكانية الوصول' if lang=='ar' else '♿ Accessibility' }}{% endblock %}
+
+{% block content %}
+<div class="card mb-4" style="background:linear-gradient(135deg,rgba(20,184,166,.06),rgba(45,212,191,.02));border-color:var(--border-h)">
+  <div style="display:flex;gap:var(--sp-3);align-items:center">
+    <div style="font-size:2.5rem">♿</div>
+    <div>
+      <h2>{{ 'إعدادات إمكانية الوصول' if lang=='ar' else 'Accessibility Settings' }}</h2>
+      <p class="text-muted">{{ 'اضبط التطبيق ليناسبك بشكل أفضل' if lang=='ar' else 'Customize the app to fit your needs' }}</p>
+    </div>
+  </div>
+</div>
+
+<div class="card mb-3">
+  <div class="card-title mb-3"><i class="bi bi-fonts"></i> {{ 'حجم الخط' if lang=='ar' else 'Font Size' }}</div>
+  <div style="display:flex;gap:var(--sp-2);flex-wrap:wrap">
+    <button type="button" class="btn btn-outline" id="fs-dec"><i class="bi bi-dash-lg"></i> {{ 'أصغر' if lang=='ar' else 'Smaller' }}</button>
+    <button type="button" class="btn btn-outline" id="fs-reset">{{ 'افتراضي' if lang=='ar' else 'Default' }}</button>
+    <button type="button" class="btn btn-outline" id="fs-inc"><i class="bi bi-plus-lg"></i> {{ 'أكبر' if lang=='ar' else 'Larger' }}</button>
+  </div>
+</div>
+
+<div class="card mb-3">
+  <div class="card-title mb-3"><i class="bi bi-circle-half"></i> {{ 'تباين عالي' if lang=='ar' else 'High Contrast' }}</div>
+  <p class="text-muted mb-3" style="font-size:var(--fs-sm)">{{ 'يزيد الوضوح بين النص والخلفية' if lang=='ar' else 'Increases text/background clarity' }}</p>
+  <button type="button" class="btn btn-pri" id="contrast-toggle"><i class="bi bi-toggles"></i> {{ 'تبديل' if lang=='ar' else 'Toggle' }}</button>
+</div>
+
+<div class="card mb-3">
+  <div class="card-title mb-3"><i class="bi bi-type"></i> {{ 'خط عسر القراءة' if lang=='ar' else 'Dyslexia-friendly Font' }}</div>
+  <p class="text-muted mb-3" style="font-size:var(--fs-sm)">{{ 'خط أسهل في القراءة' if lang=='ar' else 'Easier-to-read font' }}</p>
+  <button type="button" class="btn btn-pri" id="dys-toggle"><i class="bi bi-toggles"></i> {{ 'تبديل' if lang=='ar' else 'Toggle' }}</button>
+</div>
+
+<div class="card mb-3">
+  <div class="card-title mb-3"><i class="bi bi-speedometer"></i> {{ 'تقليل الحركة' if lang=='ar' else 'Reduce Motion' }}</div>
+  <p class="text-muted mb-3" style="font-size:var(--fs-sm)">{{ 'أوقف الرسوم المتحركة' if lang=='ar' else 'Stop animations' }}</p>
+  <button type="button" class="btn btn-pri" id="motion-toggle"><i class="bi bi-toggles"></i> {{ 'تبديل' if lang=='ar' else 'Toggle' }}</button>
+</div>
+
+<div class="card mb-3">
+  <div class="card-title mb-3"><i class="bi bi-volume-up"></i> {{ 'أصوات التفاعل' if lang=='ar' else 'Interaction Sounds' }}</div>
+  <p class="text-muted mb-3" style="font-size:var(--fs-sm)">{{ 'أصوات خفيفة للأزرار والتنبيهات' if lang=='ar' else 'Soft button and notification sounds' }}</p>
+  <button type="button" class="btn btn-pri" id="sound-toggle"><i class="bi bi-toggles"></i> {{ 'تبديل' if lang=='ar' else 'Toggle' }}</button>
+</div>
+
+<div class="card mb-3">
+  <div class="card-title mb-3"><i class="bi bi-moon-stars"></i> {{ 'الوضع الليلي' if lang=='ar' else 'Dark Mode' }}</div>
+  <p class="text-muted mb-3" style="font-size:var(--fs-sm)">{{ 'أخف على العين في الإضاءة المنخفضة' if lang=='ar' else 'Easier on the eyes in low light' }}</p>
+  <a href="{{ url_for('set_theme', theme='light' if theme=='dark' else 'dark') }}" class="btn btn-pri">
+    <i class="bi bi-{{ 'sun-fill' if theme=='dark' else 'moon-stars-fill' }}"></i>
+    {{ ('وضع فاتح' if theme=='dark' else 'وضع داكن') if lang=='ar' else ('Light Mode' if theme=='dark' else 'Dark Mode') }}
+  </a>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.getElementById('fs-inc').addEventListener('click', function(){ SM.a11y.incFont(); });
+document.getElementById('fs-dec').addEventListener('click', function(){ SM.a11y.decFont(); });
+document.getElementById('fs-reset').addEventListener('click', function(){ SM.a11y.resetFont(); });
+document.getElementById('contrast-toggle').addEventListener('click', function(){ SM.a11y.toggleContrast(); });
+document.getElementById('dys-toggle').addEventListener('click', function(){ SM.a11y.toggleDyslexia(); });
+document.getElementById('motion-toggle').addEventListener('click', function(){ SM.a11y.toggleReduceMotion(); });
+document.getElementById('sound-toggle').addEventListener('click', function(){ SM.sound.toggle(); });
+</script>
+{% endblock %}

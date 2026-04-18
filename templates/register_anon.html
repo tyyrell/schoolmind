@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% block title %}{{ 'حساب مجهول' if lang=='ar' else 'Anonymous account' }} · SchoolMind AI{% endblock %}
+
+{% block auth_content %}
+<div class="auth-shell">
+  <div class="auth-card">
+    <div class="auth-header">
+      <div class="auth-logo" aria-hidden="true" style="background:linear-gradient(135deg,#64748b,#94a3b8)">
+        <i class="bi bi-incognito" style="color:#fff" aria-hidden="true"></i>
+      </div>
+      <h1 class="auth-title">{{ 'حساب مجهول' if lang=='ar' else 'Anonymous account' }}</h1>
+      <p class="auth-subtitle">{{ 'سجّل بدون كشف هويتك. ستحصل على اسم مستخدم وكلمة مرور فوريين.' if lang=='ar' else 'Register without revealing your identity. You will receive an auto-generated username and password.' }}</p>
+    </div>
+
+    <div class="alert alert-info" role="note">
+      <i class="bi bi-info-circle-fill" aria-hidden="true"></i>
+      <span>{{ 'احفظ بيانات الدخول في مكان آمن. لا يمكن استعادتها لاحقاً.' if lang=='ar' else 'Save your credentials somewhere safe — they cannot be recovered later.' }}</span>
+    </div>
+
+    {% with msgs = get_flashed_messages(with_categories=true) %}
+      {% for cat, msg in msgs %}
+      <div class="flash-msg flash-{{ cat }}" role="alert">
+        <i class="bi bi-{% if cat=='success' %}check-circle-fill{% elif cat=='error' %}x-circle-fill{% else %}info-circle-fill{% endif %}" aria-hidden="true"></i>
+        <span>{{ msg }}</span>
+      </div>
+      {% endfor %}
+    {% endwith %}
+
+    <form method="post" action="{{ url_for('register_anonymous') }}" novalidate>
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+
+      <div class="form-group">
+        <label for="display_name" class="form-label">{{ 'اسم مستعار (اختياري)' if lang=='ar' else 'Display name (optional)' }}</label>
+        <input type="text" id="display_name" name="display_name" class="form-control"
+               maxlength="60" placeholder="{{ 'مجهول الهوية' if lang=='ar' else 'Anonymous' }}">
+      </div>
+
+      <div class="form-group">
+        <label for="grade" class="form-label">{{ 'الصف الدراسي' if lang=='ar' else 'Grade' }}<span class="req">*</span></label>
+        <select id="grade" name="grade" class="form-select" required>
+          {% for g in grades %}<option value="{{ g }}">{{ g }}</option>{% endfor %}
+        </select>
+      </div>
+
+      <button type="submit" class="btn btn-pri btn-block btn-lg">
+        <i class="bi bi-shield-check" aria-hidden="true"></i>
+        {{ 'إنشاء حساب مجهول' if lang=='ar' else 'Create anonymous account' }}
+      </button>
+    </form>
+
+    <div class="auth-footer">
+      <a href="{{ url_for('login') }}">
+        <i class="bi bi-arrow-{{ 'right' if lang=='ar' else 'left' }}" aria-hidden="true"></i>
+        {{ 'العودة لتسجيل الدخول' if lang=='ar' else 'Back to login' }}
+      </a>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,454 @@
+{% extends "base.html" %}
+{% block title %}{{ 'لوحة التحكم' if lang=='ar' else 'Dashboard' }} · SchoolMind AI{% endblock %}
+{% block topbar_title %}{{ '🏠 لوحة التحكم' if lang=='ar' else '🏠 Dashboard' }}{% endblock %}
+
+{% block extra_head %}
+<style>
+/* Dashboard-specific */
+.welcome-banner{
+  background:var(--grad-hero);color:#fff;
+  border-radius:var(--r);padding:var(--sp-5) var(--sp-6);
+  margin-bottom:var(--sp-4);position:relative;overflow:hidden;
+}
+.welcome-banner::before{
+  content:'';position:absolute;width:200px;height:200px;
+  border-radius:50%;background:rgba(255,255,255,.06);
+  top:-60px;inset-inline-end:-40px;pointer-events:none;
+}
+.welcome-banner .inner{position:relative;z-index:1;display:flex;align-items:center;gap:var(--sp-3);flex-wrap:wrap}
+.welcome-avatar{
+  width:52px;height:52px;border-radius:50%;
+  background:rgba(255,255,255,.18);
+  display:flex;align-items:center;justify-content:center;
+  font-size:1.5rem;font-weight:800;flex-shrink:0;overflow:hidden;
+}
+.welcome-avatar img{width:100%;height:100%;object-fit:cover;border-radius:50%}
+.welcome-text{flex:1;min-width:200px}
+.welcome-greeting{font-size:var(--fs-lg);font-weight:800;color:#fff}
+.welcome-sub{font-size:var(--fs-sm);color:rgba(255,255,255,.85);margin-top:2px}
+.welcome-quote{
+  margin-top:var(--sp-3);padding-top:var(--sp-3);
+  border-top:1px solid rgba(255,255,255,.15);
+  font-size:var(--fs-sm);font-style:italic;color:rgba(255,255,255,.95);
+}
+
+/* Streak card */
+.streak-card{
+  background:linear-gradient(135deg,#7c2d12,#ea580c,#f97316);
+  color:#fff;border-radius:var(--r);
+  padding:var(--sp-4) var(--sp-5);
+  display:flex;align-items:center;gap:var(--sp-3);
+  box-shadow:0 6px 20px rgba(249,115,22,.3);
+  margin-bottom:var(--sp-4);text-decoration:none;
+  transition:transform var(--tr);
+}
+.streak-card:hover{transform:translateY(-2px);color:#fff}
+.streak-emoji{font-size:2.5rem;line-height:1;flex-shrink:0}
+.streak-label{font-size:var(--fs-xs);opacity:.85}
+.streak-num{font-size:var(--fs-2xl);font-weight:900;line-height:1;margin-top:2px}
+.streak-best{text-align:center}
+.streak-best .lbl{font-size:var(--fs-xs);opacity:.8}
+.streak-best .v{font-size:var(--fs-md);font-weight:800}
+
+.streak-empty{
+  background:var(--bg-card);color:var(--text);
+  border:1.5px dashed rgba(249,115,22,.4);
+  border-radius:var(--r);padding:var(--sp-4);
+  display:flex;align-items:center;gap:var(--sp-3);
+  text-decoration:none;margin-bottom:var(--sp-4);
+  transition:border-color var(--tr);
+}
+.streak-empty:hover{border-color:rgba(249,115,22,.7);color:var(--text)}
+
+/* Quick actions grid */
+.quick-grid{
+  display:grid;gap:var(--sp-2);
+  grid-template-columns:repeat(4,1fr);
+  margin-bottom:var(--sp-4);
+}
+@media (max-width:640px){.quick-grid{grid-template-columns:repeat(3,1fr)}}
+@media (max-width:420px){.quick-grid{grid-template-columns:repeat(2,1fr)}}
+.quick-card{
+  background:var(--bg-card);border:1px solid var(--border);
+  border-radius:var(--r-sm);padding:var(--sp-3) var(--sp-2);
+  text-align:center;text-decoration:none;color:var(--text);
+  transition:all var(--tr-fast);display:block;min-height:88px;
+}
+.quick-card:hover{transform:translateY(-3px);box-shadow:var(--shadow-sm);border-color:var(--border-strong)}
+.quick-card i{font-size:1.5rem;display:block;margin-bottom:var(--sp-1)}
+.quick-card .label{font-size:var(--fs-xs);font-weight:600;display:block}
+.quick-card.sos{border-color:rgba(239,68,68,.35)}
+.quick-card.sos i{color:var(--danger-500)}
+.quick-card.sos:hover{border-color:var(--danger-500);background:rgba(239,68,68,.04)}
+
+/* Risk card */
+.risk-card{
+  background:var(--bg-card);border:1px solid var(--border);
+  border-radius:var(--r);padding:var(--sp-5);
+  display:flex;align-items:center;gap:var(--sp-4);
+}
+.risk-ring{
+  width:80px;height:80px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-size:var(--fs-xl);font-weight:900;color:#fff;
+  flex-shrink:0;background:var(--success-500);
+}
+.risk-ring.medium{background:var(--warning-500)}
+.risk-ring.high{background:var(--danger-500)}
+.risk-ring.critical{background:linear-gradient(135deg,#9d174d,#db2777)}
+.risk-info{flex:1;min-width:0}
+.risk-title{font-weight:700;margin-bottom:2px}
+.risk-level{font-size:var(--fs-sm);color:var(--text-muted)}
+
+/* Two-column */
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:var(--sp-4);margin-bottom:var(--sp-4)}
+@media (max-width:900px){.two-col{grid-template-columns:1fr}}
+
+/* Chart wrapper */
+.chart-wrap{position:relative;height:220px}
+
+/* Check-in mood grid */
+.checkin-moods{
+  display:grid;grid-template-columns:repeat(5,1fr);
+  gap:var(--sp-2);margin:var(--sp-3) 0;
+}
+
+/* Lecture card */
+.lecture-card{
+  background:var(--bg-card);border:1px solid var(--border);
+  border-radius:var(--r);padding:var(--sp-4);
+  display:flex;align-items:center;gap:var(--sp-3);
+  margin-bottom:var(--sp-4);text-decoration:none;color:var(--text);
+  transition:all var(--tr);
+}
+.lecture-card:hover{transform:translateY(-2px);box-shadow:var(--shadow-sm);color:var(--text)}
+.lecture-icon{
+  width:48px;height:48px;border-radius:var(--r-sm);
+  background:var(--grad-info);color:#fff;
+  display:flex;align-items:center;justify-content:center;
+  font-size:1.25rem;flex-shrink:0;
+}
+
+/* Recent journals list */
+.journal-item{
+  padding:var(--sp-3);background:var(--bg-muted);
+  border-radius:var(--r-sm);margin-bottom:var(--sp-2);
+  border-inline-start:3px solid var(--pri-500);
+}
+.journal-item.high{border-inline-start-color:var(--danger-500)}
+.journal-item.medium{border-inline-start-color:var(--warning-500)}
+.journal-date{font-size:var(--fs-xs);color:var(--text-muted);margin-bottom:var(--sp-1)}
+.journal-preview{font-size:var(--fs-sm);color:var(--text-soft);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;line-height:1.5}
+
+/* Location share button */
+.loc-btn{
+  border:1.5px solid rgba(34,197,94,.4);
+  background:rgba(34,197,94,.06);color:var(--success-600);
+  border-radius:var(--r-sm);padding:.5rem .9rem;
+  font-family:inherit;font-size:var(--fs-xs);font-weight:700;
+  cursor:pointer;transition:all var(--tr-fast);
+  display:inline-flex;align-items:center;gap:var(--sp-1);
+}
+.loc-btn:hover{background:rgba(34,197,94,.15)}
+[data-theme="dark"] .loc-btn{color:var(--success-500)}
+</style>
+{% endblock %}
+
+{% block content %}
+
+{# Welcome banner #}
+<div class="welcome-banner">
+  <div class="inner">
+    <div class="welcome-avatar" aria-hidden="true">
+      {% if avatar_b64 %}<img src="{{ avatar_b64 }}" alt="">
+      {% else %}{{ (session.display_name or '?')[0]|upper }}{% endif %}
+    </div>
+    <div class="welcome-text">
+      <div class="welcome-greeting">{{ greeting }}، {{ session.display_name or session.username }} 👋</div>
+      {% if session.grade %}
+      <div class="welcome-sub"><i class="bi bi-mortarboard" aria-hidden="true"></i> {{ session.grade }}</div>
+      {% endif %}
+    </div>
+    <a href="{{ url_for('student_stats') }}" class="btn btn-sm" style="background:rgba(255,255,255,.15);color:#fff;border-color:rgba(255,255,255,.25)">
+      <i class="bi bi-graph-up-arrow" aria-hidden="true"></i>
+      {{ 'إحصائياتي' if lang=='ar' else 'My stats' }}
+    </a>
+  </div>
+  <div class="welcome-quote">💭 {{ daily_quote }}</div>
+</div>
+
+{# Streak card #}
+{% if streak and streak.current > 0 %}
+<a href="{{ url_for('achievements') }}" class="streak-card">
+  <div class="streak-emoji" aria-hidden="true">🔥</div>
+  <div style="flex:1">
+    <div class="streak-label">{{ 'شعلتك اليومية' if lang=='ar' else 'Daily Streak' }}</div>
+    <div class="streak-num">{{ streak.current }} {{ 'يوم' if lang=='ar' else 'days' }}</div>
+  </div>
+  <div class="streak-best">
+    <div class="lbl">{{ 'الأطول' if lang=='ar' else 'Best' }}</div>
+    <div class="v">{{ streak.longest }}</div>
+  </div>
+  {% if achievements %}
+  <div style="display:flex;gap:4px">
+    {% for a in achievements[:3] %}
+    <div style="font-size:1.3rem" title="{{ a.label_ar if lang=='ar' else a.label_en }}">{{ a.icon }}</div>
+    {% endfor %}
+  </div>
+  {% endif %}
+</a>
+{% else %}
+<a href="{{ url_for('journal') }}" class="streak-empty">
+  <div style="font-size:2rem" aria-hidden="true">🔥</div>
+  <div style="flex:1">
+    <div style="font-weight:700">{{ 'ابدأ شعلتك اليوم!' if lang=='ar' else 'Start your streak today!' }}</div>
+    <div style="font-size:var(--fs-sm);color:var(--text-muted)">{{ 'اكتب يومية أو سجّل حالتك للبدء' if lang=='ar' else 'Write a journal or check in to begin' }}</div>
+  </div>
+  <i class="bi bi-chevron-{{ 'left' if lang=='ar' else 'right' }}" aria-hidden="true" style="color:var(--warning-500)"></i>
+</a>
+{% endif %}
+
+{# Quick actions #}
+<h2 class="mb-3" style="font-size:var(--fs-md)">
+  <i class="bi bi-lightning-fill" aria-hidden="true" style="color:var(--acc-500)"></i>
+  {{ 'إجراءات سريعة' if lang=='ar' else 'Quick Actions' }}
+</h2>
+<div class="quick-grid">
+  <a href="{{ url_for('journal') }}" class="quick-card">
+    <i class="bi bi-pencil-square" style="color:var(--pri-600)" aria-hidden="true"></i>
+    <span class="label">{{ 'يومية' if lang=='ar' else 'Journal' }}</span>
+  </a>
+  <a href="{{ url_for('companion') }}" class="quick-card">
+    <i class="bi bi-chat-heart-fill" style="color:var(--rose-500)" aria-hidden="true"></i>
+    <span class="label">{{ 'نور' if lang=='ar' else 'Nour' }}</span>
+  </a>
+  <a href="{{ url_for('survey') }}" class="quick-card">
+    <i class="bi bi-clipboard2-heart-fill" style="color:var(--info-500)" aria-hidden="true"></i>
+    <span class="label">{{ 'استبيان' if lang=='ar' else 'Survey' }}</span>
+  </a>
+  <a href="{{ url_for('breathing_center') }}" class="quick-card">
+    <i class="bi bi-wind" style="color:var(--pri-500)" aria-hidden="true"></i>
+    <span class="label">{{ 'تنفس' if lang=='ar' else 'Breathe' }}</span>
+  </a>
+  <a href="{{ url_for('goals') }}" class="quick-card">
+    <i class="bi bi-bullseye" style="color:var(--acc-500)" aria-hidden="true"></i>
+    <span class="label">{{ 'أهدافي' if lang=='ar' else 'Goals' }}</span>
+  </a>
+  <a href="{{ url_for('games') }}" class="quick-card">
+    <i class="bi bi-joystick" style="color:var(--success-500)" aria-hidden="true"></i>
+    <span class="label">{{ 'ألعاب' if lang=='ar' else 'Games' }}</span>
+  </a>
+  <a href="{{ url_for('daily_tips') }}" class="quick-card">
+    <i class="bi bi-lightbulb-fill" style="color:var(--acc-500)" aria-hidden="true"></i>
+    <span class="label">{{ 'نصائح' if lang=='ar' else 'Tips' }}</span>
+  </a>
+  <a href="{{ url_for('emergency') }}" class="quick-card sos">
+    <i class="bi bi-telephone-fill" aria-hidden="true"></i>
+    <span class="label">{{ 'طوارئ' if lang=='ar' else 'SOS' }}</span>
+  </a>
+</div>
+
+{# Risk card #}
+<div class="risk-card mb-4">
+  <div class="risk-ring {{ risk_level }}" aria-hidden="true">
+    {{ latest_risk }}
+  </div>
+  <div class="risk-info">
+    <div class="risk-title">{{ 'حالتك العامة' if lang=='ar' else 'Overall status' }}</div>
+    <div class="risk-level">
+      {% if risk_level == 'low' %}
+        {{ '🟢 مستقر — استمر!' if lang=='ar' else '🟢 Stable — keep it up!' }}
+      {% elif risk_level == 'medium' %}
+        {{ '🟡 متوسط — انتبه لنفسك' if lang=='ar' else '🟡 Medium — take care of yourself' }}
+      {% elif risk_level == 'high' %}
+        {{ '🟠 مرتفع — تحدّث مع نور' if lang=='ar' else '🟠 High — talk to Nour' }}
+      {% else %}
+        {{ '🔴 مرتفع جداً — اطلب دعماً' if lang=='ar' else '🔴 Critical — seek support' }}
+      {% endif %}
+    </div>
+    <div class="progress mt-2" style="width:100%">
+      <div class="rbar-fill" data-score="{{ latest_risk }}"></div>
+    </div>
+  </div>
+</div>
+
+{# Daily check-in + Today's lecture #}
+<div class="two-col">
+  <div class="card">
+    <div class="card-title mb-3">
+      <i class="bi bi-heart-pulse" aria-hidden="true"></i>
+      {{ 'كيف حالك اليوم؟' if lang=='ar' else 'How are you today?' }}
+    </div>
+
+    <form method="post" action="{{ url_for('checkin') }}">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+      <input type="hidden" name="mood_score" id="mood-input" value="3">
+
+      <div class="checkin-moods">
+        <button type="button" class="mood-btn" data-mood="1" aria-label="{{ 'سيء جداً' if lang=='ar' else 'Very bad' }}" aria-pressed="false" data-sm-mood="1">
+          😭<span class="label">{{ 'سيء جداً' if lang=='ar' else 'Very bad' }}</span>
+        </button>
+        <button type="button" class="mood-btn" data-mood="2" aria-label="{{ 'سيء' if lang=='ar' else 'Bad' }}" aria-pressed="false" data-sm-mood="2">
+          😟<span class="label">{{ 'سيء' if lang=='ar' else 'Bad' }}</span>
+        </button>
+        <button type="button" class="mood-btn" data-mood="3" aria-label="{{ 'عادي' if lang=='ar' else 'Okay' }}" aria-pressed="true" data-sm-mood="3">
+          😐<span class="label">{{ 'عادي' if lang=='ar' else 'Okay' }}</span>
+        </button>
+        <button type="button" class="mood-btn" data-mood="4" aria-label="{{ 'جيد' if lang=='ar' else 'Good' }}" aria-pressed="false" data-sm-mood="4">
+          🙂<span class="label">{{ 'جيد' if lang=='ar' else 'Good' }}</span>
+        </button>
+        <button type="button" class="mood-btn" data-mood="5" aria-label="{{ 'ممتاز' if lang=='ar' else 'Great' }}" aria-pressed="false" data-sm-mood="5">
+          😄<span class="label">{{ 'ممتاز' if lang=='ar' else 'Great' }}</span>
+        </button>
+      </div>
+
+      <div style="display:flex;gap:var(--sp-3);margin-bottom:var(--sp-3);flex-wrap:wrap">
+        <label class="form-check">
+          <input type="checkbox" name="feeling_safe" value="1" checked>
+          <span>{{ 'أشعر بالأمان' if lang=='ar' else 'Feeling safe' }}</span>
+        </label>
+        <label class="form-check">
+          <input type="checkbox" name="feeling_lonely" value="1">
+          <span>{{ 'أشعر بالوحدة' if lang=='ar' else 'Feeling lonely' }}</span>
+        </label>
+      </div>
+
+      <button type="submit" class="btn btn-pri btn-block">
+        <i class="bi bi-check2-circle" aria-hidden="true"></i>
+        {{ 'تسجيل حالتي' if lang=='ar' else 'Check in' }}
+      </button>
+    </form>
+  </div>
+
+  <div class="card">
+    <div class="card-title mb-3">
+      <i class="bi bi-graph-up" aria-hidden="true"></i>
+      {{ 'تطور الحالة النفسية' if lang=='ar' else 'Mental state trend' }}
+    </div>
+    {% if chart_scores and chart_scores != '[]' %}
+    <div class="chart-wrap">
+      <canvas id="riskChart"></canvas>
+    </div>
+    {% else %}
+    <div class="empty-state" style="padding:var(--sp-6) 0">
+      <i class="bi bi-graph-up-arrow" aria-hidden="true"></i>
+      <p>{{ 'لا توجد بيانات بعد. ابدأ بكتابة يومية!' if lang=='ar' else 'No data yet. Start writing a journal!' }}</p>
+    </div>
+    {% endif %}
+  </div>
+</div>
+
+{# Today's lecture #}
+{% if lecture %}
+<a href="{{ lecture.url }}" target="_blank" rel="noopener noreferrer" class="lecture-card">
+  <div class="lecture-icon" aria-hidden="true"><i class="bi bi-play-circle-fill"></i></div>
+  <div style="flex:1">
+    <div style="font-size:var(--fs-xs);color:var(--text-muted)">{{ 'محاضرة اليوم' if lang=='ar' else "Today's lecture" }}</div>
+    <div style="font-weight:700">{{ lecture.title_ar if lang=='ar' else lecture.title_en }}</div>
+  </div>
+  <i class="bi bi-box-arrow-up-{{ 'left' if lang=='ar' else 'right' }}" aria-hidden="true" style="color:var(--text-muted)"></i>
+</a>
+{% endif %}
+
+{# Recent journals #}
+<div class="card">
+  <div class="card-header">
+    <div class="card-title">
+      <i class="bi bi-journal-text" aria-hidden="true"></i>
+      {{ 'آخر يومياتي' if lang=='ar' else 'Recent journals' }}
+    </div>
+    <a href="{{ url_for('journal') }}" class="btn btn-outline btn-sm">
+      <i class="bi bi-plus-circle" aria-hidden="true"></i>
+      {{ 'جديدة' if lang=='ar' else 'New' }}
+    </a>
+  </div>
+
+  {% if journals %}
+    {% for j in journals %}
+    <div class="journal-item {{ j.risk_level or '' }}">
+      <div class="journal-date">
+        <i class="bi bi-calendar-event" aria-hidden="true"></i>
+        {{ (j.created_at or '')[:16] }}
+        {% if j.risk_level %} · <span class="badge badge-{% if j.risk_level=='low' %}success{% elif j.risk_level=='medium' %}warning{% else %}danger{% endif %}">{{ j.risk_level }}</span>{% endif %}
+      </div>
+      <div class="journal-preview">{{ j.content }}</div>
+    </div>
+    {% endfor %}
+  {% else %}
+  <div class="empty-state">
+    <i class="bi bi-pencil-square" aria-hidden="true"></i>
+    <h3>{{ 'لا توجد يوميات بعد' if lang=='ar' else 'No journals yet' }}</h3>
+    <p>{{ 'اكتب أول يومية لتتبع مشاعرك والحصول على تحليل ذكي من نور.' if lang=='ar' else 'Write your first journal to track your feelings and get smart analysis from Nour.' }}</p>
+    <a href="{{ url_for('journal') }}" class="btn btn-pri">
+      <i class="bi bi-plus-circle-fill" aria-hidden="true"></i>
+      {{ 'كتابة يومية' if lang=='ar' else 'Write a journal' }}
+    </a>
+  </div>
+  {% endif %}
+</div>
+
+{# JSON data for scripts (CSP-safe) #}
+<script id="chart-data" type="application/json">
+{"scores": {{ chart_scores|safe }}, "labels": {{ chart_labels|safe }}}
+</script>
+{% endblock %}
+
+{% block chartjs %}
+{% if chart_scores and chart_scores != '[]' %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js" defer></script>
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+{% if chart_scores and chart_scores != '[]' %}
+<script>
+(function(){
+  function init() {
+    if (typeof Chart === 'undefined') { setTimeout(init, 100); return; }
+    var el = document.getElementById('chart-data');
+    if (!el) return;
+    var data;
+    try { data = JSON.parse(el.textContent); } catch(e){ return; }
+    var canvas = document.getElementById('riskChart');
+    if (!canvas) return;
+    var textMuted = getComputedStyle(document.documentElement).getPropertyValue('--text-muted').trim() || '#6b7280';
+    var borderCol = getComputedStyle(document.documentElement).getPropertyValue('--border').trim() || 'rgba(0,0,0,.1)';
+    new Chart(canvas, {
+      type: 'line',
+      data: {
+        labels: data.labels,
+        datasets: [{
+          label: {{ ('"درجة الخطر"' if lang=='ar' else '"Risk score"')|safe }},
+          data: data.scores,
+          borderColor: '#0d9488',
+          backgroundColor: 'rgba(20,184,166,.12)',
+          fill: true, tension: 0.35,
+          pointBackgroundColor: '#0d9488',
+          pointRadius: 4, pointHoverRadius: 6,
+        }]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: {
+          y: { min: 0, max: 10, grid: { color: borderCol }, ticks: { color: textMuted } },
+          x: { grid: { display: false }, ticks: { color: textMuted, maxRotation: 0, autoSkip: true, maxTicksLimit: 7 } }
+        }
+      }
+    });
+  }
+  init();
+})();
+</script>
+{% endif %}
+<script>
+// Wire up mood buttons
+document.addEventListener('DOMContentLoaded', function(){
+  document.querySelectorAll('.mood-btn[data-sm-mood]').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      window.selectMood(btn, btn.dataset.smMood);
+    });
+  });
+});
+</script>
+{% endblock %}

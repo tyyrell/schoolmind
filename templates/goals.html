@@ -1,0 +1,217 @@
+{% extends "base.html" %}
+{% block title %}{{ 'أهدافي' if lang=='ar' else 'My Goals' }} · SchoolMind AI{% endblock %}
+{% block topbar_title %}{{ '🎯 أهدافي' if lang=='ar' else '🎯 My Goals' }}{% endblock %}
+
+{% block extra_head %}
+<style>
+.goal-card{
+  background:var(--bg-card);border:1px solid var(--border);
+  border-radius:var(--r);padding:var(--sp-4) var(--sp-5);
+  margin-bottom:var(--sp-3);box-shadow:var(--sh-xs);
+  transition:all var(--tr);position:relative;overflow:hidden;
+}
+.goal-card::before{
+  content:'';position:absolute;top:0;bottom:0;inset-inline-start:0;
+  width:4px;background:var(--grad-pri);
+}
+.goal-card.personal::before{background:var(--grad-sky)}
+.goal-card.study::before{background:var(--grad-purple)}
+.goal-card.health::before{background:var(--grad-em)}
+.goal-card.social::before{background:var(--grad-acc)}
+.goal-card.habit::before{background:var(--grad-pri)}
+.goal-card.completed{opacity:.75;background:var(--bg-muted)}
+.goal-card.completed::before{background:var(--grad-em)}
+.goal-card:hover{transform:translateY(-2px);box-shadow:var(--sh)}
+.goal-head{display:flex;justify-content:space-between;align-items:flex-start;gap:var(--sp-3);margin-bottom:var(--sp-3)}
+.goal-title{font-weight:800;font-size:var(--fs-md);flex:1}
+.goal-desc{color:var(--text-muted);font-size:var(--fs-sm);line-height:1.6;margin-bottom:var(--sp-3)}
+.goal-progress-row{display:flex;align-items:center;gap:var(--sp-3);margin-bottom:var(--sp-3)}
+.goal-progress-num{font-weight:800;font-size:var(--fs-sm);min-width:42px;text-align:end}
+.goal-actions{display:flex;gap:var(--sp-2);flex-wrap:wrap}
+
+.category-chip{
+  display:inline-flex;align-items:center;gap:.3rem;
+  padding:.2rem .6rem;border-radius:var(--r-pill);
+  font-size:var(--fs-xs);font-weight:700;
+}
+.cat-personal{background:rgba(14,165,233,.15);color:var(--info-d)}
+.cat-study{background:rgba(139,92,246,.15);color:#6d28d9}
+.cat-health{background:rgba(34,197,94,.15);color:var(--green-600)}
+.cat-social{background:rgba(245,158,11,.15);color:var(--amber-600)}
+.cat-habit{background:rgba(20,184,166,.15);color:var(--teal-700)}
+
+.new-goal-btn{
+  background:var(--grad-pri);color:#fff;
+  padding:var(--sp-3) var(--sp-5);border-radius:var(--r);
+  display:flex;align-items:center;gap:var(--sp-2);
+  font-weight:700;cursor:pointer;border:none;
+  box-shadow:var(--sh-pri);margin-bottom:var(--sp-4);
+  transition:all var(--tr);
+}
+.new-goal-btn:hover{transform:translateY(-2px);box-shadow:var(--sh-md)}
+
+.goal-form{
+  background:var(--bg-card);border:2px dashed var(--border-h);
+  border-radius:var(--r);padding:var(--sp-5);
+  margin-bottom:var(--sp-4);display:none;
+}
+.goal-form.show{display:block;animation:fadeUp .3s ease}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:var(--sp-3)}
+@media(max-width:600px){.form-row{grid-template-columns:1fr}}
+
+.progress-slider{width:100%;accent-color:var(--teal-600)}
+</style>
+{% endblock %}
+
+{% block content %}
+
+<div class="stats-grid">
+  <div class="stat-card info">
+    <i class="bi bi-bullseye stat-icon"></i>
+    <div class="stat-number" data-count="{{ active_goals|length }}">0</div>
+    <div class="stat-label">{{ 'أهداف نشطة' if lang=='ar' else 'Active goals' }}</div>
+  </div>
+  <div class="stat-card success">
+    <i class="bi bi-check2-all stat-icon"></i>
+    <div class="stat-number" data-count="{{ completed }}">0</div>
+    <div class="stat-label">{{ 'مكتملة' if lang=='ar' else 'Completed' }}</div>
+  </div>
+  <div class="stat-card warning">
+    <i class="bi bi-trophy-fill stat-icon"></i>
+    <div class="stat-number" data-count="{{ total }}">0</div>
+    <div class="stat-label">{{ 'إجمالي' if lang=='ar' else 'Total' }}</div>
+  </div>
+</div>
+
+<button type="button" class="new-goal-btn" id="toggle-goal-form">
+  <i class="bi bi-plus-circle-fill"></i>
+  {{ 'هدف جديد' if lang=='ar' else 'New goal' }}
+</button>
+
+<div class="goal-form" id="goal-form">
+  <form method="post" action="{{ url_for('goals') }}">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+    <input type="hidden" name="action" value="add">
+    <div class="form-group">
+      <label class="form-label">{{ 'عنوان الهدف' if lang=='ar' else 'Goal title' }}<span class="req">*</span></label>
+      <input type="text" name="title" class="form-control" required maxlength="200"
+             placeholder="{{ 'مثال: القراءة ٢٠ دقيقة يومياً' if lang=='ar' else 'e.g. Read 20 min daily' }}">
+    </div>
+    <div class="form-group">
+      <label class="form-label">{{ 'الوصف' if lang=='ar' else 'Description' }}</label>
+      <textarea name="description" class="form-textarea" rows="2" maxlength="1000"
+                placeholder="{{ 'اختياري' if lang=='ar' else 'Optional' }}"></textarea>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">{{ 'التصنيف' if lang=='ar' else 'Category' }}</label>
+        <select name="category" class="form-select">
+          <option value="personal">🌟 {{ 'شخصي' if lang=='ar' else 'Personal' }}</option>
+          <option value="study">📚 {{ 'دراسي' if lang=='ar' else 'Study' }}</option>
+          <option value="health">💪 {{ 'صحي' if lang=='ar' else 'Health' }}</option>
+          <option value="social">🤝 {{ 'اجتماعي' if lang=='ar' else 'Social' }}</option>
+          <option value="habit">🔄 {{ 'عادة' if lang=='ar' else 'Habit' }}</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">{{ 'تاريخ مستهدف' if lang=='ar' else 'Target date' }}</label>
+        <input type="date" name="target_date" class="form-control">
+      </div>
+    </div>
+    <button type="submit" class="btn btn-pri btn-block">
+      <i class="bi bi-check-circle"></i> {{ 'إضافة الهدف' if lang=='ar' else 'Add goal' }}
+    </button>
+  </form>
+</div>
+
+<h2 class="mb-3" style="font-size:var(--fs-md)">
+  <i class="bi bi-circle-fill" style="color:var(--teal-500);font-size:.7em"></i>
+  {{ 'الأهداف النشطة' if lang=='ar' else 'Active goals' }} ({{ active_goals|length }})
+</h2>
+
+{% if active_goals %}
+  {% for g in active_goals %}
+  <div class="goal-card {{ g.category or 'personal' }}">
+    <div class="goal-head">
+      <div style="flex:1">
+        <div class="goal-title">{{ g.title }}</div>
+        <div style="margin-top:var(--sp-1)">
+          <span class="category-chip cat-{{ g.category or 'personal' }}">
+            {% if g.category == 'personal' %}🌟 {{ 'شخصي' if lang=='ar' else 'Personal' }}
+            {% elif g.category == 'study' %}📚 {{ 'دراسي' if lang=='ar' else 'Study' }}
+            {% elif g.category == 'health' %}💪 {{ 'صحي' if lang=='ar' else 'Health' }}
+            {% elif g.category == 'social' %}🤝 {{ 'اجتماعي' if lang=='ar' else 'Social' }}
+            {% else %}🔄 {{ 'عادة' if lang=='ar' else 'Habit' }}{% endif %}
+          </span>
+          {% if g.target_date %}
+          <span class="text-muted text-xs"><i class="bi bi-calendar"></i> {{ g.target_date }}</span>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+    {% if g.description %}<div class="goal-desc">{{ g.description }}</div>{% endif %}
+    <div class="goal-progress-row">
+      <div class="progress" style="flex:1"><div class="progress-bar" style="width:{{ g.progress }}%"></div></div>
+      <span class="goal-progress-num">{{ g.progress }}%</span>
+    </div>
+    <div class="goal-actions">
+      <form method="post" action="{{ url_for('goals') }}" style="flex:1;display:flex;gap:var(--sp-2)">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+        <input type="hidden" name="action" value="update_progress">
+        <input type="hidden" name="goal_id" value="{{ g.id }}">
+        <input type="range" name="progress" min="0" max="100" value="{{ g.progress }}" class="progress-slider">
+        <button type="submit" class="btn btn-sm btn-outline">{{ 'تحديث' if lang=='ar' else 'Update' }}</button>
+      </form>
+      <form method="post" action="{{ url_for('goals') }}" style="display:inline">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+        <input type="hidden" name="action" value="complete">
+        <input type="hidden" name="goal_id" value="{{ g.id }}">
+        <button type="submit" class="btn btn-sm btn-success">
+          <i class="bi bi-check2"></i> {{ 'إنهاء' if lang=='ar' else 'Complete' }}
+        </button>
+      </form>
+      <form method="post" action="{{ url_for('goals') }}" style="display:inline">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+        <input type="hidden" name="action" value="delete">
+        <input type="hidden" name="goal_id" value="{{ g.id }}">
+        <button type="submit" class="btn btn-sm btn-ghost" aria-label="delete">
+          <i class="bi bi-trash"></i>
+        </button>
+      </form>
+    </div>
+  </div>
+  {% endfor %}
+{% else %}
+<div class="empty-state">
+  <i class="bi bi-bullseye"></i>
+  <h3>{{ 'ابدأ بتحديد أول هدف' if lang=='ar' else 'Set your first goal' }}</h3>
+  <p>{{ 'الأهداف الصغيرة تصنع تغييرات كبيرة. ما الذي تريد تحقيقه هذا الأسبوع؟' if lang=='ar' else 'Small goals create big changes. What do you want to achieve this week?' }}</p>
+</div>
+{% endif %}
+
+{% if done_goals %}
+<h2 class="mb-3 mt-6" style="font-size:var(--fs-md)">
+  <i class="bi bi-check-circle-fill" style="color:var(--success)"></i>
+  {{ 'مكتملة' if lang=='ar' else 'Completed' }} ({{ done_goals|length }})
+</h2>
+{% for g in done_goals %}
+<div class="goal-card completed">
+  <div class="goal-head">
+    <div style="flex:1">
+      <div class="goal-title"><i class="bi bi-check2-all" style="color:var(--success)"></i> {{ g.title }}</div>
+    </div>
+    <span class="badge badge-success">{{ 'منجز' if lang=='ar' else 'Done' }}</span>
+  </div>
+</div>
+{% endfor %}
+{% endif %}
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.getElementById('toggle-goal-form').addEventListener('click', function(){
+  document.getElementById('goal-form').classList.toggle('show');
+});
+</script>
+{% endblock %}

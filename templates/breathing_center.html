@@ -1,0 +1,196 @@
+{% extends "base.html" %}
+{% block title %}{{ 'تمارين التنفس' if lang=='ar' else 'Breathing' }} · SchoolMind AI{% endblock %}
+{% block topbar_title %}{{ '🫁 تمارين التنفس' if lang=='ar' else '🫁 Breathing' }}{% endblock %}
+
+{% block extra_head %}
+<style>
+.breath-hero{
+  background:linear-gradient(135deg,#0c4a6e,#0891b2,#06b6d4);
+  color:#fff;border-radius:var(--r-md);
+  padding:var(--sp-8) var(--sp-6);text-align:center;
+  margin-bottom:var(--sp-4);position:relative;overflow:hidden;
+  box-shadow:0 12px 40px rgba(14,165,233,.3);
+}
+.breath-circle{
+  width:200px;height:200px;border-radius:50%;
+  background:radial-gradient(circle,rgba(255,255,255,.3),rgba(255,255,255,.1));
+  border:4px solid rgba(255,255,255,.4);
+  margin:0 auto var(--sp-4);
+  display:flex;align-items:center;justify-content:center;
+  font-size:var(--fs-md);font-weight:700;
+  animation:breathe 7s ease-in-out infinite;
+  box-shadow:0 0 60px rgba(255,255,255,.3);
+}
+.technique-card{
+  background:var(--bg-card);border:1px solid var(--border);
+  border-radius:var(--r);padding:var(--sp-5);
+  cursor:pointer;transition:all var(--tr);
+  position:relative;overflow:hidden;
+}
+.technique-card:hover{transform:translateY(-4px);box-shadow:var(--sh)}
+.technique-card::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:4px;
+  background:var(--grad-sky);
+}
+.technique-card .emoji{font-size:2.5rem;display:block;margin-bottom:var(--sp-2)}
+.tech-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:var(--sp-3);margin-bottom:var(--sp-5)}
+
+.timer-display{
+  background:var(--bg-card);border:1px solid var(--border);
+  border-radius:var(--r);padding:var(--sp-5);
+  text-align:center;display:none;margin-bottom:var(--sp-4);
+}
+.timer-display.active{display:block;animation:fadeUp .3s ease}
+.timer-circle{
+  width:240px;height:240px;border-radius:50%;
+  background:var(--grad-sky);margin:0 auto var(--sp-4);
+  display:flex;align-items:center;justify-content:center;
+  color:#fff;font-size:var(--fs-xl);font-weight:800;
+  transition:transform 4s ease-in-out;
+  box-shadow:0 0 60px rgba(14,165,233,.4);
+}
+.timer-circle.inhale{transform:scale(1.25)}
+.timer-circle.exhale{transform:scale(.85)}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="breath-hero">
+  <div class="breath-circle">
+    <div>
+      <div style="font-size:2rem">🫁</div>
+      <div>{{ 'تنفس' if lang=='ar' else 'Breathe' }}</div>
+    </div>
+  </div>
+  <h2 style="color:#fff">{{ 'تهدئة فورية' if lang=='ar' else 'Instant calm' }}</h2>
+  <p style="opacity:.9">{{ 'دقائق قليلة من التنفس الواعي تُحدث فرقاً كبيراً' if lang=='ar' else 'A few minutes of mindful breathing make a big difference' }}</p>
+</div>
+
+<div class="stats-grid">
+  <div class="stat-card info">
+    <i class="bi bi-wind stat-icon"></i>
+    <div class="stat-number" data-count="{{ stats.total_sessions }}">0</div>
+    <div class="stat-label">{{ 'جلسات' if lang=='ar' else 'Sessions' }}</div>
+  </div>
+  <div class="stat-card success">
+    <i class="bi bi-arrow-repeat stat-icon"></i>
+    <div class="stat-number" data-count="{{ stats.total_cycles }}">0</div>
+    <div class="stat-label">{{ 'دورات تنفس' if lang=='ar' else 'Cycles' }}</div>
+  </div>
+  <div class="stat-card warning">
+    <i class="bi bi-stopwatch stat-icon"></i>
+    <div class="stat-number" data-count="{{ (stats.total_duration / 60)|round|int }}">0</div>
+    <div class="stat-label">{{ 'دقائق' if lang=='ar' else 'Minutes' }}</div>
+  </div>
+</div>
+
+<h2 class="mb-3" style="font-size:var(--fs-md)"><i class="bi bi-stars"></i> {{ 'اختر تقنية' if lang=='ar' else 'Choose a technique' }}</h2>
+
+<div class="tech-grid">
+  <div class="technique-card" data-tech="4-7-8" data-inhale="4" data-hold="7" data-exhale="8">
+    <span class="emoji">🌙</span>
+    <div style="font-weight:800;font-size:var(--fs-md);margin-bottom:var(--sp-1)">4-7-8</div>
+    <div style="color:var(--text-muted);font-size:var(--fs-sm)">{{ 'للاسترخاء والنوم' if lang=='ar' else 'For relaxation & sleep' }}</div>
+  </div>
+  <div class="technique-card" data-tech="box" data-inhale="4" data-hold="4" data-exhale="4">
+    <span class="emoji">⬜</span>
+    <div style="font-weight:800;font-size:var(--fs-md);margin-bottom:var(--sp-1)">Box Breathing</div>
+    <div style="color:var(--text-muted);font-size:var(--fs-sm)">{{ 'للتركيز والتوازن' if lang=='ar' else 'For focus & balance' }}</div>
+  </div>
+  <div class="technique-card" data-tech="calm" data-inhale="5" data-hold="2" data-exhale="5">
+    <span class="emoji">🌊</span>
+    <div style="font-weight:800;font-size:var(--fs-md);margin-bottom:var(--sp-1)">Calm Waves</div>
+    <div style="color:var(--text-muted);font-size:var(--fs-sm)">{{ 'للقلق والتوتر' if lang=='ar' else 'For anxiety & stress' }}</div>
+  </div>
+</div>
+
+<div class="timer-display" id="timer">
+  <div class="timer-circle" id="timer-circle">
+    <div>
+      <div id="timer-phase" style="font-size:var(--fs-md)">...</div>
+      <div id="timer-count" style="font-size:3rem">0</div>
+    </div>
+  </div>
+  <div style="font-size:var(--fs-sm);color:var(--text-muted);margin-bottom:var(--sp-3)">
+    <span id="cycles-done">0</span> / <span id="cycles-target">5</span> {{ 'دورات' if lang=='ar' else 'cycles' }}
+  </div>
+  <button type="button" class="btn btn-danger" id="stop-timer">
+    <i class="bi bi-stop-fill"></i> {{ 'إيقاف' if lang=='ar' else 'Stop' }}
+  </button>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+var timer = null, cycle = 0, phase = '', seconds = 0;
+var currentTech = null;
+
+document.querySelectorAll('.technique-card').forEach(function(card){
+  card.addEventListener('click', function(){
+    startSession(card.dataset.tech, +card.dataset.inhale, +card.dataset.hold, +card.dataset.exhale);
+  });
+});
+
+function startSession(tech, inhale, hold, exhale){
+  currentTech = {name:tech, inhale:inhale, hold:hold, exhale:exhale, startTime:Date.now()};
+  cycle = 0;
+  document.getElementById('timer').classList.add('active');
+  document.getElementById('cycles-target').textContent = '5';
+  runPhase('inhale');
+}
+
+function runPhase(p){
+  var circle = document.getElementById('timer-circle');
+  var phaseEl = document.getElementById('timer-phase');
+  var countEl = document.getElementById('timer-count');
+
+  var duration;
+  if (p === 'inhale'){
+    duration = currentTech.inhale;
+    circle.className = 'timer-circle inhale';
+    phaseEl.textContent = {{ ('"شهيق"' if lang=='ar' else '"Inhale"')|safe }};
+  } else if (p === 'hold'){
+    duration = currentTech.hold;
+    phaseEl.textContent = {{ ('"احبس"' if lang=='ar' else '"Hold"')|safe }};
+  } else {
+    duration = currentTech.exhale;
+    circle.className = 'timer-circle exhale';
+    phaseEl.textContent = {{ ('"زفير"' if lang=='ar' else '"Exhale"')|safe }};
+  }
+
+  seconds = duration;
+  countEl.textContent = seconds;
+
+  timer = setInterval(function(){
+    seconds--;
+    countEl.textContent = seconds;
+    if (seconds <= 0){
+      clearInterval(timer);
+      if (p === 'inhale' && currentTech.hold > 0) runPhase('hold');
+      else if (p === 'inhale' || p === 'hold') runPhase('exhale');
+      else {
+        cycle++;
+        document.getElementById('cycles-done').textContent = cycle;
+        if (cycle >= 5) endSession();
+        else runPhase('inhale');
+      }
+    }
+  }, 1000);
+}
+
+function endSession(){
+  if (timer) clearInterval(timer);
+  document.getElementById('timer').classList.remove('active');
+  var dur = Math.round((Date.now() - currentTech.startTime)/1000);
+  SM.fetch('/api/breathing-done', {
+    method:'POST',
+    body:{technique:currentTech.name, cycles:cycle, duration:dur}
+  }).then(function(){
+    SM.toast({{ ('"أحسنت! 🫁 جلسة مكتملة"' if lang=='ar' else '"Great! 🫁 Session complete"')|safe }}, 'success', 3500);
+    setTimeout(function(){window.location.reload()}, 1500);
+  });
+}
+
+document.getElementById('stop-timer').addEventListener('click', endSession);
+</script>
+{% endblock %}

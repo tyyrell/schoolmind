@@ -1,0 +1,97 @@
+{% extends "base.html" %}
+{% block title %}{{ 'موارد' if lang=='ar' else 'Resources' }} · SchoolMind AI{% endblock %}
+{% block topbar_title %}{{ '📚 موارد' if lang=='ar' else '📚 Resources' }}{% endblock %}
+
+{% block extra_head %}
+<style>
+.res-card{
+  background:var(--bg-card);border:1px solid var(--border);
+  border-radius:var(--r);padding:var(--sp-5);
+  margin-bottom:var(--sp-3);display:flex;gap:var(--sp-4);align-items:flex-start;
+  transition:all var(--tr);text-decoration:none;color:var(--text);
+}
+.res-card:hover{transform:translateY(-3px);box-shadow:var(--sh);color:var(--text)}
+.res-icon{
+  width:56px;height:56px;border-radius:var(--r-sm);
+  display:flex;align-items:center;justify-content:center;
+  font-size:1.6rem;color:#fff;flex-shrink:0;
+}
+.res-icon.blue{background:var(--grad-sky)}
+.res-icon.green{background:var(--grad-em)}
+.res-icon.orange{background:var(--grad-warm)}
+.res-icon.purple{background:var(--grad-purple)}
+.res-icon.pink{background:var(--grad-rose)}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="hero">
+  <div style="display:flex;align-items:center;gap:var(--sp-3)">
+    <div style="font-size:3rem">📚</div>
+    <div>
+      <h1 style="color:#fff">{{ 'مكتبة المصادر' if lang=='ar' else 'Resource Library' }}</h1>
+      <p>{{ 'مقالات وفيديوهات وأدوات لدعم صحتك النفسية' if lang=='ar' else 'Articles, videos, and tools for your mental health' }}</p>
+    </div>
+  </div>
+</div>
+
+<h2 class="mb-3" style="font-size:var(--fs-md)"><i class="bi bi-star-fill" style="color:var(--amber-500)"></i> {{ 'أدوات داخل التطبيق' if lang=='ar' else 'In-app tools' }}</h2>
+
+<a href="{{ url_for('companion') }}" class="res-card">
+  <div class="res-icon purple"><i class="bi bi-chat-heart-fill"></i></div>
+  <div>
+    <div style="font-weight:800;font-size:var(--fs-md)">{{ 'المساعد نور' if lang=='ar' else 'Nour AI' }}</div>
+    <div style="color:var(--text-muted);font-size:var(--fs-sm)">{{ 'تحدّث بحرية مع مساعدك النفسي الذكي' if lang=='ar' else 'Chat freely with your AI mental health companion' }}</div>
+  </div>
+</a>
+
+<a href="{{ url_for('breathing_center') }}" class="res-card">
+  <div class="res-icon blue"><i class="bi bi-wind"></i></div>
+  <div>
+    <div style="font-weight:800;font-size:var(--fs-md)">{{ 'تمارين التنفس' if lang=='ar' else 'Breathing Exercises' }}</div>
+    <div style="color:var(--text-muted);font-size:var(--fs-sm)">{{ 'تقنيات مجرّبة للتهدئة الفورية' if lang=='ar' else 'Proven techniques for instant calm' }}</div>
+  </div>
+</a>
+
+<a href="{{ url_for('relaxation') }}" class="res-card">
+  <div class="res-icon green"><i class="bi bi-headphones"></i></div>
+  <div>
+    <div style="font-weight:800;font-size:var(--fs-md)">{{ 'الاسترخاء' if lang=='ar' else 'Relaxation' }}</div>
+    <div style="color:var(--text-muted);font-size:var(--fs-sm)">{{ 'أصوات مهدئة ونصائح تأمل' if lang=='ar' else 'Calming sounds and meditation tips' }}</div>
+  </div>
+</a>
+
+<a href="{{ url_for('daily_tips') }}" class="res-card">
+  <div class="res-icon orange"><i class="bi bi-lightbulb-fill"></i></div>
+  <div>
+    <div style="font-weight:800;font-size:var(--fs-md)">{{ 'نصائح يومية' if lang=='ar' else 'Daily Tips' }}</div>
+    <div style="color:var(--text-muted);font-size:var(--fs-sm)">{{ 'تعلّم من تجارب زملائك' if lang=='ar' else 'Learn from your peers\' experiences' }}</div>
+  </div>
+</a>
+
+<a href="{{ url_for('emergency') }}" class="res-card">
+  <div class="res-icon pink"><i class="bi bi-heart-pulse-fill"></i></div>
+  <div>
+    <div style="font-weight:800;font-size:var(--fs-md)">{{ 'خطوط المساعدة' if lang=='ar' else 'Emergency Lines' }}</div>
+    <div style="color:var(--text-muted);font-size:var(--fs-sm)">{{ 'في الحالات العاجلة — أرقام مباشرة' if lang=='ar' else 'For urgent situations — direct numbers' }}</div>
+  </div>
+</a>
+
+<h2 class="mb-3 mt-6" style="font-size:var(--fs-md)"><i class="bi bi-globe"></i> {{ 'مصادر خارجية' if lang=='ar' else 'External resources' }}</h2>
+
+<a href="https://www.who.int/ar/news-room/fact-sheets/detail/mental-health-of-adolescents" target="_blank" rel="noopener" class="res-card">
+  <div class="res-icon blue"><i class="bi bi-file-earmark-text"></i></div>
+  <div>
+    <div style="font-weight:800;font-size:var(--fs-md)">{{ 'منظمة الصحة العالمية' if lang=='ar' else 'World Health Organization' }}</div>
+    <div style="color:var(--text-muted);font-size:var(--fs-sm)">{{ 'دليل الصحة النفسية للمراهقين' if lang=='ar' else 'Adolescent Mental Health Guide' }}</div>
+  </div>
+</a>
+
+<a href="https://www.unicef.org/jordan/ar/mental-health" target="_blank" rel="noopener" class="res-card">
+  <div class="res-icon green"><i class="bi bi-file-earmark-text"></i></div>
+  <div>
+    <div style="font-weight:800;font-size:var(--fs-md)">UNICEF</div>
+    <div style="color:var(--text-muted);font-size:var(--fs-sm)">{{ 'موارد الصحة النفسية للشباب' if lang=='ar' else 'Youth mental health resources' }}</div>
+  </div>
+</a>
+{% endblock %}

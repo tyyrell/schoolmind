@@ -1,0 +1,105 @@
+{% extends "base.html" %}
+{% block title %}{{ 'البحث العلمي' if lang=='ar' else 'Research' }} · SchoolMind AI{% endblock %}
+{% block topbar_title %}{{ '🔬 البحث العلمي' if lang=='ar' else '🔬 Research' }}{% endblock %}
+
+{% block content %}
+<div class="hero" style="background:linear-gradient(135deg,#4c1d95,#7c3aed,#a78bfa)">
+  <div style="display:flex;align-items:center;gap:var(--sp-3)">
+    <div style="font-size:3rem">🔬</div>
+    <div>
+      <h1 style="color:#fff">{{ 'لوحة البحث' if lang=='ar' else 'Research Dashboard' }}</h1>
+      <p>{{ 'تحليلات متقدمة وبيانات للدراسة والبحث العلمي' if lang=='ar' else 'Advanced analytics for study and research' }}</p>
+    </div>
+  </div>
+</div>
+
+<div class="stats-grid">
+  <div class="stat-card info">
+    <i class="bi bi-people stat-icon"></i>
+    <div class="stat-number" data-count="{{ stats.total }}">0</div>
+    <div class="stat-label">{{ 'إجمالي الطلاب' if lang=='ar' else 'Total students' }}</div>
+  </div>
+  <div class="stat-card success">
+    <i class="bi bi-emoji-smile stat-icon"></i>
+    <div class="stat-number" data-count="{{ stats.low }}">0</div>
+    <div class="stat-label">{{ 'حالات مستقرة' if lang=='ar' else 'Stable' }}</div>
+  </div>
+  <div class="stat-card warning">
+    <i class="bi bi-emoji-neutral stat-icon"></i>
+    <div class="stat-number" data-count="{{ stats.medium }}">0</div>
+    <div class="stat-label">{{ 'حالات متوسطة' if lang=='ar' else 'Medium risk' }}</div>
+  </div>
+  <div class="stat-card danger">
+    <i class="bi bi-emoji-frown stat-icon"></i>
+    <div class="stat-number" data-count="{{ stats.high + stats.critical }}">0</div>
+    <div class="stat-label">{{ 'حالات مرتفعة' if lang=='ar' else 'High risk' }}</div>
+  </div>
+</div>
+
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:var(--sp-4);margin-bottom:var(--sp-4)">
+  <div class="card">
+    <div class="card-title mb-3"><i class="bi bi-pie-chart-fill"></i> {{ 'توزيع المشاعر' if lang=='ar' else 'Emotion distribution' }}</div>
+    <div class="chart-wrap" style="height:280px"><canvas id="emoChart"></canvas></div>
+  </div>
+  <div class="card">
+    <div class="card-title mb-3"><i class="bi bi-graph-up-arrow"></i> {{ 'اتجاه الخطر (30 يوم)' if lang=='ar' else 'Risk trend (30 days)' }}</div>
+    <div class="chart-wrap" style="height:280px"><canvas id="trendChart"></canvas></div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-title mb-3"><i class="bi bi-bar-chart-fill"></i> {{ 'توزيع مستويات الخطر' if lang=='ar' else 'Risk-level distribution' }}</div>
+  <div class="chart-wrap" style="height:240px"><canvas id="accChart"></canvas></div>
+</div>
+
+<script id="research-data" type="application/json">
+{"emo":{{ emo_data|safe }},"trend":{{ trend_data|safe }},"acc":{{ acc_data|safe }}}
+</script>
+{% endblock %}
+
+{% block chartjs %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js" defer></script>
+{% endblock %}
+
+{% block scripts %}
+<script>
+(function init(){
+  if(typeof Chart==='undefined'){setTimeout(init,100);return}
+  var d=JSON.parse(document.getElementById('research-data').textContent);
+  var muted=getComputedStyle(document.documentElement).getPropertyValue('--text-muted').trim()||'#6b7280';
+  var colors=['#0d9488','#14b8a6','#0ea5e9','#8b5cf6','#f59e0b','#f43f5e','#22c55e','#fb923c'];
+
+  if(d.emo && d.emo.length){
+    new Chart(document.getElementById('emoChart'),{
+      type:'doughnut',
+      data:{labels:d.emo.map(function(e){return e.emotion}),
+            datasets:[{data:d.emo.map(function(e){return e.count}),backgroundColor:colors,borderWidth:3,borderColor:'#fff'}]},
+      options:{responsive:true,maintainAspectRatio:false,
+        plugins:{legend:{position:'bottom',labels:{color:muted,font:{size:12}}}}}
+    });
+  }
+
+  if(d.trend && d.trend.length){
+    new Chart(document.getElementById('trendChart'),{
+      type:'line',
+      data:{labels:d.trend.map(function(t){return t.date}),
+            datasets:[{data:d.trend.map(function(t){return t.avg_risk}),borderColor:'#0d9488',backgroundColor:'rgba(20,184,166,.14)',fill:true,tension:.4}]},
+      options:{responsive:true,maintainAspectRatio:false,
+        plugins:{legend:{display:false}},
+        scales:{y:{min:0,max:10,ticks:{color:muted}},x:{ticks:{color:muted,maxTicksLimit:7}}}}
+    });
+  }
+
+  if(d.acc){
+    new Chart(document.getElementById('accChart'),{
+      type:'bar',
+      data:{labels:Object.keys(d.acc),
+            datasets:[{data:Object.values(d.acc),backgroundColor:['#22c55e','#f59e0b','#ef4444','#9d174d'],borderRadius:8}]},
+      options:{responsive:true,maintainAspectRatio:false,
+        plugins:{legend:{display:false}},
+        scales:{y:{ticks:{color:muted}},x:{ticks:{color:muted}}}}
+    });
+  }
+})();
+</script>
+{% endblock %}

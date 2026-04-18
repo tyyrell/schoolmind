@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+{% block title %}{{ 'الطلاب' if lang=='ar' else 'Students' }} · SchoolMind AI{% endblock %}
+{% block topbar_title %}{{ '👥 إدارة الطلاب' if lang=='ar' else '👥 Students' }}{% endblock %}
+
+{% block extra_head %}
+<style>
+.filters{display:flex;gap:var(--sp-2);flex-wrap:wrap;margin-bottom:var(--sp-4)}
+.chip{
+  padding:.45rem .9rem;border-radius:var(--r-pill);
+  background:var(--bg-card);border:1.5px solid var(--border);
+  color:var(--text-muted);font-size:var(--fs-xs);font-weight:700;
+  text-decoration:none;cursor:pointer;transition:all var(--tr-fast);
+}
+.chip:hover{border-color:var(--teal-400);color:var(--teal-700)}
+.chip.active{background:var(--grad-pri);color:#fff;border-color:transparent;box-shadow:var(--sh-sm)}
+
+.stu-row{
+  display:flex;align-items:center;gap:var(--sp-3);
+  padding:var(--sp-4);background:var(--bg-card);border:1px solid var(--border);
+  border-radius:var(--r);margin-bottom:var(--sp-2);
+  transition:all var(--tr);text-decoration:none;color:var(--text);
+}
+.stu-row:hover{transform:translateX(-2px);box-shadow:var(--sh-sm);border-color:var(--border-h);color:var(--text)}
+.stu-ava{
+  width:46px;height:46px;border-radius:50%;
+  background:var(--grad-pri);color:#fff;
+  display:flex;align-items:center;justify-content:center;
+  font-weight:800;font-size:var(--fs-md);flex-shrink:0;
+}
+.stu-ava.warn{background:var(--grad-acc);color:#000}
+.stu-ava.danger{background:var(--grad-rose)}
+.stu-ava.crit{background:linear-gradient(135deg,#9d174d,#db2777)}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1><i class="bi bi-people"></i> {{ 'إدارة الطلاب' if lang=='ar' else 'Student Management' }}</h1>
+    <p class="subtitle">{{ students|length }} {{ 'طالب' if lang=='ar' else 'students' }}</p>
+  </div>
+  <a href="{{ url_for('export_csv') }}" class="btn btn-outline">
+    <i class="bi bi-download"></i> {{ 'تصدير CSV' if lang=='ar' else 'Export CSV' }}
+  </a>
+</div>
+
+<div class="filters">
+  <a href="{{ url_for('counselor_students') }}" class="chip {% if not grade_filter %}active{% endif %}">
+    {{ 'الكل' if lang=='ar' else 'All' }}
+  </a>
+  {% for g in supervised_grades %}
+  <a href="{{ url_for('counselor_students', grade=g) }}" class="chip {% if grade_filter==g %}active{% endif %}">{{ g }}</a>
+  {% endfor %}
+</div>
+
+{% if students %}
+  {% for s in students %}
+  {% set lvl = s.latest_level or 'low' %}
+  <a href="{{ url_for('student_detail', uid=s.id) }}" class="stu-row">
+    <div class="stu-ava {% if lvl=='medium' %}warn{% elif lvl=='high' %}danger{% elif lvl=='critical' %}crit{% endif %}">
+      {{ (s.anonymous_code or 'S')[0] }}
+    </div>
+    <div style="flex:1;min-width:0">
+      <div style="font-weight:800">{{ s.anonymous_code or 'S-????' }}</div>
+      <div style="font-size:var(--fs-xs);color:var(--text-muted)">
+        {{ s.grade or '—' }}
+        · <i class="bi bi-journal-text"></i> {{ s.journal_count or 0 }}
+        {% if s.current_streak %}· 🔥 {{ s.current_streak }}{% endif %}
+      </div>
+    </div>
+    <div style="text-align:end">
+      <span class="badge {% if lvl in ('high','critical') %}badge-danger{% elif lvl=='medium' %}badge-warning{% else %}badge-success{% endif %}">
+        {{ (s.latest_risk or 0)|round(1) }}/10
+      </span>
+      <div style="font-size:var(--fs-xs);color:var(--text-muted);margin-top:2px">
+        {{ lvl }}
+      </div>
+    </div>
+    <i class="bi bi-chevron-{{ 'left' if lang=='ar' else 'right' }}" style="color:var(--text-muted)"></i>
+  </a>
+  {% endfor %}
+{% else %}
+<div class="empty-state">
+  <i class="bi bi-people"></i>
+  <h3>{{ 'لا يوجد طلاب' if lang=='ar' else 'No students' }}</h3>
+  <p>{{ 'لا يوجد طلاب في نطاق إشرافك الحالي' if lang=='ar' else 'No students in your supervision range' }}</p>
+</div>
+{% endif %}
+{% endblock %}

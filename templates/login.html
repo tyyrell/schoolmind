@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+{% block title %}{{ 'تسجيل الدخول' if lang=='ar' else 'Login' }} · SchoolMind AI{% endblock %}
+
+{% block auth_content %}
+<div class="auth-shell">
+  <div class="auth-card">
+    <div class="auth-header">
+      <div class="auth-logo" aria-hidden="true">🌟</div>
+      <h1 class="auth-title">{{ 'أهلاً بعودتك' if lang=='ar' else 'Welcome back' }}</h1>
+      <p class="auth-subtitle">{{ 'سجّل الدخول لمتابعة رحلتك مع SchoolMind' if lang=='ar' else 'Sign in to continue your SchoolMind journey' }}</p>
+    </div>
+
+    {% with msgs = get_flashed_messages(with_categories=true) %}
+      {% for cat, msg in msgs %}
+      <div class="flash-msg flash-{{ cat }}" role="alert">
+        <i class="bi bi-{% if cat=='success' %}check-circle-fill{% elif cat=='error' %}x-circle-fill{% else %}info-circle-fill{% endif %}" aria-hidden="true"></i>
+        <span>{{ msg }}</span>
+      </div>
+      {% endfor %}
+    {% endwith %}
+
+    <form method="post" action="{{ url_for('login') }}" autocomplete="on" novalidate>
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+      <input type="text" name="honeypot" tabindex="-1" autocomplete="off" aria-hidden="true" style="position:absolute;left:-9999px;width:1px;height:1px;opacity:0">
+
+      <div class="form-group">
+        <label for="username" class="form-label">
+          {{ 'اسم المستخدم' if lang=='ar' else 'Username' }}
+          <span class="req">*</span>
+        </label>
+        <div class="input-icon">
+          <input type="text" id="username" name="username" class="form-control"
+                 autocomplete="username" required maxlength="40"
+                 placeholder="{{ 'اسم المستخدم' if lang=='ar' else 'your-username' }}">
+          <i class="bi bi-person icon" aria-hidden="true"></i>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="password" class="form-label">
+          {{ 'كلمة المرور' if lang=='ar' else 'Password' }}
+          <span class="req">*</span>
+        </label>
+        <div class="input-pw">
+          <input type="password" id="password" name="password" class="form-control"
+                 autocomplete="current-password" required
+                 placeholder="••••••••">
+          <button type="button" class="pw-toggle" aria-label="{{ 'إظهار/إخفاء' if lang=='ar' else 'Show/hide' }}">
+            <i class="bi bi-eye" aria-hidden="true"></i>
+          </button>
+        </div>
+      </div>
+
+      <button type="submit" class="btn btn-pri btn-block btn-lg">
+        <i class="bi bi-box-arrow-in-right" aria-hidden="true"></i>
+        {{ 'تسجيل الدخول' if lang=='ar' else 'Sign in' }}
+      </button>
+
+      <div class="auth-aux">
+        <a href="{{ url_for('forgot_password') }}">
+          <i class="bi bi-key" aria-hidden="true"></i>
+          {{ 'نسيت كلمة المرور؟' if lang=='ar' else 'Forgot password?' }}
+        </a>
+        <a href="{{ url_for('set_lang', lang='en' if lang=='ar' else 'ar') }}">
+          <i class="bi bi-translate" aria-hidden="true"></i>
+          {{ 'English' if lang=='ar' else 'العربية' }}
+        </a>
+      </div>
+    </form>
+
+    <div class="auth-footer">
+      {{ 'ليس لديك حساب؟' if lang=='ar' else "Don't have an account?" }}
+      <a href="{{ url_for('register') }}">{{ 'أنشئ حساباً' if lang=='ar' else 'Sign up' }}</a>
+      &nbsp;·&nbsp;
+      <a href="{{ url_for('register_anonymous') }}">
+        <i class="bi bi-shield-lock" aria-hidden="true"></i>
+        {{ 'حساب مجهول' if lang=='ar' else 'Anonymous' }}
+      </a>
+    </div>
+  </div>
+</div>
+{% endblock %}

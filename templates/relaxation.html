@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+{% block title %}{{ 'استرخاء' if lang=='ar' else 'Relaxation' }} · SchoolMind AI{% endblock %}
+{% block topbar_title %}{{ '🧘 استرخاء' if lang=='ar' else '🧘 Relaxation' }}{% endblock %}
+
+{% block extra_head %}
+<style>
+.sound-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:var(--sp-3)}
+.sound-card{
+  background:var(--bg-card);border:1px solid var(--border);
+  border-radius:var(--r);padding:var(--sp-5);text-align:center;
+  cursor:pointer;transition:all var(--tr);position:relative;
+  overflow:hidden;
+}
+.sound-card::before{
+  content:'';position:absolute;inset:0;opacity:0;
+  background:var(--grad-card);transition:opacity var(--tr);
+}
+.sound-card:hover{transform:translateY(-4px);box-shadow:var(--sh)}
+.sound-card:hover::before{opacity:1}
+.sound-card > *{position:relative;z-index:1}
+.sound-card .emoji{font-size:3rem;display:block;margin-bottom:var(--sp-2)}
+.sound-card.playing{border-color:var(--teal-500);background:linear-gradient(135deg,rgba(20,184,166,.08),rgba(45,212,191,.04));box-shadow:var(--sh-pri)}
+.sound-card.playing .emoji{animation:pulse 1.5s ease-in-out infinite}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="card mb-4" style="background:linear-gradient(135deg,rgba(139,92,246,.08),rgba(167,139,250,.03));border-color:var(--border-h);text-align:center">
+  <div style="font-size:3rem">🧘</div>
+  <h2 style="margin-top:var(--sp-2)">{{ 'أصوات مهدئة' if lang=='ar' else 'Calming sounds' }}</h2>
+  <p class="text-muted">{{ 'اختر صوتاً واغلق عينيك لبضع دقائق' if lang=='ar' else 'Pick a sound and close your eyes for a few minutes' }}</p>
+</div>
+
+<div class="sound-grid">
+  <div class="sound-card" data-sound="rain">
+    <span class="emoji">🌧️</span>
+    <div style="font-weight:700">{{ 'مطر' if lang=='ar' else 'Rain' }}</div>
+  </div>
+  <div class="sound-card" data-sound="ocean">
+    <span class="emoji">🌊</span>
+    <div style="font-weight:700">{{ 'أمواج' if lang=='ar' else 'Ocean' }}</div>
+  </div>
+  <div class="sound-card" data-sound="forest">
+    <span class="emoji">🌲</span>
+    <div style="font-weight:700">{{ 'غابة' if lang=='ar' else 'Forest' }}</div>
+  </div>
+  <div class="sound-card" data-sound="night">
+    <span class="emoji">🌙</span>
+    <div style="font-weight:700">{{ 'ليل هادئ' if lang=='ar' else 'Calm night' }}</div>
+  </div>
+</div>
+
+<div class="card mt-6">
+  <div class="card-title mb-3"><i class="bi bi-stars"></i> {{ 'نصائح سريعة للاسترخاء' if lang=='ar' else 'Quick relaxation tips' }}</div>
+  <ol style="line-height:2;padding-inline-start:var(--sp-5)">
+    <li>{{ 'ركّز على تنفسك — شهيق عميق من الأنف وزفير بطيء من الفم' if lang=='ar' else 'Focus on your breath — deep inhale through nose, slow exhale through mouth' }}</li>
+    <li>{{ 'اشعر بجسدك — اسمح لعضلاتك بأن تسترخي' if lang=='ar' else 'Feel your body — let your muscles relax' }}</li>
+    <li>{{ 'تخيّل مكاناً آمناً وجميلاً' if lang=='ar' else 'Imagine a safe and beautiful place' }}</li>
+    <li>{{ 'لا تحكم على أفكارك — اتركها تمر مثل السحاب' if lang=='ar' else "Don't judge your thoughts — let them pass like clouds" }}</li>
+    <li>{{ 'إذا ضاعت أفكارك، عد بلطف إلى تنفسك' if lang=='ar' else 'If your mind wanders, gently return to your breath' }}</li>
+  </ol>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Simple visual-only toggle (no actual audio to keep CSP clean)
+document.querySelectorAll('.sound-card').forEach(function(card){
+  card.addEventListener('click', function(){
+    var wasPlaying = card.classList.contains('playing');
+    document.querySelectorAll('.sound-card').forEach(function(c){c.classList.remove('playing')});
+    if (!wasPlaying){
+      card.classList.add('playing');
+      SM.toast({{ ('"ركّز على الصوت واغلق عينيك ☁️"' if lang=='ar' else '"Focus on the sound and close your eyes ☁️"')|safe }}, 'info', 3000);
+    }
+  });
+});
+</script>
+{% endblock %}

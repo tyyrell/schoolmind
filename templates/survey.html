@@ -1,0 +1,188 @@
+{% extends "base.html" %}
+{% block title %}{{ 'استبيان' if lang=='ar' else 'Survey' }} · SchoolMind AI{% endblock %}
+{% block topbar_title %}{{ '📋 استبيان' if lang=='ar' else '📋 Survey' }}{% endblock %}
+
+{% block extra_head %}
+<style>
+.q-card{
+  background:var(--bg-card);border:1px solid var(--border);
+  border-radius:var(--r);padding:var(--sp-4) var(--sp-5);
+  margin-bottom:var(--sp-3);box-shadow:var(--sh-xs);
+  transition:all var(--tr);
+}
+.q-card:hover{box-shadow:var(--sh-sm);border-color:var(--border-h)}
+.q-num{
+  display:inline-flex;align-items:center;justify-content:center;
+  width:32px;height:32px;border-radius:50%;
+  background:var(--grad-pri);color:#fff;
+  font-weight:800;font-size:var(--fs-sm);
+  margin-inline-end:var(--sp-2);flex-shrink:0;
+}
+.q-text{font-weight:700;margin-bottom:var(--sp-3);display:flex;align-items:center;gap:var(--sp-2)}
+.scale{
+  display:grid;grid-template-columns:repeat(5,1fr);
+  gap:var(--sp-2);
+}
+.scale-btn{
+  padding:var(--sp-3) var(--sp-2);text-align:center;
+  background:var(--bg-soft);border:2px solid var(--border);
+  border-radius:var(--r-sm);cursor:pointer;
+  transition:all var(--tr-fast);
+  font-size:var(--fs-sm);font-weight:700;color:var(--text);
+}
+.scale-btn:hover{border-color:var(--teal-500);transform:translateY(-2px)}
+.scale input:checked + .scale-btn{
+  background:var(--grad-pri);color:#fff;border-color:transparent;
+  box-shadow:var(--sh-pri);transform:scale(1.05);
+}
+.scale input{position:absolute;opacity:0;pointer-events:none}
+.scale label{position:relative;display:block;margin:0}
+
+.result-hero{
+  background:var(--grad-aurora);background-size:300% 300%;
+  animation:gradientFlow 8s ease infinite;
+  color:#fff;border-radius:var(--r-md);padding:var(--sp-6);
+  margin-bottom:var(--sp-4);text-align:center;
+  box-shadow:var(--sh-lg);
+}
+.result-ring{
+  width:120px;height:120px;border-radius:50%;
+  background:rgba(255,255,255,.18);backdrop-filter:blur(10px);
+  display:flex;align-items:center;justify-content:center;
+  flex-direction:column;margin:0 auto var(--sp-3);
+  border:3px solid rgba(255,255,255,.3);
+}
+.result-score{font-size:2.5rem;font-weight:900;line-height:1}
+.result-of{font-size:var(--fs-sm);opacity:.8}
+.progress-bar-wrap{
+  height:8px;background:var(--bg-muted);border-radius:var(--r-pill);
+  overflow:hidden;margin-bottom:var(--sp-4);
+}
+.progress-inner{
+  height:100%;background:var(--grad-pri);border-radius:var(--r-pill);
+  width:0;transition:width .4s ease;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+
+{% if result %}
+<div class="result-hero">
+  <div class="result-ring">
+    <div class="result-score">{{ result.score }}</div>
+    <div class="result-of">/{{ result.max_score }}</div>
+  </div>
+  <h2 style="color:#fff;margin-bottom:var(--sp-2)">
+    {% if result.level == 'low' %}{{ '🟢 حالتك جيدة' if lang=='ar' else '🟢 You\'re doing well' }}
+    {% elif result.level == 'medium' %}{{ '🟡 انتبه لنفسك' if lang=='ar' else '🟡 Take care of yourself' }}
+    {% else %}{{ '🔴 نحن هنا لدعمك' if lang=='ar' else '🔴 We\'re here to support you' }}{% endif %}
+  </h2>
+  <p style="opacity:.92">
+    {% if lang == 'ar' %}شكراً على مشاركتك. نتائج الاستبيان تساعدنا على فهمك بشكل أفضل.{% else %}Thank you. Your answers help us support you better.{% endif %}
+  </p>
+  <div style="display:flex;gap:var(--sp-2);justify-content:center;flex-wrap:wrap;margin-top:var(--sp-4)">
+    <a href="{{ url_for('companion') }}" class="btn" style="background:rgba(255,255,255,.2);color:#fff;border-color:rgba(255,255,255,.3)">
+      <i class="bi bi-chat-heart"></i> {{ 'تحدّث مع نور' if lang=='ar' else 'Talk to Nour' }}
+    </a>
+    <a href="{{ url_for('student_dashboard') }}" class="btn" style="background:#fff;color:var(--teal-700)">
+      <i class="bi bi-house-heart-fill"></i> {{ 'الرئيسية' if lang=='ar' else 'Home' }}
+    </a>
+  </div>
+</div>
+{% endif %}
+
+<div class="card" style="margin-bottom:var(--sp-4);background:linear-gradient(135deg,rgba(20,184,166,.06),rgba(251,191,36,.03));border-color:var(--border-h)">
+  <div style="display:flex;gap:var(--sp-3);align-items:center">
+    <div style="font-size:2rem">📋</div>
+    <div style="flex:1">
+      <div style="font-weight:800;margin-bottom:2px">{{ 'استبيان الصحة النفسية' if lang=='ar' else 'Mental Health Survey' }}</div>
+      <div style="font-size:var(--fs-sm);color:var(--text-muted)">
+        {{ '٢٠ سؤال · ٥-٧ دقائق · سري تماماً' if lang=='ar' else '20 questions · 5-7 min · completely confidential' }}
+      </div>
+    </div>
+  </div>
+  <div class="progress-bar-wrap" style="margin-top:var(--sp-3)">
+    <div class="progress-inner" id="survey-progress"></div>
+  </div>
+</div>
+
+<form method="post" action="{{ url_for('survey') }}" id="survey-form">
+<input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+
+{% set questions_ar = [
+  'أشعر بالحزن معظم الوقت','أجد صعوبة في النوم','أفقد الاهتمام بالأشياء التي أحبها',
+  'أشعر بالقلق والتوتر','أشعر بالوحدة','أتعرض للتنمر في المدرسة',
+  'أشعر بأنني لا أستحق الحب','أفكر في إيذاء نفسي','أجد صعوبة في التركيز بالدراسة',
+  'أشعر بالإرهاق الجسدي','لدي أصدقاء أثق بهم','أشعر بالأمان في منزلي',
+  'أستمتع بوقتي مع عائلتي','أثق بقدراتي وإمكاناتي','أشعر بالتفاؤل تجاه المستقبل',
+  'أتحدث عن مشاعري مع شخص موثوق','أمارس هوايات أستمتع بها','أحصل على نوم كافٍ',
+  'أتناول طعاماً صحياً','أشعر بالرضا عن حياتي'
+] %}
+{% set questions_en = [
+  'I feel sad most of the time','I have difficulty sleeping','I lose interest in things I enjoy',
+  'I feel anxious and stressed','I feel lonely','I am bullied at school',
+  'I feel I don\'t deserve love','I think about hurting myself','I have trouble focusing in studies',
+  'I feel physically exhausted','I have trusted friends','I feel safe at home',
+  'I enjoy time with my family','I trust my abilities','I feel optimistic about the future',
+  'I talk about my feelings with someone I trust','I practice hobbies I enjoy','I get enough sleep',
+  'I eat healthy food','I feel satisfied with my life'
+] %}
+{% set qs = questions_ar if lang == 'ar' else questions_en %}
+
+{% for q in qs %}
+{% set qidx = loop.index %}
+<div class="q-card">
+  <div class="q-text">
+    <span class="q-num">{{ qidx }}</span>
+    <span>{{ q }}</span>
+  </div>
+  <div class="scale">
+    {% for v in [1,2,3,4,5] %}
+    <label>
+      <input type="radio" name="q{{ qidx }}_grp" value="{{ v }}" class="q-input" data-qnum="{{ qidx }}"{% if v == 3 %} checked{% endif %}>
+      <div class="scale-btn">{{ ['😞','😟','😐','🙂','😊'][v-1] }}</div>
+    </label>
+    {% endfor %}
+  </div>
+  <input type="hidden" name="q{{ qidx }}" id="q{{ qidx }}_value" value="3">
+</div>
+{% endfor %}
+
+<div class="q-card">
+  <label class="form-label"><i class="bi bi-chat-text"></i> {{ 'ملاحظات إضافية (اختياري)' if lang=='ar' else 'Additional notes (optional)' }}</label>
+  <textarea name="notes" class="form-textarea" maxlength="500" rows="3"
+            placeholder="{{ 'أي شيء تريد إضافته...' if lang=='ar' else 'Anything else...' }}"></textarea>
+</div>
+
+<button type="submit" class="btn btn-pri btn-lg btn-block mt-4">
+  <i class="bi bi-stars"></i>
+  {{ 'إرسال الاستبيان' if lang=='ar' else 'Submit survey' }}
+</button>
+</form>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.querySelectorAll('.q-input').forEach(function(inp){
+  inp.addEventListener('change', function(){
+    var qnum = inp.dataset.qnum;
+    var hidden = document.getElementById('q' + qnum + '_value');
+    if (hidden) hidden.value = inp.value;
+    updateProgress();
+  });
+});
+function updateProgress(){
+  var cards = document.querySelectorAll('.q-card');
+  var total = cards.length - 1; // exclude notes card
+  var answered = 0;
+  cards.forEach(function(card){
+    if (card.querySelector('.q-input:checked')) answered++;
+  });
+  var pct = total > 0 ? (answered/total*100) : 0;
+  var bar = document.getElementById('survey-progress');
+  if (bar) bar.style.width = pct + '%';
+}
+updateProgress();
+</script>
+{% endblock %}

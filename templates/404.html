@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block title %}404 · SchoolMind AI{% endblock %}
+{% block topbar_title %}{{ 'غير موجود' if lang=='ar' else 'Not Found' }}{% endblock %}
+
+{% block content %}
+<div class="empty-state" style="padding:var(--sp-12) var(--sp-4)">
+  <div style="font-size:5rem;line-height:1;margin-bottom:var(--sp-4);background:var(--grad-pri);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;font-weight:900">404</div>
+  <h3>{{ 'الصفحة غير موجودة' if lang=='ar' else 'Page not found' }}</h3>
+  <p>{{ 'الرابط الذي اتبعته قد يكون معطلاً أو تم حذف الصفحة.' if lang=='ar' else "The page you're looking for may have been removed or is temporarily unavailable." }}</p>
+  <a href="{{ url_for('index') }}" class="btn btn-pri btn-lg mt-4">
+    <i class="bi bi-house-heart-fill" aria-hidden="true"></i>
+    {{ 'العودة للرئيسية' if lang=='ar' else 'Back to home' }}
+  </a>
+</div>
+
+{% block auth_content %}
+<div class="auth-shell">
+  <div class="auth-card text-center">
+    <div style="font-size:5rem;line-height:1;margin-bottom:var(--sp-4);background:var(--grad-pri);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;font-weight:900">404</div>
+    <h1 class="auth-title">{{ 'الصفحة غير موجودة' if lang=='ar' else 'Page not found' }}</h1>
+    <p class="auth-subtitle">{{ 'الرابط الذي اتبعته قد يكون معطلاً' if lang=='ar' else "The page you're looking for is gone" }}</p>
+    <a href="{{ url_for('index') }}" class="btn btn-pri btn-block btn-lg mt-4">
+      <i class="bi bi-house-heart-fill" aria-hidden="true"></i>
+      {{ 'العودة للرئيسية' if lang=='ar' else 'Back to home' }}
+    </a>
+  </div>
+</div>
+{% endblock %}
+{% endblock %}

@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% block title %}{{ 'يوميات المزاج' if lang=='ar' else 'Mood Diary' }} · SchoolMind AI{% endblock %}
+{% block topbar_title %}{{ '💖 يوميات المزاج' if lang=='ar' else '💖 Mood Diary' }}{% endblock %}
+
+{% block extra_head %}
+<style>
+.mood-day{
+  display:flex;align-items:center;gap:var(--sp-3);
+  padding:var(--sp-3) var(--sp-4);background:var(--bg-card);
+  border:1px solid var(--border);border-radius:var(--r);
+  margin-bottom:var(--sp-2);transition:all var(--tr);
+}
+.mood-day:hover{transform:translateX(-2px);box-shadow:var(--sh-sm);border-color:var(--border-h)}
+.mood-emoji{font-size:2.5rem;line-height:1}
+.mood-info{flex:1}
+.mood-date{font-size:var(--fs-xs);color:var(--text-muted)}
+.mood-notes{font-size:var(--fs-sm);color:var(--text-soft);margin-top:var(--sp-1)}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="card mb-4" style="background:linear-gradient(135deg,rgba(244,63,94,.06),rgba(251,113,133,.03));border-color:var(--border-h)">
+  <div style="display:flex;gap:var(--sp-3);align-items:center">
+    <div style="font-size:2.2rem">💖</div>
+    <div>
+      <div style="font-weight:800">{{ 'تتبع مزاجك اليومي' if lang=='ar' else 'Track your daily mood' }}</div>
+      <div style="color:var(--text-muted);font-size:var(--fs-sm)">
+        {{ 'آخر ٣٠ يوم من تسجيلاتك' if lang=='ar' else 'Last 30 days of check-ins' }}
+      </div>
+    </div>
+  </div>
+</div>
+
+{% if checkins %}
+{% set emojis = ['😭','😟','😐','🙂','😄'] %}
+{% for c in checkins %}
+<div class="mood-day">
+  <div class="mood-emoji">{{ emojis[c.mood - 1] if c.mood else '😐' }}</div>
+  <div class="mood-info">
+    <div class="mood-date"><i class="bi bi-calendar-event"></i> {{ (c.created_at or '')[:16] }}</div>
+    {% if c.notes %}<div class="mood-notes">{{ c.notes }}</div>{% endif %}
+    <div style="display:flex;gap:var(--sp-2);margin-top:var(--sp-2);flex-wrap:wrap">
+      {% if c.feeling_safe %}<span class="badge badge-success"><i class="bi bi-shield-check"></i> {{ 'آمن' if lang=='ar' else 'Safe' }}</span>{% endif %}
+      {% if c.feeling_lonely %}<span class="badge badge-warning"><i class="bi bi-person"></i> {{ 'وحيد' if lang=='ar' else 'Lonely' }}</span>{% endif %}
+    </div>
+  </div>
+</div>
+{% endfor %}
+{% else %}
+<div class="empty-state">
+  <i class="bi bi-calendar-heart"></i>
+  <h3>{{ 'لا يوجد تسجيلات بعد' if lang=='ar' else 'No mood check-ins yet' }}</h3>
+  <p>{{ 'ابدأ بتسجيل حالتك من الصفحة الرئيسية لتظهر هنا' if lang=='ar' else 'Start checking in from the home page to see them here' }}</p>
+  <a href="{{ url_for('student_dashboard') }}" class="btn btn-pri">
+    <i class="bi bi-house-heart"></i> {{ 'سجّل الآن' if lang=='ar' else 'Check in' }}
+  </a>
+</div>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,130 @@
+{% extends "base.html" %}
+{% block title %}{{ 'إنجازاتي' if lang=='ar' else 'Achievements' }} · SchoolMind AI{% endblock %}
+{% block topbar_title %}{{ '🏆 إنجازاتي' if lang=='ar' else '🏆 Achievements' }}{% endblock %}
+
+{% block extra_head %}
+<style>
+.badge-grid{
+  display:grid;gap:var(--sp-3);
+  grid-template-columns:repeat(auto-fill,minmax(170px,1fr));
+  margin-bottom:var(--sp-6);
+}
+.badge-card{
+  background:var(--bg-card);border:1px solid var(--border);
+  border-radius:var(--r);padding:var(--sp-5) var(--sp-3);
+  text-align:center;box-shadow:var(--sh-xs);
+  position:relative;overflow:hidden;
+  transition:all var(--tr);
+}
+.badge-card::before{
+  content:'';position:absolute;inset:0;opacity:0;
+  background:radial-gradient(circle at 50% 0%,rgba(251,191,36,.2),transparent 70%);
+  transition:opacity var(--tr);
+}
+.badge-card.earned::before{opacity:1}
+.badge-card.earned{
+  border-color:var(--amber-400);
+  box-shadow:0 4px 20px rgba(251,191,36,.2);
+}
+.badge-card.earned:hover{
+  transform:translateY(-6px) scale(1.03);
+  box-shadow:0 12px 32px rgba(251,191,36,.35);
+}
+.badge-card.locked{opacity:.5;filter:grayscale(.6)}
+.badge-icon{
+  font-size:3.5rem;line-height:1;margin-bottom:var(--sp-2);
+  display:block;position:relative;
+}
+.badge-card.earned .badge-icon{animation:float 3s ease-in-out infinite}
+.badge-card.locked .badge-icon{filter:grayscale(1)}
+.badge-name{font-weight:800;font-size:var(--fs-sm);margin-bottom:var(--sp-1)}
+.badge-date{font-size:var(--fs-xs);color:var(--text-muted)}
+
+.streak-hero{
+  background:linear-gradient(135deg,#7c2d12 0%,#ea580c 50%,#f97316 100%);
+  color:#fff;border-radius:var(--r-md);
+  padding:var(--sp-6);margin-bottom:var(--sp-5);
+  position:relative;overflow:hidden;
+  box-shadow:0 12px 40px rgba(249,115,22,.35);
+}
+.streak-hero::before{
+  content:'🔥';position:absolute;
+  font-size:10rem;opacity:.1;
+  top:-20px;inset-inline-end:-20px;
+  animation:float 3s ease-in-out infinite;
+}
+.streak-hero-inner{display:flex;align-items:center;gap:var(--sp-4);flex-wrap:wrap;position:relative;z-index:1}
+.streak-num{
+  font-size:4rem;font-weight:900;line-height:1;
+  text-shadow:0 4px 12px rgba(0,0,0,.2);
+}
+.streak-unit{font-size:var(--fs-md);opacity:.9}
+.streak-side{background:rgba(255,255,255,.15);border-radius:var(--r);
+  padding:var(--sp-3) var(--sp-4);backdrop-filter:blur(10px);}
+</style>
+{% endblock %}
+
+{% block content %}
+{% if streak and streak.current > 0 %}
+<div class="streak-hero">
+  <div class="streak-hero-inner">
+    <div>
+      <div style="font-size:var(--fs-sm);opacity:.9;margin-bottom:var(--sp-1)">🔥 {{ 'شعلتك اليومية' if lang=='ar' else 'Daily streak' }}</div>
+      <div class="streak-num">{{ streak.current }}</div>
+      <div class="streak-unit">{{ 'يوم متتالي' if lang=='ar' else 'consecutive days' }}</div>
+    </div>
+    <div style="flex:1"></div>
+    <div class="streak-side">
+      <div style="font-size:var(--fs-xs);opacity:.9">{{ 'أطول ستريك' if lang=='ar' else 'Longest streak' }}</div>
+      <div style="font-size:var(--fs-2xl);font-weight:900">{{ streak.longest }}</div>
+    </div>
+    <div class="streak-side">
+      <div style="font-size:var(--fs-xs);opacity:.9">{{ 'إجمالي الأيام' if lang=='ar' else 'Total days' }}</div>
+      <div style="font-size:var(--fs-2xl);font-weight:900">{{ streak.total_days }}</div>
+    </div>
+  </div>
+</div>
+{% endif %}
+
+<div class="page-header">
+  <div>
+    <h1><i class="bi bi-stars"></i> {{ 'شاراتك' if lang=='ar' else 'Your Badges' }}</h1>
+    <p class="subtitle">{{ badges|length }} / {{ all_badge_defs|length }} {{ 'إنجاز' if lang=='ar' else 'unlocked' }}</p>
+  </div>
+</div>
+
+<div class="badge-grid">
+  {% set earned_keys = badges | map(attribute='key') | list %}
+  {% for key, b in all_badge_defs.items() %}
+    {% if key in earned_keys %}
+    <div class="badge-card earned">
+      <span class="badge-icon">{{ b.icon }}</span>
+      <div class="badge-name">{{ b.label_ar if lang=='ar' else b.label_en }}</div>
+      {% for earned in badges %}{% if earned.key == key %}
+      <div class="badge-date">
+        <i class="bi bi-check-circle-fill" style="color:var(--success)"></i>
+        {{ earned.earned_at }}
+      </div>
+      {% endif %}{% endfor %}
+    </div>
+    {% else %}
+    <div class="badge-card locked">
+      <span class="badge-icon">🔒</span>
+      <div class="badge-name">{{ b.label_ar if lang=='ar' else b.label_en }}</div>
+      <div class="badge-date">{{ 'مقفل' if lang=='ar' else 'Locked' }}</div>
+    </div>
+    {% endif %}
+  {% endfor %}
+</div>
+
+{% if not badges %}
+<div class="empty-state">
+  <i class="bi bi-trophy"></i>
+  <h3>{{ 'لم تحصل على شارات بعد' if lang=='ar' else 'No badges earned yet' }}</h3>
+  <p>{{ 'ابدأ بكتابة يومياتك واستخدام التطبيق للحصول على شارات إنجاز جميلة!' if lang=='ar' else 'Start journaling and using the app to earn beautiful achievement badges!' }}</p>
+  <a href="{{ url_for('journal') }}" class="btn btn-pri btn-lg">
+    <i class="bi bi-pencil-square"></i> {{ 'ابدأ الآن' if lang=='ar' else 'Start now' }}
+  </a>
+</div>
+{% endif %}
+{% endblock %}
