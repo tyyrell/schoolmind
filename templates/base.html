@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="{{ 'ar' if lang=='ar' else 'en' }}"
+      dir="{{ 'rtl' if lang=='ar' else 'ltr' }}"
+      data-theme="{{ theme }}">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0b1020">
+<meta name="csrf-token" content="{{ csrf_token }}">
+<meta name="description" content="{{ 'منصة ذكاء صناعي للصحة النفسية للطلاب' if lang=='ar' else 'AI mental health platform for students' }}">
+<meta name="robots" content="noindex,nofollow">
+
+<title>{% block title %}SchoolMind AI{% endblock %}</title>
+
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preload" href="{{ url_for('static', filename='css/app.css') }}" as="style">
+<link rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"
+      crossorigin="anonymous">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&family=Nunito:wght@400;500;600;700;800&display=swap">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/app.css') }}">
+
+{# PWA — manifest, icons, iOS meta #}
+<link rel="manifest" href="{{ url_for('static', filename='manifest.json') }}">
+<link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='icons/icon-192.svg') }}">
+<link rel="apple-touch-icon" href="{{ url_for('static', filename='icons/icon-192.svg') }}">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="SchoolMind">
+<meta name="mobile-web-app-capable" content="yes">
+
+{# Apply theme BEFORE paint — no FOUC. Dark is the default. #}
+<script>
+(function(){
+  try{
+    var saved = localStorage.getItem('sm_theme');
+    var theme = saved || 'dark';  // Default: dark
+    document.documentElement.setAttribute('data-theme', theme);
+    // Restore sidebar state on desktop
+    if (window.innerWidth > 768 && localStorage.getItem('sm_sidebar_hidden') === '1') {
+      document.body.classList.add('sidebar-hidden');
+    }
+  }catch(e){}
+})();
+</script>
+
+{% block extra_head %}{% endblock %}
+</head>
+<body class="{{ age_category }}">
+
+<div class="page-loader" id="page-loader" aria-hidden="true"></div>
+<div class="bg-mesh" aria-hidden="true"></div>
+<div class="orbs" aria-hidden="true">
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+  <div class="orb orb-3"></div>
+</div>
+
+<a href="#main-content" class="skip-link">{{ 'تخطّى للمحتوى الرئيسي' if lang=='ar' else 'Skip to main content' }}</a>
+
+<div class="toast-wrap" id="toast-wrap" aria-live="polite" aria-atomic="true"></div>
+
+{% if session.user_id %}
+<div class="app-shell">
+
+  <div class="sidebar-overlay" id="sidebar-overlay" aria-hidden="true"></div>
+
+  <nav class="sidebar" id="sidebar" aria-label="{{ 'التنقل الرئيسي' if lang=='ar' else 'Main navigation' }}">
+    <div class="sidebar-stripe" aria-hidden="true"></div>
+    <div class="sidebar-inner">
+
+      <div class="sb-brand">
+        <div class="sb-logo-row">
+          <div class="sb-logo-icon" aria-hidden="true">🌟</div>
+          <div class="sb-brand-text">
+            <span class="sb-brand-name">SchoolMind AI</span>
+            <span class="sb-brand-sub">T354 · JoYS 2026</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="sb-nav">
+        {% if session.role == 'student' %}
+
+          <div class="sb-section">{{ 'الطالب' if lang=='ar' else 'Student' }}</div>
+          <a href="{{ url_for('student_dashboard') }}" class="sb-link {% if request.endpoint=='student_dashboard' %}active{% endif %}">
+            <i class="bi bi-house-heart-fill" aria-hidden="true"></i>
+            <span>{{ 'الرئيسية' if lang=='ar' else 'Home' }}</span>
+          </a>
+          <a href="{{ url_for('journal') }}" class="sb-link {% if request.endpoint=='journal' %}active{% endif %}">
+            <i class="bi bi-pencil-square" aria-hidden="true"></i>
+            <span>{{ 'يومياتي' if lang=='ar' else 'Journal' }}</span>
+          </a>
+          <a href="{{ url_for('survey') }}" class="sb-link {% if request.endpoint=='survey' %}active{% endif %}">
+            <i class="bi bi-clipboard2-heart-fill" aria-hidden="true"></i>
+            <span>{{ 'استبيان' if lang=='ar' else 'Survey' }}</span>
+          </a>
+          <a href="{{ url_for('companion') }}" class="sb-link {% if request.endpoint=='companion' %}active{% endif %}">
+            <i class="bi bi-chat-dots-fill" aria-hidden="true"></i>
+            <span>{{ 'المساعد نور' if lang=='ar' else 'Nour AI' }}</span>
+          </a>
+          <a href="{{ url_for('student_stats') }}" class="sb-link {% if request.endpoint=='student_stats' %}active{% endif %}">
+            <i class="bi bi-graph-up-arrow" aria-hidden="true"></i>
+            <span>{{ 'إحصائياتي' if lang=='ar' else 'My Stats' }}</span>
+          </a>
+          <a href="{{ url_for('student_profile') }}" class="sb-link {% if request.endpoint=='student_profile' %}active{% endif %}">
+            <i class="bi bi-person-fill" aria-hidden="true"></i>
+            <span>{{ 'حسابي' if lang=='ar' else 'My Account' }}</span>
+          </a>
+
+          <div class="sb-section">{{ 'أدوات' if lang=='ar' else 'Tools' }}</div>
+          <a href="{{ url_for('goals') }}" class="sb-link {% if request.endpoint=='goals' %}active{% endif %}">
+            <i class="bi bi-bullseye" aria-hidden="true"></i>
+            <span>{{ 'أهدافي' if lang=='ar' else 'My Goals' }}</span>
+          </a>
+          <a href="{{ url_for('achievements') }}" class="sb-link {% if request.endpoint=='achievements' %}active{% endif %}">
+            <i class="bi bi-stars" aria-hidden="true"></i>
+            <span>{{ 'إنجازاتي' if lang=='ar' else 'Achievements' }}</span>
+            {% if unread_badges and unread_badges > 0 %}
+            <span class="badge-count">{{ unread_badges }}</span>
+            {% endif %}
+          </a>
+          <a href="{{ url_for('games') }}" class="sb-link {% if request.endpoint=='games' %}active{% endif %}">
+            <i class="bi bi-joystick" aria-hidden="true"></i>
+            <span>{{ 'ألعاب' if lang=='ar' else 'Games' }}</span>
+          </a>
+          <a href="{{ url_for('breathing_center') }}" class="sb-link {% if request.endpoint=='breathing_center' %}active{% endif %}">
+            <i class="bi bi-wind" aria-hidden="true"></i>
+            <span>{{ 'تمارين التنفس' if lang=='ar' else 'Breathing' }}</span>
+          </a>
+          <a href="{{ url_for('relaxation') }}" class="sb-link {% if request.endpoint=='relaxation' %}active{% endif %}">
+            <i class="bi bi-headphones" aria-hidden="true"></i>
+            <span>{{ 'استرخاء' if lang=='ar' else 'Relaxation' }}</span>
+          </a>
+          <a href="{{ url_for('mood_diary') }}" class="sb-link {% if request.endpoint=='mood_diary' %}active{% endif %}">
+            <i class="bi bi-calendar-heart" aria-hidden="true"></i>
+            <span>{{ 'يوميات المزاج' if lang=='ar' else 'Mood Diary' }}</span>
+          </a>
+          <a href="{{ url_for('daily_tips') }}" class="sb-link {% if request.endpoint=='daily_tips' %}active{% endif %}">
+            <i class="bi bi-lightbulb-fill" aria-hidden="true"></i>
+            <span>{{ 'نصائح يومية' if lang=='ar' else 'Daily Tips' }}</span>
+          </a>
+          <a href="{{ url_for('resources') }}" class="sb-link {% if request.endpoint=='resources' %}active{% endif %}">
+            <i class="bi bi-book-half" aria-hidden="true"></i>
+            <span>{{ 'موارد' if lang=='ar' else 'Resources' }}</span>
+          </a>
+          <a href="{{ url_for('export_report') }}" class="sb-link">
+            <i class="bi bi-download" aria-hidden="true"></i>
+            <span>{{ 'تصدير تقرير' if lang=='ar' else 'Export Report' }}</span>
+          </a>
+          <a href="{{ url_for('emergency') }}" class="sb-link {% if request.endpoint=='emergency' %}active{% endif %}" style="color:rgba(244,63,94,.85)">
+            <i class="bi bi-heart-pulse-fill" aria-hidden="true" style="color:#fb7185"></i>
+            <span>{{ 'طوارئ' if lang=='ar' else 'Emergency' }}</span>
+          </a>
+
+        {% else %}
+
+          <div class="sb-section">{{ 'المرشد' if lang=='ar' else 'Counselor' }}</div>
+          <a href="{{ url_for('counselor_dashboard') }}" class="sb-link {% if request.endpoint=='counselor_dashboard' %}active{% endif %}">
+            <i class="bi bi-speedometer2" aria-hidden="true"></i>
+            <span>{{ 'لوحة التحكم' if lang=='ar' else 'Dashboard' }}</span>
+          </a>
+          <a href="{{ url_for('counselor_alerts') }}" class="sb-link {% if request.endpoint=='counselor_alerts' %}active{% endif %}">
+            <i class="bi bi-shield-exclamation" aria-hidden="true"></i>
+            <span>{{ 'تنبيهات الطوارئ' if lang=='ar' else 'Alerts' }}</span>
+          </a>
+          <a href="{{ url_for('counselor_students') }}" class="sb-link {% if request.endpoint in ('counselor_students','counselor_edit_student','student_detail') %}active{% endif %}">
+            <i class="bi bi-people-fill" aria-hidden="true"></i>
+            <span>{{ 'إدارة الطلاب' if lang=='ar' else 'Students' }}</span>
+          </a>
+          <a href="{{ url_for('school_map') }}" class="sb-link {% if request.endpoint=='school_map' %}active{% endif %}">
+            <i class="bi bi-map-fill" aria-hidden="true"></i>
+            <span>{{ 'خريطة المدرسة' if lang=='ar' else 'School Map' }}</span>
+          </a>
+          <a href="{{ url_for('counselor_locations') }}" class="sb-link {% if request.endpoint=='counselor_locations' %}active{% endif %}">
+            <i class="bi bi-geo-alt-fill" aria-hidden="true"></i>
+            <span>{{ 'مواقع الطلاب' if lang=='ar' else 'Locations' }}</span>
+          </a>
+          <a href="{{ url_for('research_dashboard') }}" class="sb-link {% if request.endpoint=='research_dashboard' %}active{% endif %}">
+            <i class="bi bi-graph-up-arrow" aria-hidden="true"></i>
+            <span>{{ 'البحث العلمي' if lang=='ar' else 'Research' }}</span>
+          </a>
+          <a href="{{ url_for('counselor_profile') }}" class="sb-link {% if request.endpoint=='counselor_profile' %}active{% endif %}">
+            <i class="bi bi-person-gear" aria-hidden="true"></i>
+            <span>{{ 'حسابي' if lang=='ar' else 'My Account' }}</span>
+          </a>
+
+        {% endif %}
+
+        <div class="sb-section">{{ 'أخرى' if lang=='ar' else 'More' }}</div>
+        <a href="{{ url_for('accessibility') }}" class="sb-link {% if request.endpoint=='accessibility' %}active{% endif %}">
+          <i class="bi bi-universal-access" aria-hidden="true"></i>
+          <span>{{ 'إمكانية الوصول' if lang=='ar' else 'Accessibility' }}</span>
+        </a>
+        <a href="{{ url_for('about') }}" class="sb-link {% if request.endpoint=='about' %}active{% endif %}">
+          <i class="bi bi-info-circle-fill" aria-hidden="true"></i>
+          <span>{{ 'عن المشروع' if lang=='ar' else 'About' }}</span>
+        </a>
+        <a href="{{ url_for('set_theme', theme='light' if theme=='dark' else 'dark') }}" class="sb-link">
+          <i class="bi bi-{{ 'sun-fill' if theme=='dark' else 'moon-stars-fill' }}" aria-hidden="true"></i>
+          <span>{{ ('وضع فاتح' if theme=='dark' else 'وضع داكن') if lang=='ar' else ('Light Mode' if theme=='dark' else 'Dark Mode') }}</span>
+        </a>
+        <a href="{{ url_for('set_lang', lang='en' if lang=='ar' else 'ar') }}" class="sb-link">
+          <i class="bi bi-translate" aria-hidden="true"></i>
+          <span>{{ 'English' if lang=='ar' else 'العربية' }}</span>
+        </a>
+      </div>
+
+      <div class="sb-bottom">
+        <div class="user-pill">
+          {% if avatar_b64 %}
+          <img src="{{ avatar_b64 }}" class="user-avatar-img" alt="" onerror="this.style.display='none'">
+          {% else %}
+          <div class="user-avatar" aria-hidden="true">{{ (session.display_name or '?')[0]|upper }}</div>
+          {% endif %}
+          <span class="user-name">{{ session.display_name or session.username }}</span>
+        </div>
+        <div class="sb-actions">
+          <a href="{{ url_for('logout') }}" class="sb-action">
+            <i class="bi bi-box-arrow-right" aria-hidden="true"></i>
+            <span>{{ 'خروج' if lang=='ar' else 'Logout' }}</span>
+          </a>
+          {% if session.anonymous_code %}
+          <span class="sb-action" style="cursor:default;opacity:.7" title="{{ 'الرمز المجهول' if lang=='ar' else 'Anonymous Code' }}">
+            <i class="bi bi-shield-check" aria-hidden="true"></i>
+            <span>{{ session.anonymous_code }}</span>
+          </span>
+          {% endif %}
+        </div>
+      </div>
+
+    </div>
+  </nav>
+
+  <main class="app-main" id="main-content">
+
+    <header class="topbar" role="banner">
+      <div class="topbar-left">
+        <button class="hamburger"
+                id="hamburger-btn"
+                aria-label="{{ 'القائمة' if lang=='ar' else 'Menu' }}"
+                aria-expanded="false"
+                aria-controls="sidebar"
+                type="button">
+          <i class="bi bi-list" aria-hidden="true"></i>
+        </button>
+
+        {# Desktop sidebar toggle — hide/show the nav bar #}
+        <button class="sidebar-toggle"
+                id="sidebar-toggle-btn"
+                aria-label="{{ 'إخفاء/إظهار الشريط الجانبي' if lang=='ar' else 'Toggle sidebar' }}"
+                type="button"
+                title="{{ 'إخفاء/إظهار الشريط الجانبي' if lang=='ar' else 'Toggle sidebar' }}">
+          <i class="bi bi-layout-sidebar{{ '-reverse' if lang=='ar' else '' }}" aria-hidden="true"></i>
+        </button>
+
+        <h1 class="topbar-title">{% block topbar_title %}SchoolMind AI{% endblock %}</h1>
+      </div>
+      <div class="topbar-right">
+        {# Theme toggle — sun for light, moon for dark #}
+        <button type="button" class="topbar-action theme-toggle-btn" id="theme-toggle"
+                aria-label="{{ 'تبديل الوضع' if lang=='ar' else 'Toggle theme' }}"
+                title="{{ 'تبديل الوضع' if lang=='ar' else 'Toggle theme' }}">
+          <i class="bi bi-sun-fill theme-icon-light" aria-hidden="true"></i>
+          <i class="bi bi-moon-stars-fill theme-icon-dark" aria-hidden="true"></i>
+        </button>
+        <a href="{{ url_for('accessibility') }}"
+           class="topbar-action"
+           title="{{ 'إمكانية الوصول' if lang=='ar' else 'Accessibility' }}">
+          <i class="bi bi-universal-access" aria-hidden="true"></i>
+          <span>{{ 'وصول' if lang=='ar' else 'A11Y' }}</span>
+        </a>
+      </div>
+    </header>
+
+    <div class="page-body">
+      {% with msgs = get_flashed_messages(with_categories=true) %}
+        {% for cat, msg in msgs %}
+          <div class="flash-msg flash-{{ cat }}" role="alert">
+            <i class="bi bi-{% if cat=='success' %}check-circle-fill{% elif cat=='error' or cat=='danger' %}x-circle-fill{% elif cat=='warning' %}exclamation-triangle-fill{% elif cat=='badge' %}trophy-fill{% else %}info-circle-fill{% endif %}" aria-hidden="true"></i>
+            <span>{{ msg }}</span>
+          </div>
+        {% endfor %}
+      {% endwith %}
+      {% block content %}{% endblock %}
+    </div>
+  </main>
+
+  <nav class="bottom-nav" aria-label="{{ 'تنقل سريع' if lang=='ar' else 'Quick Navigation' }}">
+    <div class="bottom-nav-inner">
+      {% if session.role == 'student' %}
+        <a href="{{ url_for('student_dashboard') }}" class="bn-item {% if request.endpoint=='student_dashboard' %}active{% endif %}">
+          <i class="bi bi-house-heart-fill" aria-hidden="true"></i>
+          <span>{{ 'الرئيسية' if lang=='ar' else 'Home' }}</span>
+        </a>
+        <a href="{{ url_for('journal') }}" class="bn-item {% if request.endpoint=='journal' %}active{% endif %}">
+          <i class="bi bi-pencil-square" aria-hidden="true"></i>
+          <span>{{ 'يومية' if lang=='ar' else 'Journal' }}</span>
+        </a>
+        <a href="{{ url_for('companion') }}" class="bn-item {% if request.endpoint=='companion' %}active{% endif %}">
+          <i class="bi bi-chat-heart-fill" aria-hidden="true"></i>
+          <span>{{ 'نور' if lang=='ar' else 'Nour' }}</span>
+        </a>
+        <a href="{{ url_for('student_stats') }}" class="bn-item {% if request.endpoint=='student_stats' %}active{% endif %}">
+          <i class="bi bi-bar-chart-fill" aria-hidden="true"></i>
+          <span>{{ 'إحصاء' if lang=='ar' else 'Stats' }}</span>
+        </a>
+        <a href="{{ url_for('emergency') }}" class="bn-item danger {% if request.endpoint=='emergency' %}active{% endif %}">
+          <i class="bi bi-telephone-fill" aria-hidden="true"></i>
+          <span>{{ 'طوارئ' if lang=='ar' else 'SOS' }}</span>
+        </a>
+      {% else %}
+        <a href="{{ url_for('counselor_dashboard') }}" class="bn-item {% if request.endpoint=='counselor_dashboard' %}active{% endif %}">
+          <i class="bi bi-speedometer2" aria-hidden="true"></i>
+          <span>{{ 'الرئيسية' if lang=='ar' else 'Home' }}</span>
+        </a>
+        <a href="{{ url_for('counselor_students') }}" class="bn-item {% if request.endpoint in ('counselor_students','counselor_edit_student','student_detail') %}active{% endif %}">
+          <i class="bi bi-people-fill" aria-hidden="true"></i>
+          <span>{{ 'الطلاب' if lang=='ar' else 'Students' }}</span>
+        </a>
+        <a href="{{ url_for('counselor_locations') }}" class="bn-item {% if request.endpoint=='counselor_locations' %}active{% endif %}">
+          <i class="bi bi-geo-alt-fill" aria-hidden="true"></i>
+          <span>{{ 'مواقع' if lang=='ar' else 'Map' }}</span>
+        </a>
+        <a href="{{ url_for('research_dashboard') }}" class="bn-item {% if request.endpoint=='research_dashboard' %}active{% endif %}">
+          <i class="bi bi-graph-up-arrow" aria-hidden="true"></i>
+          <span>{{ 'البحث' if lang=='ar' else 'Research' }}</span>
+        </a>
+        <a href="{{ url_for('counselor_profile') }}" class="bn-item {% if request.endpoint=='counselor_profile' %}active{% endif %}">
+          <i class="bi bi-person-fill" aria-hidden="true"></i>
+          <span>{{ 'حسابي' if lang=='ar' else 'Account' }}</span>
+        </a>
+      {% endif %}
+    </div>
+  </nav>
+
+</div>
+{% else %}
+  <main id="main-content">{% block auth_content %}{% endblock %}</main>
+{% endif %}
+
+<script id="i18n-data" type="application/json">{
+  "offline": {{ ('"انقطع الاتصال بالإنترنت"' if lang=='ar' else '"You are offline"')|safe }},
+  "online": {{ ('"عاد الاتصال"' if lang=='ar' else '"Back online"')|safe }},
+  "theme_light": {{ ('"الوضع الفاتح"' if lang=='ar' else '"Light mode"')|safe }},
+  "theme_dark": {{ ('"الوضع الداكن"' if lang=='ar' else '"Dark mode"')|safe }},
+  "sidebar_hidden": {{ ('"تم إخفاء الشريط"' if lang=='ar' else '"Sidebar hidden"')|safe }},
+  "sidebar_shown": {{ ('"تم إظهار الشريط"' if lang=='ar' else '"Sidebar shown"')|safe }},
+  "geo_thanks": {{ ('"شكراً لمشاركة موقعك 💙"' if lang=='ar' else '"Thanks for sharing your location 💙"')|safe }},
+  "geo_fail": {{ ('"لا بأس، يمكنك تفعيل الموقع لاحقاً"' if lang=='ar' else "\"No worries, you can enable location later\"")|safe }}
+}</script>
+<script>
+(function(){
+  try {
+    var el = document.getElementById('i18n-data');
+    window.SM_I18N = el ? JSON.parse(el.textContent) : {};
+  } catch(e){ window.SM_I18N = {}; }
+})();
+</script>
+
+{# Theme transition overlay — cinematic wipe effect #}
+<div class="theme-transition-overlay" id="theme-transition" aria-hidden="true"></div>
+
+{% if session.user_id %}
+{# Geo permission banner — shown once after first login #}
+<div class="geo-banner" id="geo-banner" role="dialog" aria-labelledby="geo-banner-title">
+  <div class="geo-banner-head">
+    <div class="geo-banner-icon" aria-hidden="true"><i class="bi bi-geo-alt-fill"></i></div>
+    <div class="geo-banner-title" id="geo-banner-title">
+      {{ 'هل تسمح بمشاركة موقعك؟' if lang=='ar' else 'Share your location?' }}
+    </div>
+  </div>
+  <div class="geo-banner-text">
+    {{ 'نستخدم موقعك لمساعدة المرشد على توفير الدعم في حالات الطوارئ فقط. لن يُشارك مع أي طرف آخر.' if lang=='ar' else 'We use your location only to help your counselor reach you in emergencies. It is never shared with others.' }}
+  </div>
+  <div class="geo-banner-actions">
+    <button type="button" class="btn btn-ghost btn-sm" id="geo-decline">
+      {{ 'ليس الآن' if lang=='ar' else 'Not now' }}
+    </button>
+    <button type="button" class="btn btn-success btn-sm" id="geo-allow">
+      <i class="bi bi-geo-alt-fill" aria-hidden="true"></i>
+      {{ 'السماح' if lang=='ar' else 'Allow' }}
+    </button>
+  </div>
+</div>
+{% endif %}
+
+{% block chartjs %}{% endblock %}
+
+<script src="{{ url_for('static', filename='js/app.js') }}" defer></script>
+
+{% block scripts %}{% endblock %}
+
+</body>
+</html>

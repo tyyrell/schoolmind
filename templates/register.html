@@ -1,0 +1,258 @@
+{% extends "base.html" %}
+{% block title %}{{ 'إنشاء حساب' if lang=='ar' else 'Sign up' }} · SchoolMind AI{% endblock %}
+
+{% block extra_head %}
+<style>
+.role-tabs{display:grid;grid-template-columns:1fr 1fr;gap:var(--sp-2);margin-bottom:var(--sp-4)}
+.role-tab{
+  padding:var(--sp-4) var(--sp-3);text-align:center;
+  background:var(--bg-soft);border:2px solid var(--border);
+  border-radius:var(--r-sm);cursor:pointer;
+  transition:all var(--tr-fast);
+  font-family:inherit;color:var(--text);
+  display:flex;flex-direction:column;align-items:center;gap:var(--sp-1);
+}
+.role-tab i{font-size:1.7rem;color:var(--text-muted)}
+.role-tab strong{font-weight:700}
+.role-tab small{font-size:var(--fs-xs);color:var(--text-muted)}
+.role-tab:hover{border-color:var(--border-strong)}
+.role-tab.active{
+  border-color:var(--pri-500);
+  background:rgba(20,184,166,.06);
+  box-shadow:var(--shadow-sm);
+}
+.role-tab.active i,.role-tab.active strong{color:var(--pri-700)}
+[data-theme="dark"] .role-tab.active i,
+[data-theme="dark"] .role-tab.active strong{color:var(--pri-300)}
+.grades-check{
+  display:grid;grid-template-columns:repeat(2,1fr);
+  gap:var(--sp-2);margin-top:var(--sp-2);
+}
+.grades-check label{
+  display:flex;align-items:center;gap:var(--sp-2);
+  padding:var(--sp-2) var(--sp-3);
+  background:var(--bg-soft);border:1px solid var(--border);
+  border-radius:var(--r-sm);cursor:pointer;font-size:var(--fs-sm);
+  transition:all var(--tr-fast);
+}
+.grades-check label:has(input:checked){
+  border-color:var(--pri-500);
+  background:rgba(20,184,166,.06);
+}
+</style>
+{% endblock %}
+
+{% block auth_content %}
+<div class="auth-shell">
+  <div class="auth-card auth-card-wide">
+    <div class="auth-header">
+      <div class="auth-logo" aria-hidden="true">✨</div>
+      <h1 class="auth-title">{{ 'أنشئ حسابك' if lang=='ar' else 'Create your account' }}</h1>
+      <p class="auth-subtitle">{{ 'انضم إلينا لرحلة نفسية أفضل' if lang=='ar' else 'Join us on a better mental wellness journey' }}</p>
+    </div>
+
+    {% with msgs = get_flashed_messages(with_categories=true) %}
+      {% for cat, msg in msgs %}
+      <div class="flash-msg flash-{{ cat }}" role="alert">
+        <i class="bi bi-{% if cat=='success' %}check-circle-fill{% elif cat=='error' %}x-circle-fill{% else %}info-circle-fill{% endif %}" aria-hidden="true"></i>
+        <span>{{ msg }}</span>
+      </div>
+      {% endfor %}
+    {% endwith %}
+
+    <form method="post" action="{{ url_for('register') }}" autocomplete="on" novalidate id="reg-form">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+      <input type="text" name="honeypot" tabindex="-1" autocomplete="off" aria-hidden="true" style="position:absolute;left:-9999px;width:1px;height:1px;opacity:0">
+
+      {# Role selection tabs #}
+      <div class="form-group">
+        <label class="form-label">{{ 'نوع الحساب' if lang=='ar' else 'Account type' }}</label>
+        <div class="role-tabs" role="radiogroup" aria-label="{{ 'نوع الحساب' if lang=='ar' else 'Account type' }}">
+          <label class="role-tab active" id="role-student-tab">
+            <input type="radio" name="role" value="student" checked class="visually-hidden">
+            <i class="bi bi-mortarboard-fill" aria-hidden="true"></i>
+            <strong>{{ 'طالب' if lang=='ar' else 'Student' }}</strong>
+            <small>{{ 'يوميات، استبيان، نور' if lang=='ar' else 'Journal, survey, Nour' }}</small>
+          </label>
+          <label class="role-tab" id="role-counselor-tab">
+            <input type="radio" name="role" value="counselor" class="visually-hidden">
+            <i class="bi bi-person-workspace" aria-hidden="true"></i>
+            <strong>{{ 'مرشد' if lang=='ar' else 'Counselor' }}</strong>
+            <small>{{ 'إشراف ومتابعة' if lang=='ar' else 'Supervision & tracking' }}</small>
+          </label>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="display_name" class="form-label">{{ 'الاسم الكامل' if lang=='ar' else 'Full name' }}<span class="req">*</span></label>
+        <div class="input-icon">
+          <input type="text" id="display_name" name="display_name" class="form-control"
+                 required maxlength="120" autocomplete="name"
+                 placeholder="{{ 'أحمد محمد' if lang=='ar' else 'John Doe' }}">
+          <i class="bi bi-person-fill icon" aria-hidden="true"></i>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="username" class="form-label">{{ 'اسم المستخدم' if lang=='ar' else 'Username' }}<span class="req">*</span></label>
+        <div class="input-icon">
+          <input type="text" id="username" name="username" class="form-control"
+                 required minlength="3" maxlength="40" pattern="[a-zA-Z0-9_\u0600-\u06FF\-]+"
+                 autocomplete="username"
+                 placeholder="{{ 'username_123' if lang=='ar' else 'username_123' }}">
+          <i class="bi bi-at icon" aria-hidden="true"></i>
+        </div>
+        <small class="form-help">{{ 'حروف، أرقام، أو _ و - فقط' if lang=='ar' else 'Letters, numbers, _ or - only' }}</small>
+      </div>
+
+      <div id="student-fields">
+        <div class="form-group">
+          <label for="grade" class="form-label">{{ 'الصف الدراسي' if lang=='ar' else 'Grade' }}<span class="req">*</span></label>
+          <select id="grade" name="grade" class="form-select">
+            <option value="">{{ '-- اختر الصف --' if lang=='ar' else '-- Select grade --' }}</option>
+            {% for g in grades %}<option value="{{ g }}">{{ g }}</option>{% endfor %}
+          </select>
+        </div>
+      </div>
+
+      <div id="counselor-fields" style="display:none">
+        <div class="form-group">
+          <label class="form-label">{{ 'الصفوف المشرف عليها' if lang=='ar' else 'Supervised grades' }}<span class="req">*</span></label>
+          <div class="grades-check">
+            {% for g in grades %}
+            <label>
+              <input type="checkbox" name="supervised_grades" value="{{ g }}">
+              <span>{{ g }}</span>
+            </label>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="password" class="form-label">{{ 'كلمة المرور' if lang=='ar' else 'Password' }}<span class="req">*</span></label>
+        <div class="input-pw">
+          <input type="password" id="password" name="password" class="form-control"
+                 required minlength="6" autocomplete="new-password" placeholder="••••••••">
+          <button type="button" class="pw-toggle" aria-label="{{ 'إظهار/إخفاء' if lang=='ar' else 'Show/hide' }}">
+            <i class="bi bi-eye" aria-hidden="true"></i>
+          </button>
+        </div>
+        <div class="pw-strength">
+          <div class="pw-strength-bar"><div class="pw-strength-fill" id="pw-fill" data-score="0"></div></div>
+          <span class="pw-strength-label" id="pw-label">—</span>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="confirm_password" class="form-label">{{ 'تأكيد كلمة المرور' if lang=='ar' else 'Confirm password' }}<span class="req">*</span></label>
+        <div class="input-pw">
+          <input type="password" id="confirm_password" name="confirm_password" class="form-control"
+                 required autocomplete="new-password" placeholder="••••••••">
+          <button type="button" class="pw-toggle" aria-label="{{ 'إظهار/إخفاء' if lang=='ar' else 'Show/hide' }}">
+            <i class="bi bi-eye" aria-hidden="true"></i>
+          </button>
+        </div>
+      </div>
+
+      <details style="margin-bottom:var(--sp-4)">
+        <summary style="cursor:pointer;font-size:var(--fs-sm);color:var(--text-muted);user-select:none;padding:var(--sp-2) 0">
+          <i class="bi bi-shield-lock" aria-hidden="true"></i>
+          {{ 'معلومات لاستعادة الحساب (اختياري)' if lang=='ar' else 'Account recovery info (optional)' }}
+        </summary>
+        <div class="form-group mt-3">
+          <label for="national_id" class="form-label">{{ 'الرقم الوطني' if lang=='ar' else 'National ID' }}</label>
+          <input type="text" id="national_id" name="national_id" class="form-control"
+                 inputmode="numeric" pattern="\d{9,12}" maxlength="12"
+                 placeholder="{{ '9 إلى 12 رقماً' if lang=='ar' else '9 to 12 digits' }}">
+        </div>
+        <div class="form-group">
+          <label for="birthdate" class="form-label">{{ 'تاريخ الميلاد' if lang=='ar' else 'Birth date' }}</label>
+          <input type="date" id="birthdate" name="birthdate" class="form-control">
+        </div>
+        <small class="form-help">{{ 'هذه المعلومات تُستخدم فقط لاستعادة الحساب إذا نسيت كلمة المرور' if lang=='ar' else 'Used only to recover your account if you forget your password' }}</small>
+      </details>
+
+      <button type="submit" class="btn btn-pri btn-block btn-lg">
+        <i class="bi bi-person-plus-fill" aria-hidden="true"></i>
+        {{ 'إنشاء الحساب' if lang=='ar' else 'Create account' }}
+      </button>
+    </form>
+
+    <div class="auth-footer">
+      {{ 'لديك حساب بالفعل؟' if lang=='ar' else 'Already have an account?' }}
+      <a href="{{ url_for('login') }}">{{ 'تسجيل الدخول' if lang=='ar' else 'Sign in' }}</a>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+(function(){
+  // Role tab switching
+  var studentTab = document.getElementById('role-student-tab');
+  var counselorTab = document.getElementById('role-counselor-tab');
+  var studentFields = document.getElementById('student-fields');
+  var counselorFields = document.getElementById('counselor-fields');
+
+  function switchRole(toCounselor) {
+    if (toCounselor) {
+      counselorTab.classList.add('active');
+      studentTab.classList.remove('active');
+      studentFields.style.display = 'none';
+      counselorFields.style.display = '';
+      studentFields.querySelector('select').required = false;
+    } else {
+      studentTab.classList.add('active');
+      counselorTab.classList.remove('active');
+      studentFields.style.display = '';
+      counselorFields.style.display = 'none';
+      studentFields.querySelector('select').required = true;
+    }
+  }
+  studentTab.addEventListener('click', function(){ switchRole(false); });
+  counselorTab.addEventListener('click', function(){ switchRole(true); });
+
+  // Password strength meter (live)
+  var pwInput = document.getElementById('password');
+  var pwFill = document.getElementById('pw-fill');
+  var pwLabel = document.getElementById('pw-label');
+  var strengthDebounce;
+  function updateStrength() {
+    clearTimeout(strengthDebounce);
+    var val = pwInput.value;
+    if (!val) {
+      pwFill.dataset.score = '0';
+      pwLabel.textContent = '—';
+      return;
+    }
+    strengthDebounce = setTimeout(function(){
+      SM.fetch('/api/password-strength', {
+        method: 'POST',
+        body: { password: val }
+      }).then(function(r){ return r.json(); })
+        .then(function(data){
+          if (data && typeof data.score === 'number') {
+            pwFill.dataset.score = data.score;
+            pwLabel.textContent = data.label || '';
+          }
+        }).catch(function(){});
+    }, 250);
+  }
+  if (pwInput) pwInput.addEventListener('input', updateStrength);
+
+  // Live password match
+  var confirmInput = document.getElementById('confirm_password');
+  if (confirmInput) {
+    confirmInput.addEventListener('input', function(){
+      if (confirmInput.value && confirmInput.value !== pwInput.value) {
+        confirmInput.classList.add('is-invalid');
+      } else {
+        confirmInput.classList.remove('is-invalid');
+      }
+    });
+  }
+})();
+</script>
+{% endblock %}

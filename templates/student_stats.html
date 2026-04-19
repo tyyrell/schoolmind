@@ -1,0 +1,111 @@
+{% extends "base.html" %}
+{% block title %}{{ 'إحصائياتي' if lang=='ar' else 'My Stats' }} · SchoolMind AI{% endblock %}
+{% block topbar_title %}{{ '📊 إحصائياتي' if lang=='ar' else '📊 My Stats' }}{% endblock %}
+
+{% block content %}
+<div class="stats-grid">
+  <div class="stat-card info">
+    <i class="bi bi-journal-text stat-icon"></i>
+    <div class="stat-number" data-count="{{ stats.total_journals }}">0</div>
+    <div class="stat-label">{{ 'إجمالي اليوميات' if lang=='ar' else 'Total journals' }}</div>
+  </div>
+  <div class="stat-card {% if stats.avg_risk >= 5 %}danger{% elif stats.avg_risk >= 2.5 %}warning{% else %}success{% endif %}">
+    <i class="bi bi-heart-pulse stat-icon"></i>
+    <div class="stat-number">{{ stats.avg_risk }}</div>
+    <div class="stat-label">{{ 'متوسط الخطر' if lang=='ar' else 'Avg risk' }}</div>
+  </div>
+  <div class="stat-card warning">
+    <i class="bi bi-fire stat-icon"></i>
+    <div class="stat-number" data-count="{{ stats.current_streak or 0 }}">0</div>
+    <div class="stat-label">{{ 'ستريك حالي' if lang=='ar' else 'Current streak' }}</div>
+  </div>
+  <div class="stat-card success">
+    <i class="bi bi-trophy stat-icon"></i>
+    <div class="stat-number" data-count="{{ stats.achievements_count }}">0</div>
+    <div class="stat-label">{{ 'شارات' if lang=='ar' else 'Badges' }}</div>
+  </div>
+</div>
+
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:var(--sp-4);margin-bottom:var(--sp-4)">
+  <div class="card">
+    <div class="card-title mb-3"><i class="bi bi-graph-up-arrow"></i> {{ 'تطور الحالة (٦٠ يوم)' if lang=='ar' else 'Risk trend (60 days)' }}</div>
+    <div class="chart-wrap"><canvas id="riskChart"></canvas></div>
+  </div>
+  <div class="card">
+    <div class="card-title mb-3"><i class="bi bi-emoji-smile"></i> {{ 'حالتك المزاجية' if lang=='ar' else 'Mood chart' }}</div>
+    <div class="chart-wrap"><canvas id="moodChart"></canvas></div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-title mb-3"><i class="bi bi-pie-chart-fill"></i> {{ 'توزيع المشاعر' if lang=='ar' else 'Emotion distribution' }}</div>
+  {% if stats.emotion_counts %}
+  <div style="display:flex;flex-direction:column;gap:var(--sp-3)">
+    {% for e in stats.emotion_counts[:8] %}
+    {% set pct = (e.count / stats.total_journals * 100)|round|int if stats.total_journals else 0 %}
+    <div>
+      <div style="display:flex;justify-content:space-between;margin-bottom:var(--sp-1);font-size:var(--fs-sm);font-weight:700">
+        <span>{{ e.emotion }}</span>
+        <span class="text-muted">{{ e.count }} ({{ pct }}%)</span>
+      </div>
+      <div class="progress"><div class="progress-bar" style="width:{{ pct }}%"></div></div>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="empty-state">
+    <i class="bi bi-bar-chart"></i>
+    <p>{{ 'ابدأ بكتابة يوميات لترى إحصائياتك' if lang=='ar' else 'Start journaling to see your stats' }}</p>
+  </div>
+  {% endif %}
+</div>
+
+<script id="stats-data" type="application/json">
+{"scores":{{ chart_scores|safe }},"labels":{{ chart_labels|safe }},"mood":{{ mood_data|safe }}}
+</script>
+{% endblock %}
+
+{% block chartjs %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js" defer></script>
+{% endblock %}
+
+{% block scripts %}
+<script>
+(function init(){
+  if (typeof Chart === 'undefined'){setTimeout(init,100);return}
+  var el = document.getElementById('stats-data');
+  if (!el) return;
+  var d; try{d=JSON.parse(el.textContent)}catch(e){return}
+  var muted = getComputedStyle(document.documentElement).getPropertyValue('--text-muted').trim()||'#6b7280';
+  var border = getComputedStyle(document.documentElement).getPropertyValue('--border').trim()||'rgba(0,0,0,.1)';
+
+  if (d.scores && d.scores.length){
+    new Chart(document.getElementById('riskChart'),{
+      type:'line',
+      data:{labels:d.labels,datasets:[{
+        data:d.scores, borderColor:'#0d9488', backgroundColor:'rgba(20,184,166,.14)',
+        fill:true, tension:.4, pointBackgroundColor:'#0d9488', pointRadius:3,
+      }]},
+      options:{responsive:true,maintainAspectRatio:false,
+        plugins:{legend:{display:false}},
+        scales:{y:{min:0,max:10,grid:{color:border},ticks:{color:muted}},
+                x:{grid:{display:false},ticks:{color:muted,maxTicksLimit:7}}}}
+    });
+  }
+  if (d.mood && d.mood.length){
+    new Chart(document.getElementById('moodChart'),{
+      type:'line',
+      data:{labels:d.mood.map(function(m){return m.date}),datasets:[{
+        data:d.mood.map(function(m){return m.mood}), borderColor:'#f59e0b',
+        backgroundColor:'rgba(251,191,36,.14)', fill:true, tension:.4,
+        pointBackgroundColor:'#f59e0b', pointRadius:3,
+      }]},
+      options:{responsive:true,maintainAspectRatio:false,
+        plugins:{legend:{display:false}},
+        scales:{y:{min:1,max:5,grid:{color:border},ticks:{color:muted}},
+                x:{grid:{display:false},ticks:{color:muted,maxTicksLimit:7}}}}
+    });
+  }
+})();
+</script>
+{% endblock %}

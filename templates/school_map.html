@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+{% block title %}{{ 'خريطة المدرسة' if lang=='ar' else 'School Map' }} · SchoolMind AI{% endblock %}
+{% block topbar_title %}{{ '🗺️ خريطة المدرسة' if lang=='ar' else '🗺️ School Map' }}{% endblock %}
+
+{% block content %}
+<div class="hero" style="background:linear-gradient(135deg,#0c4a6e,#0891b2,#06b6d4)">
+  <div style="display:flex;align-items:center;gap:var(--sp-3)">
+    <div style="font-size:3rem">🗺️</div>
+    <div>
+      <h1 style="color:#fff">{{ 'نظرة شاملة على المدرسة' if lang=='ar' else 'School Overview' }}</h1>
+      <p>{{ 'إحصائيات الحالة النفسية لجميع الطلاب' if lang=='ar' else 'Mental health overview of all students' }}</p>
+    </div>
+  </div>
+</div>
+
+<div class="stats-grid">
+  <div class="stat-card info">
+    <i class="bi bi-people-fill stat-icon"></i>
+    <div class="stat-number" data-count="{{ stats.total }}">0</div>
+    <div class="stat-label">{{ 'إجمالي الطلاب' if lang=='ar' else 'Total students' }}</div>
+  </div>
+  <div class="stat-card success">
+    <i class="bi bi-emoji-smile stat-icon"></i>
+    <div class="stat-number">{{ stats.pct_low }}%</div>
+    <div class="stat-label">{{ 'حالات مستقرة' if lang=='ar' else 'Stable' }}</div>
+  </div>
+  <div class="stat-card warning">
+    <i class="bi bi-emoji-neutral stat-icon"></i>
+    <div class="stat-number">{{ stats.pct_medium }}%</div>
+    <div class="stat-label">{{ 'متوسطة' if lang=='ar' else 'Medium' }}</div>
+  </div>
+  <div class="stat-card danger">
+    <i class="bi bi-emoji-frown stat-icon"></i>
+    <div class="stat-number">{{ stats.pct_high + stats.pct_critical }}%</div>
+    <div class="stat-label">{{ 'مرتفعة' if lang=='ar' else 'High' }}</div>
+  </div>
+</div>
+
+<div class="card mb-4">
+  <div class="card-title mb-3"><i class="bi bi-bar-chart-fill"></i> {{ 'التوزيع بالتفصيل' if lang=='ar' else 'Detailed Distribution' }}</div>
+  <div style="display:flex;flex-direction:column;gap:var(--sp-4)">
+    <div>
+      <div style="display:flex;justify-content:space-between;margin-bottom:var(--sp-1);font-weight:700">
+        <span>🟢 {{ 'منخفض' if lang=='ar' else 'Low' }}</span>
+        <span class="text-muted">{{ stats.low }} ({{ stats.pct_low }}%)</span>
+      </div>
+      <div class="progress" style="height:14px"><div class="progress-bar success" style="width:{{ stats.pct_low }}%"></div></div>
+    </div>
+    <div>
+      <div style="display:flex;justify-content:space-between;margin-bottom:var(--sp-1);font-weight:700">
+        <span>🟡 {{ 'متوسط' if lang=='ar' else 'Medium' }}</span>
+        <span class="text-muted">{{ stats.medium }} ({{ stats.pct_medium }}%)</span>
+      </div>
+      <div class="progress" style="height:14px"><div class="progress-bar warning" style="width:{{ stats.pct_medium }}%"></div></div>
+    </div>
+    <div>
+      <div style="display:flex;justify-content:space-between;margin-bottom:var(--sp-1);font-weight:700">
+        <span>🟠 {{ 'مرتفع' if lang=='ar' else 'High' }}</span>
+        <span class="text-muted">{{ stats.high }} ({{ stats.pct_high }}%)</span>
+      </div>
+      <div class="progress" style="height:14px"><div class="progress-bar danger" style="width:{{ stats.pct_high }}%"></div></div>
+    </div>
+    <div>
+      <div style="display:flex;justify-content:space-between;margin-bottom:var(--sp-1);font-weight:700">
+        <span>🔴 {{ 'حرج' if lang=='ar' else 'Critical' }}</span>
+        <span class="text-muted">{{ stats.critical }} ({{ stats.pct_critical }}%)</span>
+      </div>
+      <div class="progress" style="height:14px"><div class="progress-bar danger" style="width:{{ stats.pct_critical }}%"></div></div>
+    </div>
+  </div>
+</div>
+
+<div style="display:flex;gap:var(--sp-2);justify-content:center;flex-wrap:wrap">
+  <a href="{{ url_for('counselor_dashboard') }}" class="btn btn-pri"><i class="bi bi-grid-1x2-fill"></i> {{ 'لوحة التحكم' if lang=='ar' else 'Dashboard' }}</a>
+  <a href="{{ url_for('counselor_students') }}" class="btn btn-outline"><i class="bi bi-people"></i> {{ 'الطلاب' if lang=='ar' else 'Students' }}</a>
+  <a href="{{ url_for('research_dashboard') }}" class="btn btn-outline"><i class="bi bi-graph-up"></i> {{ 'البحث' if lang=='ar' else 'Research' }}</a>
+</div>
+{% endblock %}

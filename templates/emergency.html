@@ -1,0 +1,149 @@
+{% extends "base.html" %}
+{% block title %}{{ 'طوارئ' if lang=='ar' else 'Emergency' }} · SchoolMind AI{% endblock %}
+{% block topbar_title %}{{ '🚨 خطوط المساعدة' if lang=='ar' else '🚨 Helplines' }}{% endblock %}
+
+{% block extra_head %}
+<style>
+.emergency-banner{
+  background:linear-gradient(135deg,#991b1b,#dc2626);
+  color:#fff;border-radius:var(--r);
+  padding:var(--sp-6) var(--sp-5);
+  margin-bottom:var(--sp-5);
+  text-align:center;
+}
+.emergency-banner h1{color:#fff;margin-bottom:var(--sp-2);font-size:var(--fs-2xl)}
+.emergency-banner p{color:rgba(255,255,255,.9);margin:0;line-height:1.7}
+
+.hotline{
+  background:var(--bg-card);border:1px solid var(--border);
+  border-radius:var(--r);padding:var(--sp-5);
+  margin-bottom:var(--sp-3);
+  display:flex;align-items:center;gap:var(--sp-4);flex-wrap:wrap;
+  transition:transform var(--tr-fast);
+}
+.hotline:hover{transform:translateY(-2px);box-shadow:var(--shadow-sm)}
+.hotline.urgent{border-color:var(--danger-500);border-width:2px;background:rgba(239,68,68,.03)}
+[data-theme="dark"] .hotline.urgent{background:rgba(239,68,68,.08)}
+
+.hotline-icon{
+  width:56px;height:56px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-size:1.6rem;color:#fff;flex-shrink:0;
+}
+.hotline-icon.urgent{background:var(--grad-rose)}
+.hotline-icon.support{background:var(--grad-info)}
+.hotline-icon.mental{background:linear-gradient(135deg,#7c3aed,#a78bfa)}
+
+.hotline-info{flex:1;min-width:200px}
+.hotline-name{font-size:var(--fs-md);font-weight:700;margin-bottom:2px}
+.hotline-desc{font-size:var(--fs-sm);color:var(--text-muted);margin-bottom:var(--sp-1)}
+.hotline-hours{font-size:var(--fs-xs);color:var(--text-dim)}
+
+.call-btn{
+  background:var(--grad-em);color:#fff;
+  padding:.7rem 1.3rem;border-radius:var(--r-sm);
+  font-weight:700;text-decoration:none;
+  display:inline-flex;align-items:center;gap:var(--sp-2);
+  font-size:var(--fs-md);
+  transition:transform var(--tr-fast), box-shadow var(--tr-fast);
+}
+.call-btn:hover{transform:scale(1.05);box-shadow:var(--shadow-em);color:#fff}
+.call-btn.urgent{background:var(--grad-rose)}
+.call-btn.urgent:hover{box-shadow:0 8px 28px rgba(244,63,94,.3)}
+
+.reassurance{
+  background:rgba(34,197,94,.08);
+  border:1px solid rgba(34,197,94,.25);
+  border-radius:var(--r);padding:var(--sp-5);
+  margin-top:var(--sp-5);
+}
+.reassurance h3{color:var(--success-600);margin-bottom:var(--sp-2)}
+[data-theme="dark"] .reassurance h3{color:var(--success-500)}
+</style>
+{% endblock %}
+
+{% block content %}
+
+<div class="emergency-banner">
+  <h1><i class="bi bi-heart-pulse-fill" aria-hidden="true"></i> {{ 'أنت لست وحدك' if lang=='ar' else 'You are not alone' }}</h1>
+  <p>
+    {% if lang == 'ar' %}
+    إذا كنت تمر بأزمة، أو تفكر بإيذاء نفسك، أو تحتاج للحديث مع شخص الآن — تواصل فوراً مع أحد الخطوط التالية. كل المكالمات سرية ومجانية.
+    {% else %}
+    If you're in a crisis, thinking of hurting yourself, or just need to talk right now — reach out to one of the lines below. All calls are free and confidential.
+    {% endif %}
+  </p>
+</div>
+
+{# Jordan hotlines — most important first #}
+<div class="hotline urgent">
+  <div class="hotline-icon urgent" aria-hidden="true">
+    <i class="bi bi-telephone-fill"></i>
+  </div>
+  <div class="hotline-info">
+    <div class="hotline-name">{{ 'الطوارئ العامة' if lang=='ar' else 'General Emergency (Jordan)' }}</div>
+    <div class="hotline-desc">{{ 'للحالات العاجلة والخطر الفوري' if lang=='ar' else 'For urgent situations and immediate danger' }}</div>
+    <div class="hotline-hours"><i class="bi bi-clock" aria-hidden="true"></i> {{ '24/7' }}</div>
+  </div>
+  <a href="tel:911" class="call-btn urgent">
+    <i class="bi bi-telephone-fill" aria-hidden="true"></i>
+    911
+  </a>
+</div>
+
+<div class="hotline urgent">
+  <div class="hotline-icon mental" aria-hidden="true">
+    <i class="bi bi-chat-heart-fill"></i>
+  </div>
+  <div class="hotline-info">
+    <div class="hotline-name">{{ 'خط نجد - الدعم النفسي' if lang=='ar' else 'Nijad Mental Health Line' }}</div>
+    <div class="hotline-desc">{{ 'دعم نفسي مجاني وسري' if lang=='ar' else 'Free and confidential psychological support' }}</div>
+    <div class="hotline-hours"><i class="bi bi-clock" aria-hidden="true"></i> {{ '8:00 ص - 8:00 م' if lang=='ar' else '8 AM - 8 PM' }}</div>
+  </div>
+  <a href="tel:110" class="call-btn">
+    <i class="bi bi-telephone-fill" aria-hidden="true"></i>
+    110
+  </a>
+</div>
+
+<div class="hotline">
+  <div class="hotline-icon support" aria-hidden="true">
+    <i class="bi bi-shield-fill-check"></i>
+  </div>
+  <div class="hotline-info">
+    <div class="hotline-name">{{ 'خط حماية الأسرة' if lang=='ar' else 'Family Protection Line' }}</div>
+    <div class="hotline-desc">{{ 'للعنف الأسري والإساءة' if lang=='ar' else 'For domestic violence and abuse' }}</div>
+    <div class="hotline-hours"><i class="bi bi-clock" aria-hidden="true"></i> {{ '24/7' }}</div>
+  </div>
+  <a href="tel:911" class="call-btn">
+    <i class="bi bi-telephone-fill" aria-hidden="true"></i>
+    911
+  </a>
+</div>
+
+<div class="hotline">
+  <div class="hotline-icon support" aria-hidden="true">
+    <i class="bi bi-people-fill"></i>
+  </div>
+  <div class="hotline-info">
+    <div class="hotline-name">{{ 'المرشد في المدرسة' if lang=='ar' else 'Your School Counselor' }}</div>
+    <div class="hotline-desc">{{ 'اطلب مقابلة المرشد في المدرسة مباشرة' if lang=='ar' else 'Ask to meet your school counselor directly' }}</div>
+    <div class="hotline-hours"><i class="bi bi-clock" aria-hidden="true"></i> {{ 'خلال الدوام المدرسي' if lang=='ar' else 'During school hours' }}</div>
+  </div>
+  <a href="{{ url_for('companion') }}" class="call-btn" style="background:var(--grad-pri)">
+    <i class="bi bi-chat-heart" aria-hidden="true"></i>
+    {{ 'تحدّث مع نور' if lang=='ar' else 'Chat Nour' }}
+  </a>
+</div>
+
+<div class="reassurance">
+  <h3><i class="bi bi-heart" aria-hidden="true"></i> {{ 'رسالة لك' if lang=='ar' else 'A message for you' }}</h3>
+  {% if lang == 'ar' %}
+  <p>مهما كان الذي تمر به الآن، فهو مؤقت. الأيام الصعبة تمر، والمشاعر المؤلمة لا تبقى إلى الأبد. طلب المساعدة ليس ضعفاً — بل أشجع قرار تتخذه.</p>
+  <p class="mt-2"><strong>أنت مهم.</strong> أنت مرئي. أنت محبوب. 💙</p>
+  {% else %}
+  <p>Whatever you're going through right now is temporary. Hard days pass, and painful feelings don't last forever. Asking for help isn't weakness — it's the bravest decision you can make.</p>
+  <p class="mt-2"><strong>You matter.</strong> You are seen. You are loved. 💙</p>
+  {% endif %}
+</div>
+{% endblock %}

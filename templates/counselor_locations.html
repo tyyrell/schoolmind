@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+{% block title %}{{ 'مواقع الطلاب' if lang=='ar' else 'Student Locations' }} · SchoolMind AI{% endblock %}
+{% block topbar_title %}{{ '📍 مواقع الطلاب' if lang=='ar' else '📍 Locations' }}{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<style>
+#map{height:520px;border-radius:var(--r);border:1px solid var(--border);z-index:1}
+.loc-item{
+  padding:var(--sp-3) var(--sp-4);background:var(--bg-card);
+  border:1px solid var(--border);border-radius:var(--r);
+  margin-bottom:var(--sp-2);
+  display:flex;align-items:center;gap:var(--sp-3);
+  transition:all var(--tr);
+}
+.loc-item:hover{border-color:var(--border-h);box-shadow:var(--sh-sm)}
+.loc-icon{
+  width:42px;height:42px;border-radius:50%;
+  background:var(--grad-em);color:#fff;
+  display:flex;align-items:center;justify-content:center;
+  flex-shrink:0;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1><i class="bi bi-geo-alt-fill"></i> {{ 'مواقع الطلاب' if lang=='ar' else 'Student Locations' }}</h1>
+    <p class="subtitle">{{ locations|length }} {{ 'موقع مُشارك' if lang=='ar' else 'shared locations' }}</p>
+  </div>
+</div>
+
+<div style="display:grid;grid-template-columns:2fr 1fr;gap:var(--sp-4)">
+  <div class="card p-2">
+    <div id="map"></div>
+  </div>
+  <div class="card">
+    <div class="card-title mb-3"><i class="bi bi-list-ul"></i> {{ 'قائمة' if lang=='ar' else 'List' }}</div>
+    <div style="max-height:500px;overflow-y:auto">
+    {% for l in locations %}
+    <div class="loc-item">
+      <div class="loc-icon"><i class="bi bi-geo-alt-fill"></i></div>
+      <div style="flex:1;min-width:0">
+        <div style="font-weight:800;font-size:var(--fs-sm)">{{ l.anonymous_code or 'S-????' }}</div>
+        <div style="font-size:var(--fs-xs);color:var(--text-muted)">
+          {{ l.grade or '—' }} · {{ (l.shared_at or '')[:16] }}
+        </div>
+      </div>
+    </div>
+    {% else %}
+    <div class="empty-state" style="padding:var(--sp-5) 0">
+      <i class="bi bi-geo-alt-fill"></i>
+      <p class="text-muted">{{ 'لم يشارك أحد موقعه بعد' if lang=='ar' else 'No locations shared yet' }}</p>
+    </div>
+    {% endfor %}
+    </div>
+  </div>
+</div>
+
+<script id="locs-data" type="application/json">{{ locs_json|safe }}</script>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" defer></script>
+<script>
+window.addEventListener('load', function(){
+  if (typeof L === 'undefined'){setTimeout(arguments.callee, 200); return}
+  var locs = JSON.parse(document.getElementById('locs-data').textContent || '[]');
+  var map = L.map('map').setView([31.9454, 35.9284], 8); // Jordan center
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution:'© OpenStreetMap', maxZoom:18
+  }).addTo(map);
+  if (locs.length){
+    var bounds = [];
+    locs.forEach(function(l){
+      var marker = L.marker([l.lat, l.lng]).addTo(map);
+      marker.bindPopup('<strong>' + l.code + '</strong><br>' + (l.grade || '') + '<br>' + (l.time || ''));
+      bounds.push([l.lat, l.lng]);
+    });
+    if (bounds.length) map.fitBounds(bounds, {padding:[40,40]});
+  }
+});
+</script>
+{% endblock %}

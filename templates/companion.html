@@ -1,0 +1,125 @@
+{% extends "base.html" %}
+{% block title %}{{ 'المساعد نور' if lang=='ar' else 'Nour' }} · SchoolMind AI{% endblock %}
+{% block topbar_title %}{{ '💬 نور' if lang=='ar' else '💬 Nour' }}{% endblock %}
+
+{% block content %}
+
+<div class="nour-chat-wrap animate-fade-up">
+
+  {# Intro header #}
+  <div class="card mb-4" style="background:linear-gradient(135deg,rgba(99,102,241,.08),rgba(236,72,153,.04));border-color:var(--border-strong)">
+    <div style="display:flex;gap:var(--sp-3);align-items:center">
+      <div style="width:54px;height:54px;border-radius:50%;background:var(--grad-pri);color:#fff;display:flex;align-items:center;justify-content:center;font-size:1.6rem;flex-shrink:0;box-shadow:var(--glow-pri);animation:floatSlow 5s ease-in-out infinite">🌟</div>
+      <div style="flex:1">
+        <div style="font-weight:800;font-size:var(--fs-md)">{{ 'نور — مساعدك النفسي' if lang=='ar' else 'Nour — your AI companion' }}</div>
+        <div style="font-size:var(--fs-sm);color:var(--text-muted);margin-top:2px">
+          {{ 'أنا هنا للاستماع. محادثاتنا خاصة — المرشد يُبلَّغ فقط في حالة الخطر.' if lang=='ar' else "I'm here to listen. Our chats are private — your counselor is only notified if there's risk." }}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  {% if breathing %}
+  <div class="card mb-3" style="background:linear-gradient(135deg,#0891b2,#06b6d4);color:#fff;text-align:center">
+    <h3 style="color:#fff"><i class="bi bi-wind"></i> {{ 'تمرين تنفس' if lang=='ar' else 'Breathing exercise' }}</h3>
+    <p style="opacity:.95;line-height:1.7;color:#fff">{{ breathing }}</p>
+    <a href="{{ url_for('breathing_center') }}" class="btn btn-sm mt-3" style="background:rgba(255,255,255,.2);color:#fff;border-color:rgba(255,255,255,.3)">
+      <i class="bi bi-play-fill"></i> {{ 'ابدأ تمرين موجّه' if lang=='ar' else 'Start guided exercise' }}
+    </a>
+  </div>
+  {% endif %}
+
+  {# Messages area #}
+  <div id="nour-history" class="chat-history">
+    {% if chat_history %}
+      {% for m in chat_history %}
+        <div class="msg msg-{{ 'user' if m.role == 'user' else 'ai' }}">
+          <div class="msg-avatar" aria-hidden="true">
+            {% if m.role == 'user' %}{{ (session.display_name or '?')[0]|upper }}
+            {% else %}🌟{% endif %}
+          </div>
+          <div class="msg-bubble">{{ m.content }}</div>
+        </div>
+      {% endfor %}
+    {% else %}
+      <div class="chat-empty">
+        <span class="emoji" aria-hidden="true">💬</span>
+        <p>{{ 'ابدأ الحديث — نور يستمع.' if lang=='ar' else 'Start talking — Nour is listening.' }}</p>
+      </div>
+    {% endif %}
+  </div>
+
+  {# Quick-prompt chips #}
+  {% if not chat_history %}
+  <div style="display:flex;gap:var(--sp-2);flex-wrap:wrap;margin-bottom:var(--sp-3)">
+    <button type="button" class="btn btn-sm" data-qp="{{ 'حاسس بضغط من الدراسة' if lang=='ar' else 'I feel stressed about school' }}">
+      📚 {{ 'ضغط الدراسة' if lang=='ar' else 'School stress' }}
+    </button>
+    <button type="button" class="btn btn-sm" data-qp="{{ 'ما حدا فاهمني' if lang=='ar' else 'Nobody understands me' }}">
+      😔 {{ 'أشعر بالوحدة' if lang=='ar' else 'Feeling alone' }}
+    </button>
+    <button type="button" class="btn btn-sm" data-qp="{{ 'علمني تمرين تنفس' if lang=='ar' else 'Teach me a breathing exercise' }}">
+      🫁 {{ 'تمرين تنفس' if lang=='ar' else 'Breathing exercise' }}
+    </button>
+    <button type="button" class="btn btn-sm" data-qp="{{ 'كيف أتعامل مع القلق؟' if lang=='ar' else 'How do I handle anxiety?' }}">
+      💭 {{ 'التعامل مع القلق' if lang=='ar' else 'Handling anxiety' }}
+    </button>
+  </div>
+  {% endif %}
+
+  {# Chat input form — JS hooks into this via ID to send async #}
+  <form id="nour-chat-form" class="chat-input-row" autocomplete="off">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+    <textarea name="message" class="chat-textarea" rows="1"
+              placeholder="{{ 'اكتب ما تشعر به...' if lang=='ar' else 'Type what you feel...' }}"
+              maxlength="1000" required aria-label="{{ 'رسالة' if lang=='ar' else 'Message' }}"></textarea>
+    <button type="submit" class="chat-send-btn" aria-label="{{ 'إرسال' if lang=='ar' else 'Send' }}">
+      <i class="bi bi-send-fill" aria-hidden="true"></i>
+    </button>
+  </form>
+
+  {# Clear chat button #}
+  {% if chat_history %}
+  <div style="text-align:center;margin-top:var(--sp-3)">
+    <button type="button" class="btn btn-ghost btn-sm" id="clear-chat">
+      <i class="bi bi-trash"></i> {{ 'مسح المحادثة' if lang=='ar' else 'Clear chat' }}
+    </button>
+  </div>
+  {% endif %}
+
+  <div style="text-align:center;margin-top:var(--sp-3);font-size:var(--fs-xs);color:var(--text-dim)">
+    <i class="bi bi-info-circle" aria-hidden="true"></i>
+    {{ 'نور ليس بديلاً عن المساعدة الطبية. في الطوارئ' if lang=='ar' else 'Nour is not a substitute for medical help. In emergencies' }}
+    <a href="{{ url_for('emergency') }}" style="color:var(--danger-h);font-weight:700">
+      {{ 'اتصل بالطوارئ' if lang=='ar' else 'contact emergency' }}
+    </a>.
+  </div>
+
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+(function(){
+  // Quick-prompt chips → fill textarea
+  document.querySelectorAll('[data-qp]').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      var inp = document.querySelector('#nour-chat-form [name="message"]');
+      if (inp) { inp.value = btn.dataset.qp; inp.focus(); }
+    });
+  });
+
+  // Clear chat
+  var clearBtn = document.getElementById('clear-chat');
+  if (clearBtn) {
+    clearBtn.addEventListener('click', function(){
+      if (!confirm({{ ('"مسح المحادثة كاملة؟"' if lang=='ar' else '"Clear the entire chat?"')|safe }})) return;
+      SM.fetch('/companion/reset', { method: 'POST' })
+        .then(function(){ window.location.reload(); })
+        .catch(function(){ SM.toast('Error', 'error'); });
+    });
+  }
+})();
+</script>
+{% endblock %}

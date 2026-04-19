@@ -1,0 +1,39 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+.venv/
+venv/
+env/
+
+# Flask
+instance/
+.webassets-cache
+
+# Database
+database/*.db
+database/*.db-shm
+database/*.db-wal
+
+# Secrets
+.secret_key
+.env
+.env.*
+
+# Editors
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# Test cruft
+.pytest_cache/
+.coverage
+htmlcov/

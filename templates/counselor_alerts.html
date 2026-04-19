@@ -1,0 +1,137 @@
+{% extends "base.html" %}
+{% block title %}{{ 'تنبيهات الطوارئ' if lang=='ar' else 'Emergency Alerts' }} · SchoolMind AI{% endblock %}
+{% block topbar_title %}{{ '🚨 تنبيهات الطوارئ' if lang=='ar' else '🚨 Emergency Alerts' }}{% endblock %}
+
+{% block extra_head %}
+<style>
+.alert-row{
+  background:var(--surface); border:1px solid var(--border);
+  border-inline-start:4px solid var(--danger);
+  border-radius:var(--r); padding:var(--sp-4);
+  margin-bottom:var(--sp-3); transition:all var(--tr);
+}
+.alert-row:hover{ box-shadow:var(--sh-sm); border-color:var(--border-strong); }
+.alert-row[data-status="new"]{ border-inline-start-color:var(--danger); animation:glow 3s ease-in-out infinite; }
+.alert-row[data-status="seen"]{ border-inline-start-color:var(--warning); }
+.alert-row[data-status="contacted"]{ border-inline-start-color:var(--info); }
+.alert-row[data-status="resolved"]{ border-inline-start-color:var(--success); opacity:.7; }
+.alert-head{ display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:var(--sp-2); margin-bottom:var(--sp-3); }
+.alert-student{ font-weight:800; font-size:var(--fs-md); display:flex; align-items:center; gap:var(--sp-2); }
+.alert-meta{ font-size:var(--fs-xs); color:var(--text-muted); display:flex; flex-wrap:wrap; gap:var(--sp-3); margin-top:var(--sp-1); }
+.alert-status-pill{ padding:.3rem .7rem; border-radius:var(--r-pill); font-size:var(--fs-xs); font-weight:800; }
+.alert-status-pill[data-status="new"]{ background:rgba(248,113,113,.2); color:var(--danger-h); border:1px solid rgba(248,113,113,.3); }
+.alert-status-pill[data-status="seen"]{ background:rgba(251,191,36,.2); color:var(--warning-h); border:1px solid rgba(251,191,36,.3); }
+.alert-status-pill[data-status="contacted"]{ background:rgba(167,139,250,.2); color:var(--info-h); border:1px solid rgba(167,139,250,.3); }
+.alert-status-pill[data-status="resolved"]{ background:rgba(34,211,238,.2); color:var(--success-h); border:1px solid rgba(34,211,238,.3); }
+.alert-actions{ display:flex; gap:var(--sp-2); flex-wrap:wrap; margin-top:var(--sp-3); }
+.filter-chips{ display:flex; gap:var(--sp-2); flex-wrap:wrap; margin-bottom:var(--sp-4); }
+.chip{ padding:.5rem 1rem; border-radius:var(--r-pill); background:var(--surface); border:1.5px solid var(--border); color:var(--text-muted); font-size:var(--fs-xs); font-weight:700; text-decoration:none; transition:all var(--tr-fast); }
+.chip:hover{ border-color:var(--primary); color:var(--primary-h); }
+.chip.active{ background:var(--grad-pri); color:#fff; border-color:transparent; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1><i class="bi bi-shield-exclamation"></i> {{ 'تنبيهات الطوارئ' if lang=='ar' else 'Emergency Alerts' }}</h1>
+    <p class="subtitle">{{ alerts|length }} {{ 'تنبيه' if lang=='ar' else 'alerts' }}</p>
+  </div>
+</div>
+
+<div class="filter-chips">
+  <a href="{{ url_for('counselor_alerts') }}" class="chip {% if not status_filter %}active{% endif %}">
+    {{ 'الكل' if lang=='ar' else 'All' }}
+  </a>
+  <a href="{{ url_for('counselor_alerts', status='new') }}" class="chip {% if status_filter=='new' %}active{% endif %}">
+    🔴 {{ 'جديد' if lang=='ar' else 'New' }}
+  </a>
+  <a href="{{ url_for('counselor_alerts', status='seen') }}" class="chip {% if status_filter=='seen' %}active{% endif %}">
+    🟡 {{ 'تمت المعاينة' if lang=='ar' else 'Seen' }}
+  </a>
+  <a href="{{ url_for('counselor_alerts', status='contacted') }}" class="chip {% if status_filter=='contacted' %}active{% endif %}">
+    🟣 {{ 'تم التواصل' if lang=='ar' else 'Contacted' }}
+  </a>
+  <a href="{{ url_for('counselor_alerts', status='resolved') }}" class="chip {% if status_filter=='resolved' %}active{% endif %}">
+    🟢 {{ 'مُنجز' if lang=='ar' else 'Resolved' }}
+  </a>
+</div>
+
+{% if alerts %}
+{% for a in alerts %}
+<div class="alert-row" data-status="{{ a.status or 'new' }}" data-alert-id="{{ a.id }}">
+  <div class="alert-head">
+    <div>
+      <div class="alert-student">
+        <i class="bi bi-person-circle" style="color:var(--danger);font-size:1.3rem"></i>
+        {{ a.anonymous_code or 'S-????' }}
+        {% if a.grade %}<span class="badge">{{ a.grade }}</span>{% endif %}
+      </div>
+      <div class="alert-meta">
+        <span><i class="bi bi-heart-pulse"></i> {{ 'خطر' if lang=='ar' else 'Risk' }}: <strong>{{ (a.risk_score or 0)|round(1) }}/10</strong></span>
+        <span><i class="bi bi-tag"></i> {{ a.risk_level or '—' }}</span>
+        <span><i class="bi bi-clock"></i> {{ (a.created_at or '')[:16] }}</span>
+        {% if a.alert_type %}<span><i class="bi bi-info-circle"></i> {{ a.alert_type }}</span>{% endif %}
+      </div>
+    </div>
+    <span class="alert-status-pill" data-status="{{ a.status or 'new' }}">
+      {% if a.status == 'resolved' %}✓ {{ 'مُنجز' if lang=='ar' else 'Resolved' }}
+      {% elif a.status == 'contacted' %}{{ 'تم التواصل' if lang=='ar' else 'Contacted' }}
+      {% elif a.status == 'seen' %}{{ 'تمت المعاينة' if lang=='ar' else 'Seen' }}
+      {% else %}{{ 'جديد' if lang=='ar' else 'NEW' }}{% endif %}
+    </span>
+  </div>
+
+  {% if a.summary %}
+  <div style="padding:var(--sp-3);background:var(--surface-2);border-radius:var(--r-sm);font-size:var(--fs-sm);line-height:1.6;margin-bottom:var(--sp-3)">
+    <i class="bi bi-quote" style="color:var(--text-muted)"></i> {{ a.summary }}
+  </div>
+  {% endif %}
+
+  {% if a.latitude and a.longitude %}
+  <div style="padding:var(--sp-2) var(--sp-3);background:linear-gradient(90deg,rgba(34,211,238,.08),transparent);border-radius:var(--r-sm);font-size:var(--fs-sm);margin-bottom:var(--sp-3);display:flex;align-items:center;gap:var(--sp-2);flex-wrap:wrap">
+    <i class="bi bi-geo-alt-fill" style="color:var(--success)"></i>
+    <span>{{ 'موقع الطالب متوفر:' if lang=='ar' else 'Location available:' }}</span>
+    <code style="font-size:var(--fs-xs)">{{ "%.4f"|format(a.latitude) }}, {{ "%.4f"|format(a.longitude) }}</code>
+    <a href="https://www.google.com/maps?q={{ a.latitude }},{{ a.longitude }}" target="_blank" rel="noopener" class="btn btn-sm btn-outline">
+      <i class="bi bi-map"></i> {{ 'فتح الخريطة' if lang=='ar' else 'Open map' }}
+    </a>
+  </div>
+  {% endif %}
+
+  <div class="alert-actions">
+    <a href="{{ url_for('student_detail', uid=a.user_id) }}" class="btn btn-sm btn-outline">
+      <i class="bi bi-person-lines-fill"></i> {{ 'ملف الطالب' if lang=='ar' else 'Student file' }}
+    </a>
+    <form method="post" action="{{ url_for('update_alert', aid=a.id) }}" style="display:inline;margin:0">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+      <input type="hidden" name="status" value="seen">
+      <button type="submit" class="btn btn-sm btn-warm" {% if a.status in ('seen','contacted','resolved') %}disabled{% endif %}>
+        <i class="bi bi-eye"></i> {{ 'تمت المعاينة' if lang=='ar' else 'Mark seen' }}
+      </button>
+    </form>
+    <form method="post" action="{{ url_for('update_alert', aid=a.id) }}" style="display:inline;margin:0">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+      <input type="hidden" name="status" value="contacted">
+      <button type="submit" class="btn btn-sm" style="background:var(--grad-purple);color:#fff" {% if a.status == 'resolved' %}disabled{% endif %}>
+        <i class="bi bi-telephone"></i> {{ 'تم التواصل' if lang=='ar' else 'Contacted' }}
+      </button>
+    </form>
+    <form method="post" action="{{ url_for('update_alert', aid=a.id) }}" style="display:inline;margin:0">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+      <input type="hidden" name="status" value="resolved">
+      <button type="submit" class="btn btn-sm btn-success" {% if a.status == 'resolved' %}disabled{% endif %}>
+        <i class="bi bi-check-circle"></i> {{ 'مُنجز' if lang=='ar' else 'Resolved' }}
+      </button>
+    </form>
+  </div>
+</div>
+{% endfor %}
+{% else %}
+<div class="empty-state">
+  <i class="bi bi-shield-check"></i>
+  <h3>{{ 'لا توجد تنبيهات' if lang=='ar' else 'No alerts' }}</h3>
+  <p>{{ 'لا توجد تنبيهات طوارئ في نطاق إشرافك حالياً' if lang=='ar' else 'No emergency alerts in your supervision range right now' }}</p>
+</div>
+{% endif %}
+{% endblock %}

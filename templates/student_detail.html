@@ -1,0 +1,105 @@
+{% extends "base.html" %}
+{% block title %}{{ student.anonymous_code }} · SchoolMind AI{% endblock %}
+{% block topbar_title %}{{ '👤 ' + (student.anonymous_code or 'طالب') if lang=='ar' else '👤 ' + (student.anonymous_code or 'Student') }}{% endblock %}
+
+{% block content %}
+<div class="hero" style="background:var(--grad-ocean)">
+  <div style="display:flex;align-items:center;gap:var(--sp-4);flex-wrap:wrap">
+    <div style="width:80px;height:80px;border-radius:50%;background:rgba(255,255,255,.2);backdrop-filter:blur(10px);display:flex;align-items:center;justify-content:center;font-size:2rem;font-weight:900">
+      {{ (student.anonymous_code or 'S')[0] }}
+    </div>
+    <div style="flex:1;min-width:200px">
+      <h1 style="color:#fff">{{ student.anonymous_code }}</h1>
+      <p style="opacity:.9">{{ student.grade or '—' }} · {{ student.username }}</p>
+    </div>
+    <a href="{{ url_for('counselor_edit_student', uid=student.id) }}" class="btn" style="background:rgba(255,255,255,.2);color:#fff;border-color:rgba(255,255,255,.3)">
+      <i class="bi bi-pencil"></i> {{ 'تعديل' if lang=='ar' else 'Edit' }}
+    </a>
+  </div>
+</div>
+
+<div class="stats-grid">
+  <div class="stat-card info">
+    <i class="bi bi-journal-text stat-icon"></i>
+    <div class="stat-number" data-count="{{ personal_stats.total_journals }}">0</div>
+    <div class="stat-label">{{ 'يوميات' if lang=='ar' else 'Journals' }}</div>
+  </div>
+  <div class="stat-card {% if personal_stats.avg_risk >= 5 %}danger{% elif personal_stats.avg_risk >= 2.5 %}warning{% else %}success{% endif %}">
+    <i class="bi bi-heart-pulse stat-icon"></i>
+    <div class="stat-number">{{ personal_stats.avg_risk }}</div>
+    <div class="stat-label">{{ 'متوسط الخطر' if lang=='ar' else 'Avg risk' }}</div>
+  </div>
+  <div class="stat-card warning">
+    <i class="bi bi-fire stat-icon"></i>
+    <div class="stat-number" data-count="{{ streak.current or 0 }}">0</div>
+    <div class="stat-label">{{ 'ستريك' if lang=='ar' else 'Streak' }}</div>
+  </div>
+  <div class="stat-card success">
+    <i class="bi bi-trophy stat-icon"></i>
+    <div class="stat-number" data-count="{{ personal_stats.achievements_count }}">0</div>
+    <div class="stat-label">{{ 'شارات' if lang=='ar' else 'Badges' }}</div>
+  </div>
+</div>
+
+{% if chart_scores and chart_scores != '[]' %}
+<div class="card mb-4">
+  <div class="card-title mb-3"><i class="bi bi-graph-up-arrow"></i> {{ 'تطور الخطر' if lang=='ar' else 'Risk trend' }}</div>
+  <div class="chart-wrap"><canvas id="chart"></canvas></div>
+</div>
+<script id="chart-data" type="application/json">{"scores":{{ chart_scores|safe }},"labels":{{ chart_labels|safe }}}</script>
+{% endif %}
+
+{% if location %}
+<div class="card mb-4">
+  <div class="card-title mb-3"><i class="bi bi-geo-alt-fill" style="color:var(--success)"></i> {{ 'الموقع المُشارك' if lang=='ar' else 'Shared Location' }}</div>
+  <p><strong>{{ location.city or 'Unknown' }}</strong></p>
+  <p class="text-muted text-sm">📅 {{ (location.shared_at or '')[:16] }}</p>
+  <a href="https://maps.google.com/?q={{ location.latitude }},{{ location.longitude }}" target="_blank" rel="noopener" class="btn btn-outline mt-2">
+    <i class="bi bi-map"></i> {{ 'فتح في الخرائط' if lang=='ar' else 'Open in Maps' }}
+  </a>
+</div>
+{% endif %}
+
+<div class="card">
+  <div class="card-title mb-3"><i class="bi bi-journal"></i> {{ 'آخر اليوميات' if lang=='ar' else 'Recent Journals' }}</div>
+  {% if journals %}
+    {% for j in journals %}
+    <div style="padding:var(--sp-3);background:var(--bg-muted);border-radius:var(--r-sm);margin-bottom:var(--sp-2);border-inline-start:3px solid {% if j.risk_level in ('high','critical') %}var(--danger){% elif j.risk_level == 'medium' %}var(--warning){% else %}var(--teal-500){% endif %}">
+      <div style="display:flex;justify-content:space-between;margin-bottom:var(--sp-1);font-size:var(--fs-xs);color:var(--text-muted);flex-wrap:wrap;gap:var(--sp-2)">
+        <span><i class="bi bi-calendar"></i> {{ (j.created_at or '')[:16] }}</span>
+        <div style="display:flex;gap:var(--sp-1)">
+          {% if j.dominant_emotion %}<span class="badge">{{ j.dominant_emotion }}</span>{% endif %}
+          {% if j.risk_level %}<span class="badge {% if j.risk_level in ('high','critical') %}badge-danger{% elif j.risk_level == 'medium' %}badge-warning{% else %}badge-success{% endif %}">{{ j.risk_level }}</span>{% endif %}
+        </div>
+      </div>
+      <div style="font-size:var(--fs-sm);line-height:1.6">{{ j.content }}</div>
+    </div>
+    {% endfor %}
+  {% else %}
+  <div class="empty-state"><i class="bi bi-journal"></i><p>{{ 'لا توجد يوميات' if lang=='ar' else 'No journals' }}</p></div>
+  {% endif %}
+</div>
+{% endblock %}
+
+{% block chartjs %}
+{% if chart_scores and chart_scores != '[]' %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js" defer></script>
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+{% if chart_scores and chart_scores != '[]' %}
+<script>
+(function init(){
+  if(typeof Chart==='undefined'){setTimeout(init,100);return}
+  var d=JSON.parse(document.getElementById('chart-data').textContent);
+  var muted=getComputedStyle(document.documentElement).getPropertyValue('--text-muted').trim()||'#6b7280';
+  new Chart(document.getElementById('chart'),{
+    type:'line',
+    data:{labels:d.labels,datasets:[{data:d.scores,borderColor:'#0d9488',backgroundColor:'rgba(20,184,166,.14)',fill:true,tension:.4,pointBackgroundColor:'#0d9488'}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{min:0,max:10,ticks:{color:muted}},x:{ticks:{color:muted,maxTicksLimit:7}}}}
+  });
+})();
+</script>
+{% endif %}
+{% endblock %}
