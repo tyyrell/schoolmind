@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% block title %}Account security · SchoolMind{% endblock %}
+{% block content %}
+<div class="dashboard-layout">
+  {% include "partials/dashboard_nav.html" %}
+  <section class="dash-main">
+    <div class="dash-head">
+      <span class="eyebrow">Admin</span>
+      <h1>Account security</h1>
+      <p>Lockouts, reset controls, and login security history for this workspace.</p>
+    </div>
+
+    <div class="metric-strip">
+      <div class="metric-card urgent"><small>Locked accounts</small><strong>{{ summary.locked }}</strong></div>
+      <div class="metric-card watch"><small>Failed attempts / 24h</small><strong>{{ summary.failed_today }}</strong></div>
+      <div class="metric-card steady"><small>Pending reset links</small><strong>{{ summary.reset_pending }}</strong></div>
+    </div>
+
+    <div class="panel-list">
+      <h2>User access controls</h2>
+      {% for user in users %}
+        <div class="list-row tall">
+          <div>
+            <strong>{{ user.name }}</strong>
+            <small>{{ user.email }} · {{ user.role }} · failed: {{ user.failed_login_count or 0 }} · locked until: {{ user.locked_until or 'not locked' }} · last login: {{ user.last_login_at or 'never' }}</small>
+          </div>
+          <div class="row-actions">
+            <form method="post" action="{{ url_for('dashboard.admin_unlock_user', user_id=user.id) }}">
+              {% include "partials/form_csrf.html" %}
+              <button class="btn ghost" type="submit">Unlock</button>
+            </form>
+            <form method="post" action="{{ url_for('dashboard.admin_queue_reset_link', user_id=user.id) }}">
+              {% include "partials/form_csrf.html" %}
+              <button class="btn" type="submit">Queue reset</button>
+            </form>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+
+    <div class="panel-list">
+      <h2>Security events</h2>
+      {% for event in events %}
+        <div class="list-row tall">
+          <div>
+            <strong>{{ event.event_type }}</strong>
+            <small>{{ event.email }} · success: {{ 'yes' if event.success else 'no' }} · {{ event.ip_address }} · {{ event.created_at }}</small>
+            <small>{{ event.detail }}</small>
+          </div>
+          <span>{{ event.user_name or 'unknown' }}</span>
+        </div>
+      {% else %}
+        <p class="muted">No security events yet.</p>
+      {% endfor %}
+    </div>
+  </section>
+</div>
+{% endblock %}

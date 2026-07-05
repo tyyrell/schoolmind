@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block title %}Compliance Overview · SchoolMind AI{% endblock %}
+{% block content %}
+<section class="section page-hero compact">
+  <span class="eyebrow">Compliance overview</span>
+  <h1>Compliance cannot be claimed casually.</h1>
+  <p class="lead">SchoolMind AI is being structured around privacy, consent, retention, access control, auditability, and human supervision. Formal compliance claims require legal review for each market and deployment.</p>
+</section>
+<section class="section company-grid three">
+  <article class="company-card"><h3>What is built in</h3><p>Role-based access, CSRF protection, security headers, audit events, consent records, retention settings, exports, and school-admin controls.</p></article>
+  <article class="company-card"><h3>What schools must define</h3><p>Guardian consent, internal policy, staff permissions, local student privacy requirements, retention period, and escalation protocol.</p></article>
+  <article class="company-card"><h3>What needs external review</h3><p>Country-specific legal compliance, data processing agreement, subprocessors, incident response, and commercial terms.</p></article>
+</section>
+<section class="section table-card">
+  <table>
+    <thead><tr><th>Area</th><th>Current product posture</th><th>Before production</th></tr></thead>
+    <tbody>
+      <tr><td>Student privacy</td><td>Role boundaries and consent workflow exist.</td><td>Review local school privacy law and guardian consent rules.</td></tr>
+      <tr><td>Data hosting</td><td>Production is designed for PostgreSQL/Supabase or equivalent.</td><td>Connect real production database, backups, and data residency decision.</td></tr>
+      <tr><td>AI safety</td><td>Non-diagnostic educational wording and human review framing.</td><td>Review AI provider, logging, retention, and disclosure policy if external AI is used.</td></tr>
+      <tr><td>Payments</td><td>Pricing and billing structure are prepared.</td><td>Connect provider checkout, webhook secret, and invoicing/tax rules.</td></tr>
+    </tbody>
+  </table>
+</section>
+<section class="section final-cta-section"><span class="eyebrow">No fake badges</span><h2>Do not display compliance logos until they are real.</h2><p>Trust is stronger when the product is honest about readiness. Use this page as a readiness overview, then upgrade it after legal/security review.</p></section>
+{% endblock %}

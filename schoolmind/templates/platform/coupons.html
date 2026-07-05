@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% block title %}Coupons · SchoolMind Platform{% endblock %}
+{% block content %}
+<section class="dash-main">
+  <div class="dash-head">
+    <span class="eyebrow">Platform billing</span>
+    <h1>Coupons and launch offers</h1>
+    <p>Codes created here are validated during approved billing activation flows and recorded against the school.</p>
+  </div>
+  <div class="dash-grid two">
+    <form class="pixel-form compact" method="post">
+      {% include "partials/form_csrf.html" %}
+      <h2>Create coupon</h2>
+      <label>Code<input name="code" placeholder="PILOT25" required></label>
+      <label>Description<input name="description" placeholder="25% pilot discount for early partners"></label>
+      <label>Discount percent<input name="discount_percent" type="number" min="1" max="100" value="25"></label>
+      <label>Maximum redemptions<input name="max_redemptions" type="number" min="1" max="10000" value="50"></label>
+      <label>Plan scope
+        <select name="applies_to_plan">
+          <option value="all">All plans</option>
+          {% for key, plan in plans.items() %}<option value="{{ key }}">{{ plan.name }}</option>{% endfor %}
+        </select>
+      </label>
+      <label>Expires at<input name="expires_at" placeholder="2026-12-31"></label>
+      <button class="btn primary" type="submit">Create coupon</button>
+    </form>
+    <div class="panel-list">
+      <h2>Active codes</h2>
+      {% for coupon in coupons %}
+        <div class="list-row tall">
+          <span>{{ coupon.code }}</span>
+          <b>{{ coupon.discount_percent }}%</b>
+          <small>{{ coupon.description }} · {{ coupon.status }} · {{ coupon.applies_to_plan }} · used {{ coupon.redeemed_count }}/{{ coupon.max_redemptions }}</small>
+          <form method="post" action="{{ url_for('platform.platform_coupon_status', coupon_id=coupon.id) }}">
+            {% include "partials/form_csrf.html" %}
+            <input type="hidden" name="status" value="{{ 'disabled' if coupon.status == 'active' else 'active' }}">
+            <button class="btn ghost" type="submit">{{ 'Disable' if coupon.status == 'active' else 'Enable' }}</button>
+          </form>
+        </div>
+      {% else %}<p class="muted">No coupons yet.</p>{% endfor %}
+    </div>
+  </div>
+  <div class="panel-list">
+    <h2>Recent redemptions</h2>
+    {% for item in redemptions %}
+      <div class="list-row tall">
+        <span>{{ item.code }}</span>
+        <b>{{ item.school_name }}</b>
+        <small>Discount amount ${{ item.discount_amount }} · {{ item.created_at }}</small>
+      </div>
+    {% else %}<p class="muted">No coupon redemptions yet.</p>{% endfor %}
+  </div>
+</section>
+{% endblock %}

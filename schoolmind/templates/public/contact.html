@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block title %}Contact · SchoolMind AI{% endblock %}
+{% block content %}
+<section class="section company-split">
+  <div>
+    <span class="eyebrow">Contact</span>
+    <h1>Request a demo, pilot, or school deployment discussion.</h1>
+    <p class="lead">Use this form for school trials, guided pilots, pricing questions, implementation planning, or privacy/security questions.</p>
+    <div class="company-card">
+      <h2>Production warning</h2>
+      <p>Connect a real email provider before production launch so leads do not stay only in the database. Support email configured for this environment: {{ support_email }}.</p>
+    </div>
+  </div>
+  <form class="pixel-form" method="post">
+    {% include "partials/form_csrf.html" %}
+    <input type="hidden" name="lead_type" value="contact">
+    <label>Name<input name="name" required></label>
+    <label>Email<input name="email" type="email" required></label>
+    <label>School or organization<input name="school_name"></label>
+    <label>Estimated students<input name="student_count" inputmode="numeric" placeholder="Optional"></label>
+    <label>Reason
+      <select name="preferred_path">
+        <option value="not_sure">General question</option>
+        <option value="demo_first">Guided demo</option>
+        <option value="self_serve_trial">Trial question</option>
+        <option value="guided_pilot">Guided pilot</option>
+      </select>
+    </label>
+    <label>Message<textarea name="message" rows="6" placeholder="Tell us what you want to evaluate, how many students you support, and whether you need a guided pilot." required></textarea></label>
+    <button class="btn primary" type="submit">Send message</button>
+  </form>
+</section>
+{% endblock %}

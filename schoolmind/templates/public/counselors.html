@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block title %}For Counselors · SchoolMind AI{% endblock %}
+{% block content %}
+<section class="section page-hero compact">
+  <span class="eyebrow">For counselors</span>
+  <h1>A supervised support hub for follow-up, notes, and human review.</h1>
+  <p class="lead">SchoolMind AI organizes educational wellbeing signals so counselors can review, prioritize, document, and coordinate support with appropriate context.</p>
+</section>
+<section class="section company-split">
+  <div>
+    <span class="eyebrow">Support workflow</span>
+    <h2>Move from scattered signals to a reviewable case flow.</h2>
+    <ul class="company-list">
+      <li>Support queue for authorized staff.</li>
+      <li>Student briefs with educational indicators and recent support activity.</li>
+      <li>Case notes, follow-up cadence, playbooks, and closure actions.</li>
+      <li>Clear reminders that SchoolMind does not replace professional judgment or emergency services.</li>
+    </ul>
+  </div>
+  <div class="company-image"><picture class="smart-picture"><source srcset="{{ url_for('static', filename='img/pages/04_counselor_student_support.webp') }}" type="image/webp"><img src="{{ url_for('static', filename='img/pages/04_counselor_student_support.png') }}" alt="Counselor student support workflow" loading="lazy" decoding="async" width="368" height="312"></picture></div>
+</section>
+{% endblock %}

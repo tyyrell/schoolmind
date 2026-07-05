@@ -1,0 +1,82 @@
+{
+  "artifact": "SchoolMind_AI_Company_Ready_Final_Phase17.zip",
+  "created_at_utc": "2026-07-04T16:07:38.709740+00:00",
+  "project_root": "schoolmind-main",
+  "release_name": "SchoolMind AI Company Ready Final Phase 17",
+  "release_status": "controlled-pilot-and-demo-ready; production requires owner-provided database, email, payment, domain, and legal review",
+  "file_count": 219,
+  "html_template_count": 80,
+  "test_count": 111,
+  "test_result": {
+    "passed": 110,
+    "skipped": 1,
+    "assertion_failures": 0,
+    "skipped_reason": "TEST_DATABASE_URL not provided"
+  },
+  "route_audit_endpoints": 112,
+  "phase_audits": [
+    "image_audit",
+    "i18n_audit",
+    "company_site_audit",
+    "billing_audit",
+    "trial_pilot_audit",
+    "onboarding_audit",
+    "dashboard_role_audit",
+    "ai_safety_audit",
+    "legal_trust_audit",
+    "security_hardening_audit",
+    "email_readiness_audit",
+    "postgres_readiness_audit",
+    "performance_mobile_audit",
+    "seo_discovery_audit",
+    "route_audit",
+    "preflight",
+    "audit",
+    "release_check"
+  ],
+  "core_features": [
+    "company public site",
+    "instant limited demo",
+    "30-day trial",
+    "guided pilot",
+    "bilingual English/Arabic RTL",
+    "role-based dashboards",
+    "AI safety guardrails",
+    "privacy/legal trust layer",
+    "pricing and billing guardrails",
+    "email readiness",
+    "PostgreSQL/Supabase readiness",
+    "mobile/performance polish",
+    "SEO/social discovery"
+  ],
+  "production_blockers": [
+    "strong SECRET_KEY",
+    "Supabase/PostgreSQL DATABASE_URL",
+    "payment checkout URLs and webhook secret",
+    "transactional email provider",
+    "final PUBLIC_BASE_URL/domain",
+    "legal review",
+    "real subprocessor list",
+    "backup/restore drill",
+    "Redis rate limiting",
+    "admin/platform MFA"
+  ],
+  "excluded_dirs": [
+    ".git",
+    ".mypy_cache",
+    ".pytest_cache",
+    ".ruff_cache",
+    ".venv",
+    "__pycache__",
+    "instance",
+    "venv"
+  ],
+  "excluded_suffixes": [
+    ".db",
+    ".log",
+    ".pyc",
+    ".pyo",
+    ".sqlite",
+    ".sqlite3"
+  ]
+}

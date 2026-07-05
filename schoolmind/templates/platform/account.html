@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+{% block title %}{{ t('settings.title') }} · SchoolMind{% endblock %}
+{% block content %}
+<section class="dash-main">
+  <div class="dash-head">
+    <span class="eyebrow">{{ t('nav.platform') }}</span>
+    <h1>{{ t('settings.title') }}</h1>
+    <p>{{ t('settings.subtitle') }}</p>
+  </div>
+
+  <div class="hero-actions">
+    <a class="btn ghost" href="{{ url_for('platform.platform_home') }}">{{ t('nav.platform') }}</a>
+    <a class="btn ghost" href="{{ url_for('platform.platform_settings') }}">{{ t('nav.settings') }}</a>
+    <a class="btn ghost" href="{{ url_for('platform.platform_coupons') }}">Coupons</a>
+    <button class="btn ghost" type="button" data-open-personalization>{{ t('personalize.reopen') }}</button>
+  </div>
+
+  <div class="dash-grid two">
+    <form class="pixel-form compact" method="post">
+      {% include "partials/form_csrf.html" %}
+      <input type="hidden" name="action" value="profile">
+      <h2>{{ t('settings.profile') }}</h2>
+      <label>{{ t('settings.display_name') }}<input name="name" value="{{ current_platform_admin.name }}" required></label>
+      <div class="board-row"><span>Email</span><b>{{ current_platform_admin.email }}</b></div>
+      <button class="btn primary" type="submit">{{ t('common.save') }}</button>
+    </form>
+
+    <form class="pixel-form compact" method="post">
+      {% include "partials/form_csrf.html" %}
+      <input type="hidden" name="action" value="preferences">
+      <h2>{{ t('settings.accessibility') }}</h2>
+      <div class="form-grid">
+        <label>{{ t('settings.language') }}
+          <select name="language">
+            {% for code, meta in languages.items() %}
+              <option value="{{ code }}" {% if preferences.language == code %}selected{% endif %}>{{ meta.name }}</option>
+            {% endfor %}
+          </select>
+        </label>
+        <label>{{ t('settings.theme') }}
+          <select name="theme">
+            {% for code, label in themes.items() %}
+              <option value="{{ code }}" {% if preferences.theme == code %}selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+          </select>
+        </label>
+        <label>{{ t('settings.font_size') }}
+          <select name="font_size">
+            {% for code, label in font_sizes.items() %}
+              <option value="{{ code }}" {% if preferences.font_size == code %}selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+          </select>
+        </label>
+      </div>
+      <label class="inline-check"><input type="checkbox" name="reduced_motion" {% if preferences.reduced_motion %}checked{% endif %}>{{ t('settings.reduced_motion') }}</label>
+      <label class="inline-check"><input type="checkbox" name="high_contrast" {% if preferences.high_contrast %}checked{% endif %}>{{ t('settings.high_contrast') }}</label>
+      <label class="inline-check"><input type="checkbox" name="dyslexia_friendly" {% if preferences.dyslexia_friendly %}checked{% endif %}>{{ t('settings.dyslexia') }}</label>
+      <button class="btn primary" type="submit">{{ t('common.save') }}</button>
+    </form>
+  </div>
+
+  <div class="dash-grid two">
+    <form class="pixel-form compact" method="post">
+      {% include "partials/form_csrf.html" %}
+      <input type="hidden" name="action" value="notifications">
+      <h2>{{ t('settings.notifications') }}</h2>
+      <label class="inline-check"><input type="checkbox" name="notify_email" {% if preferences.notify_email %}checked{% endif %}>{{ t('settings.email_notifications') }}</label>
+      <button class="btn ghost" type="submit">{{ t('common.save') }}</button>
+    </form>
+
+    <form class="pixel-form compact" method="post">
+      {% include "partials/form_csrf.html" %}
+      <input type="hidden" name="action" value="password">
+      <h2>{{ t('settings.security') }}</h2>
+      <label>{{ t('settings.current_password') }}<input type="password" name="current_password" autocomplete="current-password"></label>
+      <label>{{ t('settings.new_password') }}<input type="password" name="new_password" minlength="8" autocomplete="new-password"></label>
+      <button class="btn ghost" type="submit">{{ t('settings.password_updated') }}</button>
+    </form>
+  </div>
+</section>
+{% endblock %}

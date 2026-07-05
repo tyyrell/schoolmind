@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+{% block title %}Platform admin · SchoolMind{% endblock %}
+{% block content %}
+<section class="dash-main">
+  <div class="dash-head">
+    <span class="eyebrow">SaaS operator</span>
+    <h1>Platform admin</h1>
+    <p>Cross-school operations. This is not for counselors or school staff.</p>
+  </div>
+  <div class="metric-strip">
+    <div class="metric-card steady"><small>Schools</small><strong>{{ stats.schools }}</strong></div>
+    <div class="metric-card steady"><small>Active</small><strong>{{ stats.active }}</strong></div>
+    <div class="metric-card watch"><small>Trials</small><strong>{{ stats.trial }}</strong></div>
+    <div class="metric-card"><small>Users</small><strong>{{ stats.users }}</strong></div>
+    <div class="metric-card urgent"><small>Open signals</small><strong>{{ stats.open_events }}</strong></div>
+    <div class="metric-card watch"><small>New leads</small><strong>{{ stats.leads }}</strong></div>
+  </div>
+
+  <div class="dash-grid two">
+    <a class="feature-card clickable" href="{{ url_for('platform.platform_coupons') }}">
+      <span class="pixel-icon">%</span>
+      <h3>Coupons and offers</h3>
+      <p>Create paid-plan discounts, track redemptions, and support pilot sales conversations.</p>
+    </a>
+    <a class="feature-card clickable" href="{{ url_for('platform.platform_settings') }}">
+      <span class="pixel-icon">SET</span>
+      <h3>Public site settings</h3>
+      <p>Update homepage copy, public announcement, trial availability, and maintenance switches.</p>
+    </a>
+  </div>
+
+  <div class="panel-list">
+    <h2>Schools</h2>
+    {% for school in schools %}
+      <a class="list-row tall clickable" href="{{ url_for('platform.platform_school', school_id=school.id) }}">
+        <div>
+          <strong>{{ school.name }}</strong>
+          <small>{{ school.slug }} · {{ school.plan }} · {{ school.status }} · users: {{ school.users_count or 0 }} · students: {{ school.students_count or 0 }}</small>
+        </div>
+        <span class="risk {{ 'urgent' if school.open_events else 'steady' }}">{{ school.open_events or 0 }} open</span>
+      </a>
+    {% endfor %}
+  </div>
+
+  <div class="dash-grid two">
+    <div class="panel-list">
+      <h2>Sales leads</h2>
+      {% for lead in leads %}
+        <div class="list-row tall">
+          <div><strong>{{ lead.school_name or lead.name }}</strong><small>{{ lead.email }} · {{ lead.created_at }}</small><small>{{ lead.message }}</small></div>
+          <span>{{ lead.status }}</span>
+        </div>
+      {% else %}<p class="muted">No leads yet.</p>{% endfor %}
+    </div>
+    <div class="panel-list">
+      <h2>Billing events</h2>
+      {% for event in billing %}
+        <div class="list-row tall">
+          <div><strong>{{ event.event_type }}</strong><small>{{ event.school_name }} · {{ event.plan }} · ${{ event.amount }} · {{ event.created_at }}</small></div>
+          <span>{{ event.provider_reference or 'manual' }}</span>
+        </div>
+      {% else %}<p class="muted">No billing events.</p>{% endfor %}
+    </div>
+  </div>
+
+  <div class="dash-grid two">
+    <div class="panel-list">
+      <h2>Recent coupons</h2>
+      {% for coupon in coupons %}
+        <div class="list-row tall">
+          <div><strong>{{ coupon.code }}</strong><small>{{ coupon.discount_percent }}% · {{ coupon.status }} · {{ coupon.applies_to_plan }}</small></div>
+          <span>{{ coupon.redeemed_count }}/{{ coupon.max_redemptions }}</span>
+        </div>
+      {% else %}<p class="muted">No coupons yet.</p>{% endfor %}
+    </div>
+    <div class="panel-list">
+      <h2>Site settings</h2>
+      {% for item in settings %}
+        <div class="list-row tall">
+          <div><strong>{{ item.key }}</strong><small>{{ item.value }}</small></div>
+          <span>{{ item.updated_at }}</span>
+        </div>
+      {% else %}<p class="muted">No settings yet.</p>{% endfor %}
+    </div>
+  </div>
+</section>
+{% endblock %}

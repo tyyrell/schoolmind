@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block title %}Site settings · SchoolMind Platform{% endblock %}
+{% block content %}
+<section class="dash-main">
+  <div class="dash-head">
+    <span class="eyebrow">Developer-only control</span>
+    <h1>Public site settings</h1>
+    <p>These values are stored in the server database and affect the public sales pages immediately.</p>
+  </div>
+  <form class="pixel-form compact" method="post">
+    {% include "partials/form_csrf.html" %}
+    <label>Public announcement<input name="public_announcement" value="{{ settings.public_announcement or '' }}"></label>
+    <label>Homepage title<textarea name="hero_title" rows="2">{{ settings.hero_title or '' }}</textarea></label>
+    <label>Homepage subtitle<textarea name="hero_subtitle" rows="4">{{ settings.hero_subtitle or '' }}</textarea></label>
+    <label>Maintenance mode
+      <select name="maintenance_mode">
+        <option value="false" {% if settings.maintenance_mode != 'true' %}selected{% endif %}>Off</option>
+        <option value="true" {% if settings.maintenance_mode == 'true' %}selected{% endif %}>On</option>
+      </select>
+    </label>
+    <label>Public trials
+      <select name="allow_public_trials">
+        <option value="true" {% if settings.allow_public_trials != 'false' %}selected{% endif %}>Allowed</option>
+        <option value="false" {% if settings.allow_public_trials == 'false' %}selected{% endif %}>Hidden</option>
+      </select>
+    </label>
+    <button class="btn primary" type="submit">Save site settings</button>
+  </form>
+</section>
+{% endblock %}

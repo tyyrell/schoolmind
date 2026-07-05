@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+{% block title %}Database readiness · SchoolMind{% endblock %}
+{% block content %}
+<div class="dashboard-layout">
+  {% include "partials/dashboard_nav.html" %}
+  <section class="dash-main">
+    <div class="dash-head">
+      <span class="eyebrow">Data layer</span>
+      <h1>Database readiness</h1>
+      <p>Storage status, schema version, Supabase/PostgreSQL readiness, and export discipline before a paid school launch.</p>
+    </div>
+
+    <div class="metric-strip">
+      <div class="metric-card"><small>Engine</small><strong>{{ report.engine }}</strong></div>
+      <div class="metric-card"><small>Environment</small><strong>{{ report.app_env }}</strong></div>
+      <div class="metric-card"><small>Storage</small><strong>{{ 'Ready' if report.exists else 'Missing' }}</strong></div>
+      <div class="metric-card"><small>Size</small><strong>{{ report.size_bytes }} B</strong></div>
+    </div>
+
+    <div class="panel-list">
+      <h2>Runtime database</h2>
+      <div class="list-row tall"><span>Database target</span><b>{{ report.path }}</b><small>Parent/provider: {{ report.parent }}</small></div>
+      <div class="list-row tall"><span>DATABASE_URL present</span><b>{{ 'Yes' if report.database_url_present else 'No' }}</b><small>PostgreSQL URLs are masked. Production should use Supabase Postgres through DATABASE_ENGINE=postgres and DATABASE_URL.</small></div>
+      {% if report.database_url_safe %}<div class="list-row tall"><span>Masked DATABASE_URL</span><b>{{ report.database_url_safe }}</b><small>Credentials are never shown in the dashboard or logs.</small></div>{% endif %}
+    </div>
+
+    <div class="panel-list postgres-readiness-panel">
+      <h2>Supabase/PostgreSQL readiness</h2>
+      <div class="list-row tall"><span>Host</span><b>{{ report.postgres_settings.host or 'Not detected' }}</b><small>{{ 'Looks like Supabase' if report.postgres_settings.looks_like_supabase else 'Verify this is the intended managed PostgreSQL provider.' }}</small></div>
+      <div class="list-row tall"><span>Pooler posture</span><b>{{ report.postgres_settings.pooling_mode }}</b><small>{% if report.postgres_settings.looks_like_pooler %}The URL appears to use a Supabase pooler or pooler-like endpoint.{% else %}Direct endpoints are acceptable for small deployments, but use an external pooler before serious traffic.{% endif %}</small></div>
+      <div class="list-row tall"><span>TLS mode</span><b>{{ report.postgres_settings.sslmode or 'not set' }}</b><small>Production must use sslmode=require, verify-ca, or verify-full.</small></div>
+      <div class="list-row tall"><span>Timeouts</span><b>{{ report.postgres_settings.connect_timeout_seconds }}s / {{ report.postgres_settings.statement_timeout_ms }}ms</b><small>Connect timeout and statement timeout prevent hung requests from exhausting workers.</small></div>
+      <div class="list-row tall"><span>Application name</span><b>{{ report.postgres_settings.application_name }}</b><small>Useful for Supabase/PostgreSQL activity logs.</small></div>
+    </div>
+
+    <div class="panel-list">
+      <h2>Readiness checks</h2>
+      {% for item in report.checks %}
+        <div class="list-row tall status-{{ item.status }}">
+          <span>{{ item.name }}</span>
+          <b>{{ item.status|upper }}</b>
+          <small>{{ item.detail }}</small>
+        </div>
+      {% endfor %}
+    </div>
+
+    <div class="dash-grid two">
+      <div class="panel-list">
+        <h2>Table counts</h2>
+        {% for item in counts %}
+          <div class="list-row"><span>{{ item.table }}{% if item.scoped %} <small>school-scoped</small>{% endif %}</span><b>{{ item.total }}</b></div>
+        {% endfor %}
+      </div>
+      <div class="panel-list">
+        <h2>Release artifact scan</h2>
+        {% if release_findings %}
+          {% for item in release_findings[:12] %}
+            <div class="list-row tall status-blocker"><span>{{ item.path }}</span><b>BLOCK</b><small>{{ item.issue }}</small></div>
+          {% endfor %}
+        {% else %}
+          <div class="list-row tall status-pass"><span>No runtime artifacts detected</span><b>PASS</b><small>The source tree is clean for packaging checks.</small></div>
+        {% endif %}
+        <a class="btn ghost" href="{{ url_for('dashboard.admin_backups') }}">Open backup center</a>
+      </div>
+    </div>
+
+    <div class="panel-list">
+      <h2>Production database inputs</h2>
+      {% for item in report.production_env_vars %}
+        <div class="list-row"><span>{{ item }}</span><b>Required</b></div>
+      {% endfor %}
+      <p class="microcopy">Do not paste secrets into source files. Configure production values in Render environment variables and keep Supabase credentials out of git.</p>
+    </div>
+  </section>
+</div>
+{% endblock %}

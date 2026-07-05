@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% block title %}Reports · SchoolMind{% endblock %}
+{% block content %}
+<div class="dashboard-layout">
+  {% include "partials/dashboard_nav.html" %}
+  <section class="dash-main">
+    <div class="dash-head">
+      <span class="eyebrow">Reports</span>
+      <h1>Decision data without exposing private student writing.</h1>
+      <p>These metrics are operational. They are not medical scoring and not a diagnosis.</p>
+    </div>
+    {% with title="Reports safety boundary", body="Reports summarize operational support indicators. SchoolMind AI does not diagnose, and reports should not be treated as medical scores, automated student labels, or standalone decisions." %}{% include "partials/ai_safety_notice.html" %}{% endwith %}
+
+    <div class="metric-strip">
+      <div class="metric-card"><small>Students</small><strong>{{ totals.students }}</strong></div>
+      <div class="metric-card"><small>Wellbeing scans</small><strong>{{ totals.assessments }}</strong></div>
+      <div class="metric-card"><small>Average score</small><strong>{{ totals.avg_score }}</strong></div>
+      <div class="metric-card {{ 'watch' if totals.assessment_needs_review else 'steady' }}"><small>Needs review</small><strong>{{ totals.assessment_needs_review }}</strong></div>
+      <div class="metric-card"><small>Total signals</small><strong>{{ totals.signals }}</strong></div>
+      <div class="metric-card"><small>Open signals</small><strong>{{ totals.open }}</strong></div>
+      <div class="metric-card"><small>Goals</small><strong>{{ totals.goals }}</strong></div>
+      <div class="metric-card"><small>Skill games</small><strong>{{ totals.game_sessions }}</strong></div>
+      <div class="metric-card"><small>Breathing sessions</small><strong>{{ totals.breathing_sessions }}</strong></div>
+      <div class="metric-card"><small>Nour messages</small><strong>{{ totals.ai_messages }}</strong></div>
+      <div class="metric-card"><small>Interventions</small><strong>{{ totals.interventions }}</strong></div>
+      <div class="metric-card"><small>Consent records</small><strong>{{ totals.consent }}</strong></div>
+    </div>
+    <div class="dash-grid three">
+      <div class="panel-list">
+        <h2>Risk distribution</h2>
+        {% for row in risk_rows %}
+          <div class="list-row"><span>{{ row.risk_level }}</span><b>{{ row.total }}</b><small>signals</small></div>
+        {% else %}<p class="muted">No signals yet.</p>{% endfor %}
+      </div>
+      <div class="panel-list">
+        <h2>Wellbeing focus areas</h2>
+        {% for row in assessment_rows %}
+          <div class="list-row tall">
+            <span>{{ row.primary_need|replace('_', ' ')|title }}</span>
+            <b>{{ row.total }}</b>
+            <small>Average {{ row.avg_score }} · {{ row.needs_review or 0 }} need counselor review</small>
+          </div>
+        {% else %}<p class="muted">No scans yet.</p>{% endfor %}
+      </div>
+      <div class="panel-list">
+        <h2>Group summary</h2>
+        {% for row in group_rows %}
+          <div class="list-row tall"><span>{{ row.group_name or 'Unassigned' }}</span><b>{{ row.students }} students</b><small>{{ row.signals }} signals · {{ row.requests }} requests</small></div>
+        {% else %}<p class="muted">No groups yet.</p>{% endfor %}
+      </div>
+    </div>
+    <div class="panel-list">
+      <h2>Engagement and practice</h2>
+      {% for row in practice_rows %}
+        <div class="list-row tall">
+          <span>{{ row.group_name or 'Unassigned' }}</span>
+          <b>{{ row.active_goals or 0 }} active goals</b>
+          <small>{{ row.completed_goals or 0 }} completed goals · {{ row.game_sessions or 0 }} skill games · {{ row.breathing_sessions or 0 }} breathing sessions</small>
+        </div>
+      {% else %}<p class="muted">No practice records yet.</p>{% endfor %}
+    </div>
+  </section>
+</div>
+{% endblock %}

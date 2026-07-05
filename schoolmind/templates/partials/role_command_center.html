@@ -1,0 +1,29 @@
+{% if role_board %}
+  <section class="role-command-center {{ role_board.status }}" aria-label="{{ role_board.label }}">
+    <div class="role-command-copy">
+      <span class="eyebrow">{{ role_board.label }}</span>
+      <h2>{{ role_board.title }}</h2>
+      <p>{{ role_board.summary }}</p>
+      <a class="btn primary" href="{{ url_for(role_board.primary_endpoint) }}">{{ role_board.primary_action }}</a>
+    </div>
+    <div class="role-kpi-grid">
+      {% for item in role_board.kpis %}
+        <div class="role-kpi-card">
+          <small>{{ item.label }}</small>
+          <strong>{{ item.value }}</strong>
+          <span>{{ item.detail }}</span>
+        </div>
+      {% endfor %}
+    </div>
+  </section>
+
+  <section class="role-workflow-grid" aria-label="Role workflow actions">
+    {% for action in role_board.actions %}
+      <a class="role-action-card clickable" href="{{ url_for(action.endpoint) }}">
+        <span class="pixel-icon">{{ loop.index }}</span>
+        <h3>{{ action.title }}</h3>
+        <p>{{ action.body }}</p>
+      </a>
+    {% endfor %}
+  </section>
+{% endif %}

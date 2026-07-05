@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block title %}Terms · SchoolMind AI{% endblock %}
+{% block content %}
+<section class="section page-hero compact legal-hero">
+  <span class="eyebrow">Terms</span>
+  <h1>Use SchoolMind AI as a supervised school support platform.</h1>
+  <p class="lead">These terms define the product posture: educational indicators, school governance, human review, and responsible trial use. They are not final commercial legal terms for every country.</p>
+  <p class="legal-note">{{ legal_notice }}</p>
+</section>
+
+<section class="company-grid two policy-grid">
+  <article class="company-card policy-card"><h3>Educational support only</h3><p>The platform provides educational wellbeing indicators and workflow support. It does not provide medical diagnosis, clinical treatment, emergency response, or legal advice.</p></article>
+  <article class="company-card policy-card"><h3>School responsibility</h3><p>Schools are responsible for user access, guardian consent where required, local policy, staff training, data ownership, and human support decisions.</p></article>
+  <article class="company-card policy-card"><h3>Trial use</h3><p>The 30-day trial is for evaluation. Production student data should not be added until privacy, consent, and deployment readiness are reviewed.</p></article>
+  <article class="company-card policy-card"><h3>Billing</h3><p>Standard and Pro plans are priced per school. Annual billing can reduce the effective monthly cost. Larger deployments may use negotiated terms.</p></article>
+  <article class="company-card policy-card"><h3>Acceptable use</h3><p>Do not use the platform to harass, profile, discriminate, bypass school policy, or make unsupported conclusions about a student.</p></article>
+  <article class="company-card policy-card"><h3>Emergency boundary</h3><p>SchoolMind AI is not an emergency service. Schools must use their approved emergency and safeguarding procedures outside the platform.</p></article>
+</section>
+
+<section class="section company-split legal-split">
+  <div>
+    <span class="eyebrow">Commercial readiness</span>
+    <h2>Do not sign real schools on vague promises.</h2>
+    <p class="lead">Before paid production use, the operator should publish final subprocessors, connect production database/email/payment systems, define support terms, and review privacy obligations.</p>
+  </div>
+  <div class="company-card legal-callout"><h3>Related documents</h3><p>Read the privacy policy, DPA draft, student data notice, retention policy, and incident response overview together. One page alone is not enough for a school product.</p><div class="hero-actions"><a class="btn ghost" href="{{ url_for('public.privacy') }}">Privacy</a><a class="btn ghost" href="{{ url_for('public.data_processing_agreement') }}">DPA</a></div></div>
+</section>
+{% endblock %}

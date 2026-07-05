@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% block title %}School detail · SchoolMind{% endblock %}
+{% block content %}
+<section class="dash-main">
+  <div class="dash-head">
+    <span class="eyebrow">Platform school</span>
+    <h1>{{ school.name }}</h1>
+    <p>{{ school.slug }} · {{ school.country }} · {{ school.plan }} · {{ school.status }}</p>
+  </div>
+  <div class="metric-strip">
+    <div class="metric-card"><small>Students</small><strong>{{ counts.students }}</strong></div>
+    <div class="metric-card"><small>Staff</small><strong>{{ counts.staff }}</strong></div>
+    <div class="metric-card urgent"><small>Open signals</small><strong>{{ counts.open_events }}</strong></div>
+    <div class="metric-card watch"><small>Queued email</small><strong>{{ counts.queued_email }}</strong></div>
+  </div>
+
+  <div class="panel-list">
+    <h2>Operational status</h2>
+    <form class="form-grid" method="post" action="{{ url_for('platform.platform_school_status', school_id=school.id) }}">
+      {% include "partials/form_csrf.html" %}
+      <label>Status
+        <select name="status">
+          {% for status in ['trial', 'active', 'past_due', 'suspended', 'cancelled'] %}
+            <option value="{{ status }}" {% if school.status == status %}selected{% endif %}>{{ status }}</option>
+          {% endfor %}
+        </select>
+      </label>
+      <button class="btn primary" type="submit">Update status</button>
+    </form>
+    {% if settings %}
+      <p class="muted">Support owner: {{ settings.support_owner or 'missing' }} · SLA: {{ settings.escalation_window_minutes }} minutes · retention: {{ settings.data_retention_days }} days</p>
+    {% endif %}
+  </div>
+
+  <div class="dash-grid two">
+    <div class="panel-list">
+      <h2>Users</h2>
+      {% for user in users %}
+        <div class="list-row tall">
+          <div><strong>{{ user.name }}</strong><small>{{ user.email }} · {{ user.role }} · active: {{ user.is_active }} · last login: {{ user.last_login_at or 'never' }}</small></div>
+          <span>{{ 'locked' if user.locked_until else 'ok' }}</span>
+        </div>
+      {% endfor %}
+    </div>
+    <div class="panel-list">
+      <h2>Audit trail</h2>
+      {% for item in audit %}
+        <div class="list-row tall"><div><strong>{{ item.action }}</strong><small>{{ item.detail }} · {{ item.created_at }}</small></div></div>
+      {% else %}<p class="muted">No audit events.</p>{% endfor %}
+    </div>
+  </div>
+</section>
+{% endblock %}

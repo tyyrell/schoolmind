@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block title %}Settings · SchoolMind{% endblock %}
+{% block content %}
+<div class="dashboard-layout">
+  {% include "partials/dashboard_nav.html" %}
+  <section class="dash-main">
+    <div class="dash-head">
+      <span class="eyebrow">School settings</span>
+      <h1>Policy before scale.</h1>
+      <p>This page exists because selling to schools without a human escalation policy is reckless.</p>
+    </div>
+    <form class="pixel-form compact" method="post">
+      {% include "partials/form_csrf.html" %}
+      <div class="form-grid">
+        <label>Country<input name="country" value="{{ school.country }}"></label>
+        <label>Support owner<input name="support_owner" value="{{ settings.support_owner }}" placeholder="Counselor lead or support team"></label>
+        <label>Escalation window minutes<input name="escalation_window_minutes" type="number" min="5" max="1440" value="{{ settings.escalation_window_minutes }}"></label>
+        <label>Data retention days<input name="data_retention_days" type="number" min="30" max="3650" value="{{ settings.data_retention_days }}"></label>
+      </div>
+      <label class="inline-check"><input name="guardian_consent_required" type="checkbox" {% if settings.guardian_consent_required %}checked{% endif %}> Guardian consent required</label>
+      <label>Escalation instructions<textarea name="emergency_instructions" rows="5">{{ settings.emergency_instructions }}</textarea></label>
+      <button class="btn primary" type="submit">Save settings</button>
+    </form>
+    <div class="dash-grid two">
+      <form class="pixel-form compact danger-zone" method="post" action="{{ url_for('dashboard.admin_run_retention') }}">
+        {% include "partials/form_csrf.html" %}
+        <h2>Run retention cleanup</h2>
+        <p class="muted">Deletes old operational records beyond the configured retention window. Users and consent records are preserved.</p>
+        <button class="btn ghost" type="submit">Run cleanup</button>
+      </form>
+      <div class="pixel-board wide">
+        <div class="board-row"><span>Backup export</span><b><a href="{{ url_for('api.export_workspace_json') }}">Download JSON</a></b></div>
+        <div class="board-row"><span>Retention window</span><b>{{ settings.data_retention_days }} days</b></div>
+        <div class="board-row"><span>Consent requirement</span><b>{{ 'on' if settings.guardian_consent_required else 'off' }}</b></div>
+      </div>
+    </div>
+  </section>
+</div>
+{% endblock %}

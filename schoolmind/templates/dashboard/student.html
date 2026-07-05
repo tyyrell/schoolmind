@@ -1,0 +1,151 @@
+{% extends "base.html" %}
+{% block title %}Student console · SchoolMind{% endblock %}
+{% block content %}
+<div class="dashboard-layout">
+  {% include "partials/dashboard_nav.html" %}
+  <section class="dash-main">
+    <div class="dash-head">
+      <span class="eyebrow">Student console</span>
+      <h1>Check in. Build a plan. Stay supported.</h1>
+      <p>Support owner: <strong>{{ settings.support_owner or 'school support team' }}</strong>. SchoolMind gives educational support indicators, not a diagnosis.</p>
+    </div>
+
+    {% include "partials/role_command_center.html" %}
+
+    {% with title="Student safety boundary", body="Your check-ins and support scans create educational indicators for supervised school support. SchoolMind AI does not diagnose, and urgent decisions stay with your school support team." %}{% include "partials/ai_safety_notice.html" %}{% endwith %}
+
+    {% if not consent_ok %}
+      <div class="panel-list danger-zone">
+        <h2>Consent required before student tools unlock</h2>
+        <p class="muted">Your school has guardian consent enabled. Ask an administrator to record consent before check-ins, journals, support requests, or companion messages are used.</p>
+      </div>
+    {% endif %}
+
+    <div class="metric-strip">
+      <div class="metric-card {{ snapshot.level }}"><small>Wellbeing score</small><strong>{{ snapshot.score }}</strong><progress class="meter-progress" value="{{ snapshot.score }}" max="100">{{ snapshot.score }}%</progress></div>
+      <div class="metric-card"><small>Current focus</small><strong>{{ snapshot.level|title }}</strong><p class="muted">{{ snapshot.headline }}</p></div>
+      <div class="metric-card"><small>Active plans</small><strong>{{ snapshot.plan_count }}</strong><p class="muted">Plans are support steps, not labels.</p></div>
+      <div class="metric-card"><small>Recent inputs</small><strong>{{ snapshot.checkin_count + snapshot.journal_count }}</strong><p class="muted">Check-ins and journal entries this view can use.</p></div>
+    </div>
+
+    <div class="feature-grid four">
+      <a class="feature-card clickable" href="{{ url_for('dashboard.journal_studio') }}"><span class="pixel-icon">J</span><h3>Journal</h3><p>Write a clearer reflection and keep it in the support workflow.</p></a>
+      <a class="feature-card clickable" href="{{ url_for('dashboard.student_goals') }}"><span class="pixel-icon">G</span><h3>Goals</h3><p>Turn pressure into small progress the support team can understand.</p></a>
+      <a class="feature-card clickable" href="{{ url_for('dashboard.progress_hub') }}"><span class="pixel-icon">R</span><h3>Progress</h3><p>See goals, practice, breathing, and the latest support scan together.</p></a>
+      <a class="feature-card clickable" href="{{ url_for('dashboard.games') }}"><span class="pixel-icon">P</span><h3>Practice</h3><p>Use short skill games that build calm, focus, and positive recall.</p></a>
+      <a class="feature-card clickable" href="{{ url_for('dashboard.weekly_summary') }}"><span class="pixel-icon">W</span><h3>Weekly summary</h3><p>Review the last seven days without guessing what changed.</p></a>
+      <a class="feature-card clickable" href="{{ url_for('dashboard.support_plans') }}"><span class="pixel-icon">S</span><h3>Support plans</h3><p>Track plan goals, next steps, cadence, and requests in one view.</p></a>
+      <a class="feature-card clickable" href="{{ url_for('dashboard.breathing_center') }}"><span class="pixel-icon">B</span><h3>Breathing</h3><p>Record a short reset before exams, messages, or check-ins.</p></a>
+    </div>
+
+    {% if latest_assessment %}
+      <div class="panel-list insight-panel">
+        <h2>Latest wellbeing scan</h2>
+        <div class="list-row tall">
+          <span>{{ latest_assessment.primary_need|replace('_', ' ')|title }}</span>
+          <b class="risk {{ latest_assessment.risk_level }}">{{ latest_assessment.risk_level }}</b>
+          <small>{{ latest_assessment.recommendation }}</small>
+          <small>Score {{ latest_assessment.score }} · {{ latest_assessment.created_at }}</small>
+        </div>
+      </div>
+    {% endif %}
+
+    <form class="pixel-form compact wellbeing-form {% if not consent_ok %}locked-section{% endif %}" method="post" action="{{ url_for('dashboard.student_assessment') }}">
+      {% include "partials/form_csrf.html" %}
+      <div>
+        <span class="eyebrow">Wellbeing studio</span>
+        <h2>Two-minute support scan</h2>
+        <p class="muted">This creates a personal support plan and gives counselors a safer, clearer brief.</p>
+      </div>
+      <div class="form-grid">
+        <label>Mood<select name="mood"><option value="5">5 Strong</option><option value="4">4 Good</option><option value="3" selected>3 Okay</option><option value="2">2 Low</option><option value="1">1 Hard</option></select></label>
+        <label>Stress<select name="stress"><option value="1">1 Low</option><option value="2">2 Mild</option><option value="3" selected>3 Medium</option><option value="4">4 High</option><option value="5">5 Very high</option></select></label>
+        <label>Sleep<select name="sleep"><option value="5">5 Rested</option><option value="4">4 Mostly rested</option><option value="3" selected>3 Mixed</option><option value="2">2 Poor</option><option value="1">1 Exhausted</option></select></label>
+        <label>Belonging<select name="belonging"><option value="5">5 Connected</option><option value="4">4 Mostly connected</option><option value="3" selected>3 Unsure</option><option value="2">2 Isolated</option><option value="1">1 Very isolated</option></select></label>
+        <label>Study pressure<select name="study_pressure"><option value="1">1 Light</option><option value="2">2 Manageable</option><option value="3" selected>3 Medium</option><option value="4">4 Heavy</option><option value="5">5 Too heavy</option></select></label>
+        <label>Focus<select name="focus"><option value="5">5 Clear</option><option value="4">4 Good</option><option value="3" selected>3 Mixed</option><option value="2">2 Scattered</option><option value="1">1 Very hard</option></select></label>
+        <label>Safety<select name="safety"><option value="5">5 Safe</option><option value="4">4 Mostly safe</option><option value="3" selected>3 Unsure</option><option value="2">2 Not safe enough</option><option value="1">1 Needs immediate human help</option></select></label>
+        <label>Support access<select name="support_access"><option value="5">5 I know who to ask</option><option value="4">4 Mostly clear</option><option value="3" selected>3 Not sure</option><option value="2">2 Hard to ask</option><option value="1">1 I do not know who can help</option></select></label>
+      </div>
+      <button class="btn primary" type="submit" {% if not consent_ok %}disabled{% endif %}>Create support plan</button>
+    </form>
+
+    <div class="dash-grid two">
+      <div class="panel-list">
+        <h2>Active support plans</h2>
+        {% for plan in active_plans %}
+          <article class="list-row tall">
+            <span>{{ plan.focus_area }}</span>
+            <b>{{ plan.status }}</b>
+            <small>{{ plan.goal }}</small>
+            <small>{{ plan.next_step }} · {{ plan.cadence }}</small>
+          </article>
+        {% else %}<p class="muted">Complete the wellbeing scan to generate a plan.</p>{% endfor %}
+      </div>
+      <div class="panel-list">
+        <h2>Scan history</h2>
+        {% for item in assessments %}
+          <div class="list-row tall"><span>{{ item.primary_need|replace('_', ' ')|title }}</span><b class="risk {{ item.risk_level }}">{{ item.score }}</b><small>{{ item.recommendation }}</small></div>
+        {% else %}<p class="muted">No scans yet.</p>{% endfor %}
+      </div>
+    </div>
+
+    <div class="dash-grid two {% if not consent_ok %}locked-section{% endif %}">
+      <form class="pixel-form compact" method="post" action="{{ url_for('dashboard.student_checkin') }}">
+        {% include "partials/form_csrf.html" %}
+        <h2>Daily check-in</h2>
+        <label>Mood<select name="mood"><option value="5">5 Great</option><option value="4">4 Good</option><option value="3" selected>3 Okay</option><option value="2">2 Low</option><option value="1">1 Hard</option></select></label>
+        <label>Stress<select name="stress"><option value="1">1 Low</option><option value="2">2 Mild</option><option value="3" selected>3 Medium</option><option value="4">4 High</option><option value="5">5 Very high</option></select></label>
+        <label>Energy<select name="energy"><option value="5">5 Strong</option><option value="4">4 Good</option><option value="3" selected>3 Okay</option><option value="2">2 Tired</option><option value="1">1 Drained</option></select></label>
+        <label>Optional note<textarea name="note" rows="3"></textarea></label>
+        <button class="btn primary" type="submit" {% if not consent_ok %}disabled{% endif %}>Save check-in</button>
+      </form>
+      <form class="pixel-form compact" method="post" action="{{ url_for('dashboard.student_journal') }}">
+        {% include "partials/form_csrf.html" %}
+        <h2>Private journal</h2>
+        <label>Write a note<textarea name="body" rows="9" placeholder="Write what you want your support team to understand."></textarea></label>
+        <button class="btn primary" type="submit" {% if not consent_ok %}disabled{% endif %}>Save journal</button>
+      </form>
+    </div>
+
+    <div class="dash-grid two">
+      <form class="pixel-form compact" method="post" action="{{ url_for('dashboard.student_support') }}">
+        {% include "partials/form_csrf.html" %}
+        <h2>Request support</h2>
+        <label>Topic<input name="topic" placeholder="Study plan, pressure, conflict, attendance"></label>
+        <label>Message<textarea name="message" rows="4" required></textarea></label>
+        <button class="btn ghost" type="submit" {% if not consent_ok %}disabled{% endif %}>Send request</button>
+      </form>
+      <form class="pixel-form compact" method="post" action="{{ url_for('dashboard.student_companion') }}">
+        {% include "partials/form_csrf.html" %}
+        <h2>Nour companion</h2>
+        <p class="muted">Nour gives a simple reflection step and can route support signals to a human reviewer.</p>
+        <label>Message<textarea name="message" rows="4" placeholder="What is the main thing you want to handle today?"></textarea></label>
+        <button class="btn ghost" type="submit" {% if not consent_ok %}disabled{% endif %}>Ask Nour</button>
+      </form>
+    </div>
+
+    <div class="dash-grid two">
+      <div class="panel-list">
+        <h2>Recent signals</h2>
+        {% for checkin in checkins %}
+          <div class="list-row"><span>Check-in</span><b class="risk {{ checkin.risk_level }}">{{ checkin.risk_level }}</b><small>{{ checkin.created_at }}</small></div>
+        {% else %}<p class="muted">No check-ins yet.</p>{% endfor %}
+      </div>
+      <div class="panel-list">
+        <h2>Support requests</h2>
+        {% for item in requests %}
+          <div class="list-row tall"><span>{{ item.topic }}</span><b>{{ item.status }}</b><small>{{ item.message }}</small></div>
+        {% else %}<p class="muted">No requests yet.</p>{% endfor %}
+      </div>
+    </div>
+
+    <div class="panel-list">
+      <h2>Journal history</h2>
+      {% for journal in journals %}
+        <article class="list-row tall"><span>{{ journal.body }}</span><b class="risk {{ journal.risk_level }}">{{ journal.risk_level }}</b><small>{{ journal.ai_summary }}</small></article>
+      {% else %}<p class="muted">No journals yet.</p>{% endfor %}
+    </div>
+  </section>
+</div>
+{% endblock %}

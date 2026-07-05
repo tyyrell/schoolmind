@@ -1,0 +1,131 @@
+{% extends "base.html" %}
+{% block title %}Pricing · SchoolMind AI{% endblock %}
+{% block content %}
+<section class="section page-hero compact pricing-hero">
+  <span class="eyebrow">Pricing</span>
+  <h1>Clear school pricing. No permanent free plan. No hidden production launch.</h1>
+  <p class="lead">Every paid plan starts with a 30-day evaluation trial. Monthly and annual billing are available, annual billing lowers the effective monthly cost, and larger schools can move into a guided pilot or custom agreement.</p>
+  <div class="trust-strip pricing-strip">
+    <span>30-day evaluation trial</span>
+    <span>Per-school pricing</span>
+    <span>Monthly or annual billing</span>
+    <span>Extra seats approved before billing</span>
+  </div>
+</section>
+
+<section class="section billing-toggle-note" aria-labelledby="billing-options-title">
+  <div>
+    <span class="eyebrow">Billing options</span>
+    <h2 id="billing-options-title">Choose monthly flexibility or annual savings.</h2>
+    <p class="lead">The trial is for product evaluation. Production student data should only be used after the school reviews privacy, consent, and human-support responsibilities.</p>
+  </div>
+  <div class="billing-cycle-cards" aria-label="Billing cycle summary">
+    <article>
+      <strong>Monthly</strong>
+      <span>Lower commitment, same product limits.</span>
+    </article>
+    <article>
+      <strong>Annual</strong>
+      <span>Lower effective monthly cost for committed schools.</span>
+    </article>
+  </div>
+</section>
+
+<section class="pricing-grid company-pricing detailed-pricing" aria-label="SchoolMind AI plans">
+  {% for plan in pricing_catalog %}
+  <article class="price-card {% if plan.key == 'growth' %}featured{% endif %}">
+    <span class="eyebrow">{{ plan.name }}</span>
+    {% if plan.is_custom %}
+      <span class="price-number">Custom</span>
+      <p class="price-note">Guided pilot or negotiated deployment for large schools and multi-campus groups.</p>
+    {% else %}
+      <span class="price-number">${{ plan.monthly_price }}<small>/month</small></span>
+      <p class="price-note">Annual: ${{ plan.annual_price }}/year · about ${{ plan.annual_effective_monthly }}/month · save ${{ plan.annual_savings }}/year</p>
+    {% endif %}
+    <p>{{ plan.tagline }}</p>
+    <strong>{{ plan.limits }}</strong>
+    <p class="muted">Staff limit: {{ plan.staff_limit }} · Extra seats: {{ plan.extra_student_fee }}</p>
+    <p class="muted">{{ plan.extra_student_note }}</p>
+    <ul>{% for feature in plan.features %}<li>{{ feature }}</li>{% endfor %}</ul>
+    <div class="row-actions stacked-actions">
+      {% if plan.is_custom %}
+        <a class="btn primary" href="{{ url_for('public.request_demo') }}">Request guided pilot</a>
+        <a class="btn ghost" href="{{ url_for('public.contact') }}">Discuss terms</a>
+      {% else %}
+        <a class="btn primary" href="{{ url_for('auth.start', plan=plan.key, billing_cycle='monthly') }}">Start monthly trial</a>
+        <a class="btn ghost" href="{{ url_for('auth.start', plan=plan.key, billing_cycle='annual') }}">Start annual trial</a>
+      {% endif %}
+    </div>
+  </article>
+  {% endfor %}
+</section>
+
+<section class="section comparison-section" aria-labelledby="comparison-title">
+  <span class="eyebrow">Plan comparison</span>
+  <h2 id="comparison-title">The plan limits are intentionally simple.</h2>
+  <div class="comparison-table-wrap">
+    <table class="comparison-table">
+      <thead>
+        <tr>
+          <th>Plan</th>
+          <th>Included students</th>
+          <th>Staff accounts</th>
+          <th>Best for</th>
+          <th>After included limit</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for plan in pricing_catalog %}
+        <tr>
+          <td><strong>{{ plan.name }}</strong></td>
+          <td>{% if plan.is_custom %}Negotiated{% else %}{{ plan.student_limit }}{% endif %}</td>
+          <td>{% if plan.is_custom %}Negotiated{% else %}{{ plan.staff_limit }}{% endif %}</td>
+          <td>{{ plan.best_for }}</td>
+          <td>{{ plan.extra_student_fee }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section class="section company-split pricing-explainer">
+  <div>
+    <span class="eyebrow">What happens after the trial?</span>
+    <h2>No surprise conversion. The school chooses the billing path.</h2>
+    <p class="lead">At the end of the 30-day trial, the workspace should move to monthly billing, annual billing, a guided pilot agreement, or pause until the school is ready.</p>
+    <ul class="company-list">
+      <li>Checkout must be completed through the configured payment provider before paid activation.</li>
+      <li>Manual activation stays locked for normal school admins by default.</li>
+      <li>Extra student charges should be approved before being billed.</li>
+      <li>Custom plans are for large schools, districts, data residency needs, or negotiated rollout support.</li>
+    </ul>
+  </div>
+  <div class="company-image"><picture class="smart-picture"><source srcset="{{ url_for('static', filename='img/pages/10_school_partnership_meeting.webp') }}" type="image/webp"><img src="{{ url_for('static', filename='img/pages/10_school_partnership_meeting.png') }}" alt="School partnership discussion" loading="lazy" decoding="async" width="369" height="350"></picture></div>
+</section>
+
+<section class="section pricing-guardrails" aria-labelledby="pricing-guardrails-title">
+  <span class="eyebrow">Billing guardrails</span>
+  <h2 id="pricing-guardrails-title">This is not a fake-free funnel.</h2>
+  <div class="feature-grid three">
+    <article class="feature-card"><h3>Trial means evaluation</h3><p>The free path is a 30-day trial to evaluate SchoolMind AI, not a permanent free plan and not permission to collect uncontrolled student data.</p></article>
+    <article class="feature-card"><h3>Checkout before activation</h3><p>Paid subscriptions should activate through provider checkout and webhook confirmation, not by a school admin clicking a manual switch.</p></article>
+    <article class="feature-card"><h3>Pilot for serious rollouts</h3><p>Schools that need onboarding, privacy review, or staff workflow design should request a guided pilot instead of self-serving a production rollout.</p></article>
+  </div>
+</section>
+
+{% if coupons %}
+<section class="section">
+  <div class="panel-list">
+    <h2>Active launch offers</h2>
+    {% for coupon in coupons %}
+      <div class="list-row tall">
+        <span>{{ coupon.code }}</span>
+        <b>{{ coupon.discount_percent }}% off</b>
+        <small>{{ coupon.description }} · applies to {{ coupon.applies_to_plan }}</small>
+      </div>
+    {% endfor %}
+  </div>
+</section>
+{% endif %}
+{% endblock %}

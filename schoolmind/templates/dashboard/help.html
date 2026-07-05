@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %}{{ t('nav.help') }} · SchoolMind{% endblock %}
+{% block content %}
+<div class="dashboard-layout">
+  {% include "partials/dashboard_nav.html" %}
+  <section class="dash-main">
+    <div class="dash-head">
+      <span class="eyebrow">{{ t('nav.group.help') }}</span>
+      <h1>{{ t('help.title') }}</h1>
+      <p>{{ t('help.subtitle') }}</p>
+    </div>
+    <div class="feature-grid three">
+      {% for card in cards %}
+        <article class="feature-card">
+          <span class="pixel-icon">{{ loop.index }}</span>
+          <h3>{{ card.title }}</h3>
+          <p>{{ card.body }}</p>
+        </article>
+      {% endfor %}
+    </div>
+    <div class="panel-list">
+      <h2>{{ t('help.quick_links') }}</h2>
+      <div class="row-actions">
+        <a class="btn ghost" href="{{ url_for('dashboard.account_settings') }}">{{ t('nav.settings') }}</a>
+        <a class="btn ghost" href="{{ url_for('dashboard.activity_center') }}">{{ t('nav.activity') }}</a>
+        <a class="btn ghost" href="{{ url_for('public.terms') }}">Terms</a>
+        <a class="btn ghost" href="{{ url_for('public.privacy') }}">Privacy</a>
+      </div>
+    </div>
+  </section>
+</div>
+{% endblock %}

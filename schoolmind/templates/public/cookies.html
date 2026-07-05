@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block title %}Cookie Policy · SchoolMind AI{% endblock %}
+{% block content %}
+<section class="section page-hero compact">
+  <span class="eyebrow">Cookie policy</span>
+  <h1>Minimal cookies for a safer school product.</h1>
+  <p class="lead">SchoolMind AI should use only necessary cookies unless a school explicitly approves analytics or marketing tools. This draft keeps the default posture conservative.</p>
+</section>
+<section class="section company-grid three">
+  <article class="company-card"><h3>Required session cookie</h3><p>Used to keep users signed in, protect CSRF flow, preserve language/theme preferences, and keep the limited demo working.</p></article>
+  <article class="company-card"><h3>Preference state</h3><p>Language, theme, font size, contrast, reduced motion, and demo reminders may be stored in the session or user preferences.</p></article>
+  <article class="company-card"><h3>No default ad tracking</h3><p>Do not add advertising pixels or invasive analytics to a student support platform without written school approval.</p></article>
+</section>
+<section class="section table-card">
+  <table>
+    <thead><tr><th>Type</th><th>Purpose</th><th>Default position</th></tr></thead>
+    <tbody>
+      <tr><td>Session</td><td>Login, CSRF, demo role, language, and security context.</td><td>Required.</td></tr>
+      <tr><td>Preferences</td><td>Accessibility and display settings.</td><td>Required for user-requested customization.</td></tr>
+      <tr><td>Analytics</td><td>Product usage measurement.</td><td>Disabled unless a school approves a specific tool.</td></tr>
+      <tr><td>Marketing</td><td>Advertising or remarketing.</td><td>Not appropriate for student workspaces by default.</td></tr>
+    </tbody>
+  </table>
+</section>
+{% endblock %}

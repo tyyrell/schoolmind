@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+{% block title %}Billing · SchoolMind AI{% endblock %}
+{% block content %}
+<div class="dashboard-layout">
+  {% include "partials/dashboard_nav.html" %}
+  <section class="dash-main billing-workspace">
+    <div class="dash-head">
+      <span class="eyebrow">Billing</span>
+      <h1>Subscription status that controls access.</h1>
+      <p>Current plan: <strong>{{ subscription.plan if subscription else 'none' }}</strong> · Status: <strong>{{ subscription.status if subscription else 'none' }}</strong> · Price: <strong>${{ subscription.monthly_price if subscription else 0 }}/mo</strong></p>
+    </div>
+
+    <div class="pixel-board wide billing-policy-board">
+      <h2>Billing policy</h2>
+      <p class="muted">Paid activation should come from payment-provider checkout and webhook confirmation. Manual activation is locked unless the owner explicitly enables it for offline payment reconciliation.</p>
+      <div class="metric-strip">
+        <div><span>Trial</span><b>30 days</b></div>
+        <div><span>Billing</span><b>Monthly / annual</b></div>
+        <div><span>Pricing</span><b>Per school</b></div>
+        <div><span>Extra seats</span><b>Approved first</b></div>
+      </div>
+    </div>
+
+    <div class="pricing-grid dashboard-pricing">
+      {% for plan in pricing_catalog %}
+      <article class="price-card {% if subscription and subscription.plan == plan.key %}featured{% endif %}">
+        <span class="eyebrow">{{ plan.name }}</span>
+        {% if plan.is_custom %}
+          <h2>Custom</h2>
+          <p>{{ plan.limits }}</p>
+          <p class="muted">{{ plan.extra_student_note }}</p>
+          <a class="btn primary" href="{{ url_for('public.request_demo') }}">Request guided pilot</a>
+        {% else %}
+          <h2>${{ plan.monthly_price }}<small>/mo</small></h2>
+          <p>Annual: ${{ plan.annual_price }}/year · about ${{ plan.annual_effective_monthly }}/mo · save ${{ plan.annual_savings }}/year.</p>
+          <p>{{ plan.limits }} · Staff limit: {{ plan.staff_limit }}</p>
+          <p class="muted">Extra students: {{ plan.extra_student_fee }}</p>
+          <ul>{% for feature in plan.features %}<li>{{ feature }}</li>{% endfor %}</ul>
+          <div class="row-actions stacked-actions">
+            <a class="btn primary" href="{{ url_for('dashboard.billing_checkout', plan=plan.key, billing_cycle='monthly') }}">Open monthly checkout</a>
+            <a class="btn ghost" href="{{ url_for('dashboard.billing_checkout', plan=plan.key, billing_cycle='annual') }}">Open annual checkout</a>
+          </div>
+        {% endif %}
+      </article>
+      {% endfor %}
+    </div>
+
+    <div class="dash-grid two">
+      {% if allow_manual_billing %}
+      <form class="pixel-form compact" method="post" action="{{ url_for('dashboard.billing_manual_activate') }}">
+        {% include "partials/form_csrf.html" %}
+        <h2>Manual activation</h2>
+        <p class="muted">Use this only after offline payment or a provider dashboard confirmation. This is disabled by default for normal school admins.</p>
+        <label>Plan<select name="plan">{% for key, plan in plans.items() %}<option value="{{ key }}">{{ plan.name }}</option>{% endfor %}</select></label>
+        <label>Coupon code<input name="coupon_code" placeholder="PILOT25"></label>
+        <label>Reference<input name="reference" placeholder="Invoice or provider reference"></label>
+        <button class="btn ghost" type="submit">Record activation</button>
+      </form>
+      {% else %}
+      <form class="pixel-board wide locked-billing-form" method="post" action="{{ url_for('dashboard.billing_manual_activate') }}" aria-label="Locked manual billing activation">
+        {% include "partials/form_csrf.html" %}
+        <h2>Provider checkout required</h2>
+        <p class="muted">Manual activation is locked for school admins. Add checkout URLs and webhook secrets before selling automated subscriptions. Platform-owner billing adjustments should stay outside normal school workspaces.</p>
+        <div class="locked-form-grid" aria-hidden="true">
+          <span>Plan</span><b>Locked</b>
+          <span>Coupon</span><b>Provider verified</b>
+          <span>Reference</span><b>Required after payment</b>
+        </div>
+        <button class="btn ghost" type="button" disabled>Manual activation locked</button>
+      </form>
+      {% endif %}
+      <div class="pixel-board wide checkout-status-board">
+        <h2>Checkout configuration</h2>
+        {% for key, plan in plans.items() %}
+          <div class="board-row"><span>{{ key|upper }} monthly</span><b>{{ 'set' if checkout[key].monthly else 'missing' }}</b></div>
+          <div class="board-row"><span>{{ key|upper }} annual</span><b>{{ 'set' if checkout[key].annual else 'missing' }}</b></div>
+        {% endfor %}
+      </div>
+    </div>
+
+    <div class="panel-list">
+      <h2>Available coupons</h2>
+      {% for coupon in coupons %}
+        <div class="list-row tall"><span>{{ coupon.code }} · {{ coupon.discount_percent }}%</span><b>{{ coupon.applies_to_plan }}</b><small>{{ coupon.description }} · expires {{ coupon.expires_at or 'not set' }}</small></div>
+      {% else %}<p class="muted">No active coupons.</p>{% endfor %}
+    </div>
+    <div class="panel-list">
+      <h2>Billing events</h2>
+      {% for event in events %}<div class="list-row tall"><span>{{ event.event_type }} · {{ event.plan }}</span><b>${{ event.amount }}</b><small>{{ event.note }} {{ event.provider_reference or '' }} · {{ event.created_at }}</small></div>{% else %}<p class="muted">No billing events yet.</p>{% endfor %}
+    </div>
+  </section>
+</div>
+{% endblock %}

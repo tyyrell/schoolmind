@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block title %}Goals · SchoolMind{% endblock %}
+{% block content %}
+<div class="dashboard-layout">
+  {% include "partials/dashboard_nav.html" %}
+  <section class="dash-main">
+    <div class="dash-head"><span class="eyebrow">Goals</span><h1>Small plans that survive school pressure.</h1><p>Your plan allows {{ limits.active_goals }} active goals.</p></div>
+    <div class="dash-grid two">
+      <form class="pixel-form compact" method="post">
+        {% include "partials/form_csrf.html" %}
+        <input type="hidden" name="action" value="create">
+        <h2>Create goal</h2>
+        <label>Title<input name="title" placeholder="Finish the first revision block"></label>
+        <label>Category<select name="category"><option value="study">Study</option><option value="wellbeing">Wellbeing</option><option value="social">Social</option><option value="sleep">Sleep</option></select></label>
+        <label>Target date<input name="target_date" type="date"></label>
+        <label>Description<textarea name="description" rows="4"></textarea></label>
+        <button class="btn primary" type="submit">Create goal</button>
+      </form>
+      <div class="panel-list">
+        <h2>Goal method</h2>
+        <div class="list-row tall"><span>One clear outcome</span><b>1</b><small>Make it small enough to start today.</small></div>
+        <div class="list-row tall"><span>One blocker</span><b>2</b><small>Name the thing that usually stops progress.</small></div>
+        <div class="list-row tall"><span>One support person</span><b>3</b><small>Know who you can ask before the goal gets heavy.</small></div>
+      </div>
+    </div>
+    <div class="panel-list">
+      <h2>Your goals</h2>
+      {% for goal in goals %}
+        <div class="list-row tall">
+          <span>{{ goal.title }}</span><b>{{ goal.status }} · {{ goal.progress }}%</b>
+          <small>{{ goal.description }} · {{ goal.category }} · {{ goal.target_date or 'No date' }}</small>
+          <form method="post">
+            {% include "partials/form_csrf.html" %}
+            <input type="hidden" name="action" value="progress"><input type="hidden" name="goal_id" value="{{ goal.id }}">
+            <input name="progress" type="number" min="0" max="100" value="{{ goal.progress }}">
+            <button class="btn ghost" type="submit">Update</button>
+          </form>
+        </div>
+      {% else %}<p class="muted">No goals yet.</p>{% endfor %}
+    </div>
+  </section>
+</div>
+{% endblock %}

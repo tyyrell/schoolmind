@@ -1,0 +1,206 @@
+{% extends "base.html" %}
+{% block title %}{{ t('home.title') }}{% endblock %}
+{% block head_extra %}
+<link rel="preload" as="image" href="{{ url_for('static', filename='img/pages/02_hero_student_ai_platform.webp') }}" type="image/webp">
+{% endblock %}
+{% block content %}
+<section class="hero company-hero conversion-hero" id="top">
+  <div class="hero-copy">
+    <span class="eyebrow">{{ t('home.eyebrow') }}</span>
+    <h1>{{ settings.hero_title if current_language == 'en' and settings.hero_title else t('home.hero.title') }}</h1>
+    <div class="instant-role-panel" aria-label="Instant role entry">
+      <div>
+        <strong>Try the product as a real role</strong>
+        <span>Choose a safe guided demo. No signup required.</span>
+      </div>
+      <div class="instant-role-actions">
+        {% for key, label in {'student': 'Student', 'teacher': 'Teacher', 'counselor': 'Counselor', 'admin': 'Admin'}.items() %}
+          <form action="{{ url_for('public.instant_experience', role=key) }}" method="post">
+            {% include "partials/form_csrf.html" %}
+            <button class="chip" type="submit">{{ label }}</button>
+          </form>
+        {% endfor %}
+      </div>
+    </div>
+    <p class="lead">{{ settings.hero_subtitle if current_language == 'en' and settings.hero_subtitle else t('home.hero.subtitle') }}</p>
+    <div class="hero-actions">
+      <a class="btn primary" href="{{ url_for('public.try_demo') }}">{{ t('home.cta.try') }}</a>
+      <a class="btn ghost" href="{{ url_for('public.trial') }}">{{ t('home.cta.trial') }}</a>
+      <a class="btn ghost" href="{{ url_for('public.pilot') }}">{{ t('home.cta.pilot') }}</a>
+    </div>
+    <div class="trust-row trust-row-strong" aria-label="Trust highlights">
+      <span>{{ t('home.trust.english') }}</span>
+      <span>{{ t('home.trust.arabic') }}</span>
+      <span>{{ t('home.trust.human') }}</span>
+      <span>{{ t('home.trust.no_diagnosis') }}</span>
+    </div>
+  </div>
+  <div class="company-visual hero-product-frame" aria-label="SchoolMind AI product preview">
+    <picture class="smart-picture"><source srcset="{{ url_for('static', filename='img/pages/02_hero_student_ai_platform.webp') }}" type="image/webp"><img src="{{ url_for('static', filename='img/pages/02_hero_student_ai_platform.png') }}" alt="Students using a modern AI-supported school platform" loading="eager" decoding="async" width="427" height="362" fetchpriority="high"></picture>
+    <div class="visual-caption">
+      <strong>{{ t('home.visual.caption.title') }}</strong>
+      <span>{{ t('home.visual.caption.body') }}</span>
+    </div>
+  </div>
+</section>
+
+<section class="decision-strip" aria-label="SchoolMind AI business summary">
+  <article><strong>{{ t('home.metric.trial.value') }}</strong><span>{{ t('home.metric.trial.label') }}</span></article>
+  <article><strong>{{ t('home.metric.standard.value') }}</strong><span>{{ t('home.metric.standard.label') }}</span></article>
+  <article><strong>{{ t('home.metric.pro.value') }}</strong><span>{{ t('home.metric.pro.label') }}</span></article>
+  <article><strong>{{ t('home.metric.global.value') }}</strong><span>{{ t('home.metric.global.label') }}</span></article>
+</section>
+
+<section class="limited-demo-banner demo-first-block" id="start-experience">
+  <div>
+    <span class="eyebrow">{{ t('home.demo.eyebrow') }}</span>
+    <h2>{{ t('home.demo.title') }}</h2>
+    <span>{{ t('home.demo.body') }}</span>
+  </div>
+  <div class="row-actions">
+    <a class="btn primary" href="{{ url_for('public.try_demo') }}">{{ t('home.demo.student') }}</a>
+    <a class="btn ghost" href="{{ url_for('public.demo') }}">{{ t('home.demo.roles') }}</a>
+  </div>
+</section>
+
+<section id="product" class="section buyer-problem-section">
+  <div class="section-head">
+    <span class="eyebrow">{{ t('home.problem.eyebrow') }}</span>
+    <h2>{{ t('home.problem.title') }}</h2>
+    <p class="lead">{{ t('home.problem.body') }}</p>
+  </div>
+  <div class="company-grid three">
+    <article class="company-card objection-card"><span class="pixel-icon">01</span><h3>{{ t('home.problem.card1.title') }}</h3><p>{{ t('home.problem.card1.body') }}</p></article>
+    <article class="company-card objection-card"><span class="pixel-icon">02</span><h3>{{ t('home.problem.card2.title') }}</h3><p>{{ t('home.problem.card2.body') }}</p></article>
+    <article class="company-card objection-card"><span class="pixel-icon">03</span><h3>{{ t('home.problem.card3.title') }}</h3><p>{{ t('home.problem.card3.body') }}</p></article>
+  </div>
+</section>
+
+<section class="section company-split product-narrative">
+  <div>
+    <span class="eyebrow">{{ t('home.product.eyebrow') }}</span>
+    <h2>{{ t('home.product.title') }}</h2>
+    <p class="lead">{{ t('home.product.body') }}</p>
+    <div class="company-grid two compact-proof-grid">
+      <article class="mini-proof"><strong>{{ t('home.product.student.title') }}</strong><span>{{ t('home.product.student.body') }}</span></article>
+      <article class="mini-proof"><strong>{{ t('home.product.staff.title') }}</strong><span>{{ t('home.product.staff.body') }}</span></article>
+    </div>
+    <div class="hero-actions">
+      <a class="btn primary" href="{{ url_for('public.schools') }}">{{ t('home.product.school_workflow') }}</a>
+      <a class="btn ghost" href="{{ url_for('public.implementation') }}">{{ t('home.product.implementation') }}</a>
+    </div>
+  </div>
+  <div class="company-image">
+    <picture class="smart-picture"><source srcset="{{ url_for('static', filename='img/pages/03_dashboard_overview_mockup.webp') }}" type="image/webp"><img src="{{ url_for('static', filename='img/pages/03_dashboard_overview_mockup.png') }}" alt="SchoolMind AI dashboard overview mockup" loading="lazy" decoding="async" width="683" height="362"></picture>
+  </div>
+</section>
+
+<section class="section workflow-section">
+  <div class="section-head">
+    <span class="eyebrow">{{ t('home.workflow.eyebrow') }}</span>
+    <h2>{{ t('home.workflow.title') }}</h2>
+    <p class="lead">{{ t('home.workflow.body') }}</p>
+  </div>
+  <div class="timeline-grid">
+    <article><span>1</span><h3>{{ t('home.workflow.step1.title') }}</h3><p>{{ t('home.workflow.step1.body') }}</p></article>
+    <article><span>2</span><h3>{{ t('home.workflow.step2.title') }}</h3><p>{{ t('home.workflow.step2.body') }}</p></article>
+    <article><span>3</span><h3>{{ t('home.workflow.step3.title') }}</h3><p>{{ t('home.workflow.step3.body') }}</p></article>
+    <article><span>4</span><h3>{{ t('home.workflow.step4.title') }}</h3><p>{{ t('home.workflow.step4.body') }}</p></article>
+  </div>
+</section>
+
+<section class="section">
+  <div class="section-head">
+    <span class="eyebrow">{{ t('home.roles.eyebrow') }}</span>
+    <h2>{{ t('home.roles.title') }}</h2>
+  </div>
+  <div class="company-grid four role-grid">
+    <article class="company-card"><picture class="smart-picture"><source srcset="{{ url_for('static', filename='img/pages/06_student_nour_ai_companion.webp') }}" type="image/webp"><img src="{{ url_for('static', filename='img/pages/06_student_nour_ai_companion.png') }}" alt="Student companion experience" loading="lazy" decoding="async" width="368" height="312"></picture><h3>{{ t('home.roles.students.title') }}</h3><p>{{ t('home.roles.students.body') }}</p><a href="{{ url_for('public.students') }}">{{ t('home.roles.students.link') }}</a></article>
+    <article class="company-card"><picture class="smart-picture"><source srcset="{{ url_for('static', filename='img/pages/05_teacher_classroom_insights.webp') }}" type="image/webp"><img src="{{ url_for('static', filename='img/pages/05_teacher_classroom_insights.png') }}" alt="Teacher classroom insights" loading="lazy" decoding="async" width="368" height="312"></picture><h3>{{ t('home.roles.teachers.title') }}</h3><p>{{ t('home.roles.teachers.body') }}</p><a href="{{ url_for('public.teachers') }}">{{ t('home.roles.teachers.link') }}</a></article>
+    <article class="company-card"><picture class="smart-picture"><source srcset="{{ url_for('static', filename='img/pages/04_counselor_student_support.webp') }}" type="image/webp"><img src="{{ url_for('static', filename='img/pages/04_counselor_student_support.png') }}" alt="Counselor support workflow" loading="lazy" decoding="async" width="368" height="312"></picture><h3>{{ t('home.roles.counselors.title') }}</h3><p>{{ t('home.roles.counselors.body') }}</p><a href="{{ url_for('public.counselors') }}">{{ t('home.roles.counselors.link') }}</a></article>
+    <article class="company-card"><picture class="smart-picture"><source srcset="{{ url_for('static', filename='img/pages/08_school_admin_operations.webp') }}" type="image/webp"><img src="{{ url_for('static', filename='img/pages/08_school_admin_operations.png') }}" alt="School admin operations" loading="lazy" decoding="async" width="368" height="350"></picture><h3>{{ t('home.roles.leaders.title') }}</h3><p>{{ t('home.roles.leaders.body') }}</p><a href="{{ url_for('public.schools') }}">{{ t('home.roles.leaders.link') }}</a></article>
+  </div>
+</section>
+
+<section class="section company-split mobile-proof-section">
+  <div class="company-image">
+    <picture class="smart-picture"><source srcset="{{ url_for('static', filename='img/pages/09_mobile_app_experience.webp') }}" type="image/webp"><img src="{{ url_for('static', filename='img/pages/09_mobile_app_experience.png') }}" alt="SchoolMind AI mobile experience" loading="lazy" decoding="async" width="431" height="312"></picture>
+  </div>
+  <div>
+    <span class="eyebrow">{{ t('home.mobile.eyebrow') }}</span>
+    <h2>{{ t('home.mobile.title') }}</h2>
+    <p class="lead">{{ t('home.mobile.body') }}</p>
+    <ul class="company-list">
+      <li>{{ t('home.mobile.item1') }}</li>
+      <li>{{ t('home.mobile.item2') }}</li>
+      <li>{{ t('home.mobile.item3') }}</li>
+    </ul>
+  </div>
+</section>
+
+<section class="section trust-deep-section">
+  <div class="section-head">
+    <span class="eyebrow">{{ t('home.trust.eyebrow') }}</span>
+    <h2>{{ t('home.trust.title') }}</h2>
+    <p class="lead">{{ t('home.trust.body') }}</p>
+  </div>
+  <div class="company-grid three">
+    <article class="company-card"><span class="pixel-icon">A</span><h3>{{ t('home.trust.privacy.title') }}</h3><p>{{ t('home.trust.privacy.body') }}</p><a href="{{ url_for('public.privacy') }}">{{ t('home.trust.privacy.link') }}</a></article>
+    <article class="company-card"><span class="pixel-icon">B</span><h3>{{ t('home.trust.ai.title') }}</h3><p>{{ t('home.trust.ai.body') }}</p><a href="{{ url_for('public.safety') }}">{{ t('home.trust.ai.link') }}</a></article>
+    <article class="company-card"><span class="pixel-icon">C</span><h3>{{ t('home.trust.security.title') }}</h3><p>{{ t('home.trust.security.body') }}</p><a href="{{ url_for('public.security') }}">{{ t('home.trust.security.link') }}</a></article>
+  </div>
+</section>
+
+<section class="section pricing-preview-section">
+  <div class="section-head">
+    <span class="eyebrow">{{ t('home.pricing.eyebrow') }}</span>
+    <h2>{{ t('home.pricing.title') }}</h2>
+    <p class="lead">{{ t('home.pricing.body') }}</p>
+  </div>
+  <div class="pricing-grid company-pricing">
+    {% for key, plan in plans.items() %}
+    <article class="price-card {% if key == 'growth' %}featured{% endif %}">
+      <span class="eyebrow">{{ plan.name }}</span>
+      {% if plan.price %}
+        <span class="price-number">${{ plan.price }}<small>/mo</small></span>
+        <p class="price-note">{{ t('home.pricing.annual') }} ${{ plan.annual_price }}/year</p>
+      {% else %}
+        <span class="price-number">{{ t('home.pricing.custom') }}</span>
+        <p class="price-note">{{ t('home.pricing.custom_note') }}</p>
+      {% endif %}
+      <p>{{ plan.tagline }}</p>
+      <strong>{{ plan.limits }}</strong>
+      <ul>{% for feature in plan.features %}<li>{{ feature }}</li>{% endfor %}</ul>
+      <a class="btn {% if key == 'growth' %}primary{% else %}ghost{% endif %}" href="{{ url_for('auth.start', plan=key) }}">{{ t('home.pricing.start') }} {{ plan.name }}</a>
+    </article>
+    {% endfor %}
+  </div>
+  <p class="center-note">{{ t('home.pricing.note') }}</p>
+</section>
+
+<section class="section company-split partnership-section">
+  <div>
+    <span class="eyebrow">{{ t('home.partnership.eyebrow') }}</span>
+    <h2>{{ t('home.partnership.title') }}</h2>
+    <p class="lead">{{ t('home.partnership.body') }}</p>
+    <div class="hero-actions">
+      <a class="btn primary" href="{{ url_for('public.pilot') }}">{{ t('home.cta.pilot') }}</a>
+      <a class="btn ghost" href="{{ url_for('public.contact') }}">{{ t('home.partnership.contact') }}</a>
+    </div>
+  </div>
+  <div class="company-image">
+    <picture class="smart-picture"><source srcset="{{ url_for('static', filename='img/pages/10_school_partnership_meeting.webp') }}" type="image/webp"><img src="{{ url_for('static', filename='img/pages/10_school_partnership_meeting.png') }}" alt="School partnership meeting" loading="lazy" decoding="async" width="431" height="312"></picture>
+  </div>
+</section>
+
+<section class="final-cta-section" aria-label="Final call to action">
+  <span class="eyebrow">{{ t('home.final.eyebrow') }}</span>
+  <h2>{{ t('home.final.title') }}</h2>
+  <p>{{ t('home.final.body') }}</p>
+  <div class="hero-actions centered-actions">
+    <a class="btn primary" href="{{ url_for('public.try_demo') }}">{{ t('home.cta.try') }}</a>
+    <a class="btn ghost" href="{{ url_for('public.trial') }}">{{ t('home.cta.trial') }}</a>
+    <a class="btn ghost" href="{{ url_for('public.contact') }}">{{ t('nav.demo') }}</a>
+  </div>
+</section>
+{% endblock %}

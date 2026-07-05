@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block title %}Breathing Center · SchoolMind{% endblock %}
+{% block content %}
+<div class="dashboard-layout">
+  {% include "partials/dashboard_nav.html" %}
+  <section class="dash-main">
+    <div class="dash-head"><span class="eyebrow">Breathing center</span><h1>Reset before pressure grows.</h1><p>{{ totals.count or 0 }} sessions · {{ ((totals.duration or 0) / 60)|round(1) }} minutes practiced.</p></div>
+    <div class="dash-grid two">
+      <form class="pixel-form compact" method="post">
+        {% include "partials/form_csrf.html" %}
+        <h2>Record a session</h2>
+        <label>Technique<select name="technique"><option value="box">Box breathing</option><option value="4-6">Inhale 4 / exhale 6</option><option value="grounding">Grounding reset</option></select></label>
+        <label>Cycles<input name="cycles" type="number" min="1" max="30" value="4"></label>
+        <label>Duration seconds<input name="duration_seconds" type="number" min="30" max="3600" value="180"></label>
+        <label>Mood before<select name="mood_before"><option value="1">1 Hard</option><option value="2">2 Low</option><option value="3" selected>3 Mixed</option><option value="4">4 Good</option><option value="5">5 Strong</option></select></label>
+        <label>Mood after<select name="mood_after"><option value="1">1 Hard</option><option value="2">2 Low</option><option value="3">3 Mixed</option><option value="4" selected>4 Good</option><option value="5">5 Strong</option></select></label>
+        <button class="btn primary" type="submit">Save session</button>
+      </form>
+      <div class="panel-list breath-visual">
+        <h2>3-minute routine</h2>
+        <div class="breath-orbit"><span>In</span><span>Hold</span><span>Out</span></div>
+        <p class="muted">Use this before exams, difficult messages, or counselor check-ins.</p>
+      </div>
+    </div>
+    <div class="panel-list">
+      <h2>History</h2>
+      {% for item in sessions %}
+        <div class="list-row"><span>{{ item.technique }}</span><b>{{ item.cycles }} cycles</b><small>{{ item.mood_before }} → {{ item.mood_after }} · {{ item.created_at }}</small></div>
+      {% else %}<p class="muted">No breathing sessions yet.</p>{% endfor %}
+    </div>
+  </section>
+</div>
+{% endblock %}

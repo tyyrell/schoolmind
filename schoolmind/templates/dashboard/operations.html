@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block title %}Operations center · SchoolMind{% endblock %}
+{% block content %}
+<div class="dashboard-layout">
+  {% include "partials/dashboard_nav.html" %}
+  <section class="dash-main">
+    <div class="dash-head">
+      <span class="eyebrow">Operations center</span>
+      <h1>Launch controls, limits, queues.</h1>
+      <p>This page shows whether the workspace can be sold, operated, and supported without pretending the product is a clinical system.</p>
+    </div>
+    <div class="metric-strip">
+      <div class="metric-card"><small>Student seats</small><strong>{{ usage.students }}/{{ usage.student_limit }}</strong><progress class="meter-progress" value="{{ usage.student_percent }}" max="100">{{ usage.student_percent }}%</progress></div>
+      <div class="metric-card"><small>Staff seats</small><strong>{{ usage.staff }}/{{ usage.staff_limit }}</strong><progress class="meter-progress" value="{{ usage.staff_percent }}" max="100">{{ usage.staff_percent }}%</progress></div>
+      <div class="metric-card {{ 'urgent' if overdue else 'steady' }}"><small>SLA overdue</small><strong>{{ overdue }}</strong></div>
+      <div class="metric-card"><small>Open events</small><strong>{{ counts.open_events }}</strong></div>
+    </div>
+    <div class="dash-grid two">
+      <div class="panel-list">
+        <h2>Production checks</h2>
+        {% for check in config_checks %}
+          <div class="list-row tall {{ 'danger-zone' if not check.ok else '' }}"><span>{{ check.name }}</span><b>{{ 'OK' if check.ok else 'Fix' }}</b><small>{{ check.detail }}</small></div>
+        {% endfor %}
+      </div>
+      <div class="panel-list">
+        <h2>Email queue</h2>
+        <div class="list-row"><span>Queued</span><b>{{ outbox.queued or 0 }}</b></div>
+        <div class="list-row"><span>Sent</span><b>{{ outbox.sent or 0 }}</b></div>
+        <div class="list-row"><span>Failed</span><b>{{ outbox.failed or 0 }}</b></div>
+        <a class="btn ghost" href="{{ url_for('dashboard.admin_outbox') }}">Open outbox</a>
+      </div>
+    </div>
+    <div class="dash-grid two">
+      <div class="panel-list">
+        <h2>Data operations</h2>
+        <a class="btn ghost" href="{{ url_for('dashboard.admin_backups') }}">Open backup center</a>
+        <a class="btn ghost" href="{{ url_for('api.export_workspace_json') }}">Download workspace backup</a>
+        <form method="post" action="{{ url_for('dashboard.admin_run_retention') }}">
+          {% include "partials/form_csrf.html" %}
+          <button class="btn ghost" type="submit">Run retention cleanup</button>
+        </form>
+      </div>
+      <div class="panel-list">
+        <h2>Escalation settings</h2>
+        <div class="list-row tall"><span>Support owner</span><b>{{ settings.support_owner or 'Missing' }}</b><small>Configured in Settings.</small></div>
+        <div class="list-row tall"><span>Escalation window</span><b>{{ settings.escalation_window_minutes }} minutes</b><small>Alerts beyond this window are highlighted.</small></div>
+        <a class="btn ghost" href="{{ url_for('dashboard.admin_settings') }}">Update settings</a>
+      </div>
+    </div>
+  </section>
+</div>
+{% endblock %}

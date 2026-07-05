@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block title %}For Schools · SchoolMind AI{% endblock %}
+{% block content %}
+<section class="section page-hero compact">
+  <span class="eyebrow">For schools</span>
+  <h1>A safer operating layer for student support, not another disconnected dashboard.</h1>
+  <p class="lead">SchoolMind AI helps schools coordinate wellbeing indicators, staff workflows, consent, and support follow-up while keeping human review in control.</p>
+  <div class="hero-actions"><a class="btn primary" href="{{ url_for('public.demo') }}">Try limited demo</a><a class="btn ghost" href="{{ url_for('public.pilot') }}">Plan a guided pilot</a></div>
+</section>
+<section class="section company-split">
+  <div>
+    <span class="eyebrow">Leadership outcomes</span>
+    <h2>Give school leaders visibility without exposing private student reflection.</h2>
+    <ul class="company-list">
+      <li>Track readiness across users, consent, billing, data operations, and support workflows.</li>
+      <li>Use aggregate school and classroom indicators for planning, not diagnosis.</li>
+      <li>Keep counselors and authorized staff responsible for individual support decisions.</li>
+      <li>Prepare a safer pilot before moving real student data into production.</li>
+    </ul>
+  </div>
+  <div class="company-image"><picture class="smart-picture"><source srcset="{{ url_for('static', filename='img/pages/08_school_admin_operations.webp') }}" type="image/webp"><img src="{{ url_for('static', filename='img/pages/08_school_admin_operations.png') }}" alt="School operations dashboard" loading="lazy" decoding="async" width="368" height="350"></picture></div>
+</section>
+<section class="section phase-grid">
+  <article class="company-card"><span class="pixel-icon">01</span><h3>Launch readiness</h3><p>School profile, staff invites, consent review, support owner, and escalation protocol.</p></article>
+  <article class="company-card"><span class="pixel-icon">02</span><h3>Governed data</h3><p>Privacy-aware boundaries between private student inputs and role-safe aggregate insights.</p></article>
+  <article class="company-card"><span class="pixel-icon">03</span><h3>Support workflow</h3><p>Structured follow-up between students, counselors, teachers, and school admins.</p></article>
+</section>
+{% endblock %}

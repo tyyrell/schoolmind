@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block title %}Human Review · SchoolMind AI{% endblock %}
+{% block content %}
+<section class="section page-hero compact">
+  <span class="eyebrow">Human review</span>
+  <h1>School staff stay responsible for support decisions.</h1>
+  <p class="lead">SchoolMind AI can organize educational indicators and support workflows, but it must not replace qualified human judgment, school policy, guardian communication, or emergency procedures.</p>
+</section>
+<section class="section company-split">
+  <div>
+    <span class="eyebrow">Operating principle</span>
+    <h2>The platform can assist. The school must decide.</h2>
+    <ul class="company-list">
+      <li>AI-assisted outputs are framed as educational support suggestions, not diagnoses.</li>
+      <li>Serious signals are routed toward authorized human review instead of automated conclusions.</li>
+      <li>Counselors and school leaders define follow-up, escalation, and documentation practices.</li>
+      <li>Students should understand when their school may review support requests or safety-related signals.</li>
+    </ul>
+  </div>
+  <div class="company-image"><picture class="smart-picture"><source srcset="{{ url_for('static', filename='img/pages/04_counselor_student_support.webp') }}" type="image/webp"><img src="{{ url_for('static', filename='img/pages/04_counselor_student_support.png') }}" alt="Counselor reviewing student support context" loading="lazy" decoding="async" width="368" height="312"></picture></div>
+</section>
+<section class="section trust-stack">
+  <article class="company-card"><span class="pixel-icon">1</span><h3>Student signal</h3><p>A student submits a check-in, journal, assessment, or support request.</p></article>
+  <article class="company-card"><span class="pixel-icon">2</span><h3>Educational indicator</h3><p>The system labels broad support patterns using safe, non-clinical wording.</p></article>
+  <article class="company-card"><span class="pixel-icon">3</span><h3>Role-safe review</h3><p>Authorized staff see only the context their role should handle.</p></article>
+  <article class="company-card"><span class="pixel-icon">4</span><h3>Human action</h3><p>The school follows its approved support protocol and records follow-up.</p></article>
+</section>
+{% endblock %}

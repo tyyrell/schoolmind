@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block title %}Accept invite · SchoolMind{% endblock %}
+{% block content %}
+<section class="auth-wrap">
+  <form class="pixel-form" method="post">
+    {% include "partials/form_csrf.html" %}
+    <span class="eyebrow">Workspace invite</span>
+    <h1>Join {{ invite.school_name }}</h1>
+    <p class="muted">Invite email: {{ invite.email }} · Role: {{ invite.role|title }}</p>
+    <label>Your name<input name="name" required></label>
+    <label>Password<input name="password" type="password" minlength="8" required></label>
+    <label class="inline-check"><input type="checkbox" name="accept_terms" required> I accept the Terms, Privacy commitments, and the human-review safety rule.</label>
+    <button class="btn primary" type="submit">Create account</button>
+  </form>
+</section>
+{% endblock %}

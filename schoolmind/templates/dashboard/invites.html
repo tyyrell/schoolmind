@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block title %}Invites · SchoolMind{% endblock %}
+{% block content %}
+<div class="dashboard-layout">
+  {% include "partials/dashboard_nav.html" %}
+  <section class="dash-main">
+    <div class="dash-head">
+      <span class="eyebrow">Invites and outbox</span>
+      <h1>Email-ready onboarding without pretending email is connected.</h1>
+      <p>Invites are queued in the outbox. Connect SMTP/provider delivery later, or copy links from provider logs during testing.</p>
+    </div>
+    <div class="dash-grid two">
+      <form class="pixel-form compact" method="post">
+        {% include "partials/form_csrf.html" %}
+        <h2>Create invite</h2>
+        <label>Email<input name="email" type="email" required></label>
+        <label>Role<select name="role">{% for role in roles %}<option value="{{ role }}">{{ role|title }}</option>{% endfor %}</select></label>
+        <label>Group<input name="group_name" placeholder="Grade 10-A"></label>
+        <button class="btn primary" type="submit">Queue invite</button>
+      </form>
+      <div class="panel-list">
+        <h2>Recent invites</h2>
+        {% for invite in invites %}
+          <div class="list-row tall"><span>{{ invite.email }} · {{ invite.role }}</span><b>{{ invite.status }}</b><small>Expires {{ invite.expires_at }} · {{ invite.group_name or 'No group' }}</small></div>
+        {% else %}<p class="muted">No invites yet.</p>{% endfor %}
+      </div>
+    </div>
+    <div class="panel-list">
+      <h2>Outbox</h2>
+      {% for item in outbox %}
+        <div class="list-row tall"><span>{{ item.recipient }} · {{ item.subject }}</span><b>{{ item.status }}</b><small>{{ item.body }}</small></div>
+      {% else %}<p class="muted">No queued messages.</p>{% endfor %}
+    </div>
+  </section>
+</div>
+{% endblock %}

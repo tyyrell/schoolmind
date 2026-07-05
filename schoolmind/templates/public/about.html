@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block title %}About · SchoolMind AI{% endblock %}
+{% block content %}
+<section class="section company-split">
+  <div>
+    <span class="eyebrow">About SchoolMind AI</span>
+    <h1>A global school support platform with Arabic and English access.</h1>
+    <p class="lead">SchoolMind AI is designed for schools that need clearer wellbeing indicators, safer support workflows, and practical dashboards without turning software into a clinical authority.</p>
+    <p class="muted">The product should be presented honestly: pilot-ready, human-supervised, and built for responsible school evaluation before full production use.</p>
+  </div>
+  <div class="company-image"><picture class="smart-picture"><source srcset="{{ url_for('static', filename='img/pages/10_school_partnership_meeting.webp') }}" type="image/webp"><img src="{{ url_for('static', filename='img/pages/10_school_partnership_meeting.png') }}" alt="School partnership meeting" loading="lazy" decoding="async" width="369" height="350"></picture></div>
+</section>
+<section class="section">
+  <div class="company-grid three">
+    <article class="company-card"><h3>Mission</h3><p>Help schools notice educational wellbeing patterns earlier and coordinate support more clearly.</p></article>
+    <article class="company-card"><h3>Boundary</h3><p>SchoolMind AI does not diagnose, treat, or replace professional judgment, guardians, school counselors, or emergency response.</p></article>
+    <article class="company-card"><h3>Direction</h3><p>English is the default language, Arabic is supported, and the platform is intended for global school environments.</p></article>
+  </div>
+</section>
+{% endblock %}

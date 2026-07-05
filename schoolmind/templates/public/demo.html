@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block title %}Demo · SchoolMind AI{% endblock %}
+{% block content %}
+<section class="section page-hero compact">
+  <span class="eyebrow">Try before signup</span>
+  <h1>Enter SchoolMind AI immediately with limited demo access.</h1>
+  <p class="lead">Choose a role and explore the product. The demo keeps sensitive operations locked: no production imports, no billing changes, no real school data, and no permanent deployment setup until you register.</p>
+</section>
+<section class="limited-demo-banner">
+  <div>
+    <h2>Fastest path: instant student demo.</h2>
+    <span>Like ChatGPT, visitors can try first. Signup is only required when they need a real workspace, saved production records, staff invites, billing, imports, and school configuration.</span>
+  </div>
+  <a class="btn primary" href="{{ url_for('public.try_demo') }}">Open instant demo</a>
+</section>
+<section class="feature-grid four">
+  {% for account in demo_accounts %}
+  <form class="feature-card role-entry-card" action="{{ url_for('public.instant_experience', role=account.key) }}" method="post">
+    {% include "partials/form_csrf.html" %}
+    <span class="pixel-icon">{{ loop.index }}</span>
+    <h3>{{ account.role }}</h3>
+    <p>Open the {{ account.role|lower }} workspace in limited guided demo mode.</p>
+    <button class="btn primary" type="submit">Enter as {{ account.role }}</button>
+  </form>
+  {% endfor %}
+</section>
+<section class="section company-split">
+  <div class="company-image"><picture class="smart-picture"><source srcset="{{ url_for('static', filename='img/pages/09_mobile_app_experience.webp') }}" type="image/webp"><img src="{{ url_for('static', filename='img/pages/09_mobile_app_experience.png') }}" alt="SchoolMind AI mobile experience" loading="lazy" decoding="async" width="368" height="350"></picture></div>
+  <div>
+    <span class="eyebrow">Demo limits</span>
+    <h2>The demo is intentionally limited.</h2>
+    <p class="lead">This protects the product from fake production data and makes the signup reminder honest instead of annoying.</p>
+    <ul class="company-list">
+      <li>Navigation is open across role workspaces.</li>
+      <li>Safe sandbox actions are available for exploration.</li>
+      <li>Admin imports, billing, exports, account management, and sensitive operations require a real workspace.</li>
+      <li>Visitors are reminded to register when they hit a locked action.</li>
+    </ul>
+  </div>
+</section>
+{% endblock %}

@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block title %}{{ t('nav.plan_limits') }} · SchoolMind{% endblock %}
+{% block content %}
+<div class="dashboard-layout">
+  {% include "partials/dashboard_nav.html" %}
+  <section class="dash-main">
+    <div class="dash-head">
+      <span class="eyebrow">{{ t('nav.billing') }}</span>
+      <h1>{{ t('limits.title') }}</h1>
+      <p>{{ t('limits.subtitle') }}</p>
+    </div>
+    <div class="feature-grid four">
+      {% for item in usage %}
+        <article class="metric-card">
+          <small>{{ item.label }}</small>
+          <strong>{{ item.used }}</strong>
+          <p class="muted">Limit {{ item.limit }}</p>
+          <progress class="meter-progress" value="{{ [100, ((item.used / item.limit) * 100)|round|int]|min if item.limit else 0 }}" max="100">{{ [100, ((item.used / item.limit) * 100)|round|int]|min if item.limit else 0 }}%</progress>
+        </article>
+      {% endfor %}
+    </div>
+    <div class="panel-list">
+      <h2>Upgrade paths</h2>
+      {% for plan, data in plans.items() %}
+        <div class="list-row">
+          <span>{{ plan|title }}</span>
+          <b>${{ data.price }}/mo</b>
+          {% if checkout[plan] %}
+            <a class="btn ghost" href="{{ url_for('dashboard.billing_checkout', plan=plan) }}">Checkout</a>
+          {% else %}
+            <small class="muted">Checkout URL not configured.</small>
+          {% endif %}
+        </div>
+      {% endfor %}
+    </div>
+  </section>
+</div>
+{% endblock %}

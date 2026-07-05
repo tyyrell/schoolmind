@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block title %}For Teachers · SchoolMind AI{% endblock %}
+{% block content %}
+<section class="section page-hero compact">
+  <span class="eyebrow">For teachers</span>
+  <h1>Classroom pulse without making teachers responsible for private counseling data.</h1>
+  <p class="lead">Teachers need signals they can act on safely: workload, class climate, engagement patterns, and practical support suggestions.</p>
+</section>
+<section class="section company-split">
+  <div class="company-image"><picture class="smart-picture"><source srcset="{{ url_for('static', filename='img/pages/05_teacher_classroom_insights.webp') }}" type="image/webp"><img src="{{ url_for('static', filename='img/pages/05_teacher_classroom_insights.png') }}" alt="Teacher classroom insights" loading="lazy" decoding="async" width="368" height="312"></picture></div>
+  <div>
+    <span class="eyebrow">Role-safe insight</span>
+    <h2>Useful classroom context, strict privacy boundaries.</h2>
+    <ul class="company-list">
+      <li>Aggregate classroom indicators instead of private student journals.</li>
+      <li>Practical class-level adjustments for workload and support routines.</li>
+      <li>Clear escalation path when a student needs human support.</li>
+      <li>Less guesswork, no medical claims, no hidden surveillance framing.</li>
+    </ul>
+  </div>
+</section>
+{% endblock %}

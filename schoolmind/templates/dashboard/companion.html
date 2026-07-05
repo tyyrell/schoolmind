@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% block title %}Nour AI · SchoolMind{% endblock %}
+{% block content %}
+<div class="dashboard-layout">
+  {% include "partials/dashboard_nav.html" %}
+  <section class="dash-main">
+    <div class="dash-head"><span class="eyebrow">{{ t('nour.title') }}</span><h1>{{ t('nour.subtitle') }}</h1><p>{{ t('nour.description') }}</p></div>
+    {% with title="Nour safety boundary", body="Nour can suggest next steps and create human-review signals, but it does not diagnose, make final support decisions, or replace school staff judgment." %}{% include "partials/ai_safety_notice.html" %}{% endwith %}
+
+    <section class="nour-chat {% if not consent_ok %}locked-section{% endif %}" data-nour-chat data-endpoint="{{ url_for('dashboard.nour_messages_api') }}">
+      <div class="chat-toolbar">
+        <span class="badge">{{ t('nour.usage') }}: {{ remaining }} / {{ daily_limit }}</span>
+        <button class="btn ghost compact-btn" type="button" data-clear-chat>{{ t('nour.clear_visible') }}</button>
+      </div>
+      <div class="chat-stream" data-chat-stream aria-live="polite">
+        {% for item in messages %}
+          <article class="chat-bubble {{ 'nour' if item.role == 'nour' else 'student' }}">
+            <div><strong>{{ 'Nour' if item.role == 'nour' else current_user.name }}</strong><span class="risk {{ item.risk_level }}">{{ item.risk_level }}</span></div>
+            <p>{{ item.message }}</p>
+            <small>{{ item.created_at }}</small>
+          </article>
+        {% else %}
+          <article class="chat-bubble nour">
+            <div><strong>Nour</strong><span class="risk steady">steady</span></div>
+            <p>{{ t('nour.welcome') }}</p>
+          </article>
+        {% endfor %}
+      </div>
+      <form class="chat-composer" method="post" data-chat-form>
+        {% include "partials/form_csrf.html" %}
+        <label>{{ t('common.send') }}<textarea name="message" rows="4" placeholder="{{ t('nour.placeholder') }}" data-chat-input></textarea></label>
+        <div class="composer-row">
+          <small class="muted">{{ t('nour.shift_enter') }}</small>
+          <button class="btn primary" type="submit" data-chat-submit {% if not consent_ok %}disabled{% endif %}>{{ t('common.send') }}</button>
+        </div>
+      </form>
+    </section>
+    <div class="dash-grid two">
+      <div class="panel-list">
+        <h2>{{ t('nour.suggestions') }}</h2>
+        <button class="list-row tall chat-suggestion" type="button" data-chat-suggestion="{{ t('nour.prompt.study') }}"><span>{{ t('nour.prompt.study') }}</span><b>Study</b><small>Nour will help reduce the task to one next step.</small></button>
+        <button class="list-row tall chat-suggestion" type="button" data-chat-suggestion="{{ t('nour.prompt.overwhelmed') }}"><span>{{ t('nour.prompt.overwhelmed') }}</span><b>Calm</b><small>Nour will suggest grounding and support routing.</small></button>
+        <button class="list-row tall chat-suggestion" type="button" data-chat-suggestion="{{ t('nour.prompt.support') }}"><span>{{ t('nour.prompt.support') }}</span><b>Support</b><small>Nour can create a human-review signal.</small></button>
+      </div>
+      <div class="panel-list">
+        <h2>Safety routing</h2>
+        <div class="list-row tall"><span>Educational support</span><b>Local AI</b><small>Nour gives next steps and keeps support decisions with humans.</small></div>
+        <div class="list-row tall"><span>Human review</span><b>Signal</b><small>Support or urgent signals create counselor-visible risk events.</small></div>
+        <div class="list-row tall"><span>Daily limit</span><b>Plan</b><small>Usage follows the school's active subscription plan.</small></div>
+      </div>
+    </div>
+  </section>
+</div>
+{% endblock %}

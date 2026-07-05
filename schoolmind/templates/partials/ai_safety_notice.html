@@ -1,0 +1,8 @@
+<section class="ai-safety-notice" aria-label="AI safety boundary">
+  <div>
+    <span class="eyebrow">AI safety boundary</span>
+    <h2>{{ title|default('Educational indicators, human decisions') }}</h2>
+    <p>{{ body|default('SchoolMind AI organizes support context for supervised school review. It does not diagnose, treat, replace professional judgment, or operate as an emergency service.') }}</p>
+  </div>
+  <a class="btn ghost compact-btn" href="{{ url_for('public.safety') }}">AI safety</a>
+</section>

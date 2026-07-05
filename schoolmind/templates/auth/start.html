@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block title %}Start 30-day trial · SchoolMind AI{% endblock %}
+{% block content %}
+<section class="auth-wrap wide-auth">
+  <form class="pixel-form" method="post">
+    {% include "partials/form_csrf.html" %}
+    <span class="eyebrow">30-day evaluation trial</span>
+    <h1>Create your SchoolMind AI workspace</h1>
+    <p class="muted">Use the trial to evaluate the platform in a supervised school environment. Production student data should only be added after your school reviews consent, privacy, and human support policies.</p>
+    <div class="form-grid">
+      <label>School name<input name="school_name" required></label>
+      <label>Admin name<input name="admin_name" required></label>
+      <label>Admin email<input name="email" type="email" required></label>
+      <label>Country<input name="country" placeholder="Country or region" required></label>
+      <label>Password<input name="password" type="password" minlength="8" required></label>
+      <label>Plan
+        <select name="plan">
+          <option value="starter" {% if selected_plan == 'starter' %}selected{% endif %}>Standard · $50/month · up to 300 students</option>
+          <option value="growth" {% if selected_plan == 'growth' %}selected{% endif %}>Pro · $120/month · up to 1,000 students</option>
+        </select>
+      </label>
+      <label>Preferred billing after trial
+        <select name="billing_cycle">
+          <option value="monthly" {% if selected_billing_cycle == 'monthly' %}selected{% endif %}>Monthly billing after trial</option>
+          <option value="annual" {% if selected_billing_cycle == 'annual' %}selected{% endif %}>Annual billing after trial</option>
+        </select>
+      </label>
+    </div>
+    <div class="pixel-board compact trial-boundary">
+      <strong>Trial boundary</strong>
+      <p class="muted">The free trial is for platform evaluation. It is not a permanent free plan, and it is not permission to collect uncontrolled student data. Paid activation should happen through provider checkout after the trial.</p>
+    </div>
+    <div class="feature-grid two compact-grid">
+      <article class="feature-card"><h3>Use self-serve trial when</h3><p>Your school can evaluate with limited data, clear staff roles, and understood privacy responsibilities.</p></article>
+      <article class="feature-card"><h3>Use guided pilot when</h3><p>You need privacy review, custom onboarding, multi-campus setup, or approval before real student data is used.</p><a href="{{ url_for('public.pilot') }}">Plan guided pilot</a></article>
+    </div>
+    <label class="inline-check"><input type="checkbox" name="accept_terms" required> I accept the Terms, Privacy commitments, and the rule that SchoolMind AI provides educational indicators only.</label>
+    <label class="inline-check"><input type="checkbox" name="accept_human_review" required> I understand human review is mandatory and SchoolMind AI does not diagnose, treat, or replace school staff judgment.</label>
+    <label class="inline-check"><input type="checkbox" name="accept_trial_boundary" required> I understand the trial is for supervised evaluation and production student data requires school-approved consent, privacy, and support policies.</label>
+    <button class="btn primary" type="submit">Create workspace</button>
+    <p class="muted">This creates a 30-day trial. Connect checkout URLs and email delivery before automated paid sales.</p>
+  </form>
+</section>
+{% endblock %}

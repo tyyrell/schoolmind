@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% block title %}AI Safety · SchoolMind AI{% endblock %}
+{% block content %}
+<section class="section company-split ai-safety-hero">
+  <div>
+    <span class="eyebrow">AI safety</span>
+    <h1>AI-assisted does not mean AI-controlled.</h1>
+    <p class="lead">{{ safety_statement }}</p>
+    <div class="hero-actions">
+      <a class="btn primary" href="{{ url_for('public.human_review') }}">Review human-review model</a>
+      <a class="btn ghost" href="{{ url_for('public.privacy') }}">Review privacy model</a>
+    </div>
+  </div>
+  <div class="company-image"><picture class="smart-picture"><source srcset="{{ url_for('static', filename='img/pages/06_student_nour_ai_companion.webp') }}" type="image/webp"><img src="{{ url_for('static', filename='img/pages/06_student_nour_ai_companion.png') }}" alt="Nour AI-assisted student companion" loading="lazy" decoding="async" width="369" height="312"></picture></div>
+</section>
+
+<section class="section ai-safety-principles">
+  <div class="section-head">
+    <span class="eyebrow">Operating boundaries</span>
+    <h2>SchoolMind AI supports supervised workflows, not automated conclusions.</h2>
+    <p class="lead">Every AI-assisted surface must stay inside four product boundaries: educational framing, human review, role-safe visibility, and real-world escalation outside the software.</p>
+  </div>
+  <div class="company-grid four">
+    {% for item in principles %}
+      <article class="company-card ai-boundary-card"><span class="pixel-icon">{{ loop.index }}</span><h3>{{ item.title }}</h3><p>{{ item.body }}</p></article>
+    {% endfor %}
+  </div>
+</section>
+
+<section class="section company-split ai-safety-rules">
+  <div class="company-card do-card">
+    <span class="eyebrow">Allowed use</span>
+    <h2>Use it for structured school support.</h2>
+    <ul class="company-list">
+      {% for item in do_list %}<li>{{ item }}</li>{% endfor %}
+    </ul>
+  </div>
+  <div class="company-card dont-card">
+    <span class="eyebrow">Not allowed</span>
+    <h2>Do not turn it into a clinical or emergency product.</h2>
+    <ul class="company-list">
+      {% for item in do_not_list %}<li>{{ item }}</li>{% endfor %}
+    </ul>
+  </div>
+</section>
+
+<section class="section ai-routing-model">
+  <div class="section-head">
+    <span class="eyebrow">Signal routing</span>
+    <h2>What happens when a student input needs attention?</h2>
+  </div>
+  <div class="timeline-grid">
+    <article><span>1</span><h3>Student input</h3><p>A check-in, scan, journal entry, or support request enters the supervised school workspace.</p></article>
+    <article><span>2</span><h3>Educational signal</h3><p>The system summarizes broad support context using non-clinical wording and plan-safe limits.</p></article>
+    <article><span>3</span><h3>Human review</h3><p>Authorized staff review the signal, decide follow-up, and document operational actions.</p></article>
+    <article><span>4</span><h3>School protocol</h3><p>The school follows its own escalation, guardian, safeguarding, and documentation procedures outside automated decisioning.</p></article>
+  </div>
+</section>
+{% endblock %}

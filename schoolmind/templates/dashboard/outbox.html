@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+{% block title %}Outbox · SchoolMind AI{% endblock %}
+{% block content %}
+<div class="dashboard-layout">
+  {% include "partials/dashboard_nav.html" %}
+  <section class="dash-main">
+    <div class="dash-head">
+      <span class="eyebrow">Email operations</span>
+      <h1>Transactional outbox.</h1>
+      <p>Invites, password resets, trial notices, and sales notifications are queued first. Real production delivery requires a configured SMTP provider.</p>
+    </div>
+
+    <div class="email-health-grid">
+      <article class="pixel-board wide">
+        <span class="eyebrow">Delivery health</span>
+        <h2>{{ health.mode|upper }} mode</h2>
+        <p class="muted">
+          {% if health.production_ready %}
+            SMTP is configured. Transactional email can be delivered from this environment.
+          {% elif health.mode == 'queue' %}
+            Queue-only mode stores messages but does not deliver them. This is not enough for production.
+          {% elif health.mode == 'console' %}
+            Console mode is for local QA only. Do not use it for live school leads or invites.
+          {% else %}
+            Delivery is not production-ready. Fix SMTP settings before relying on email.
+          {% endif %}
+        </p>
+        {% if health.warnings %}
+          <div class="notice-list">
+            {% for warning in health.warnings %}<p class="notice warning">{{ warning }}</p>{% endfor %}
+          </div>
+        {% endif %}
+      </article>
+      <div class="pixel-board wide">
+        <span class="eyebrow">Status counts</span>
+        {% for row in counts %}
+          <div class="board-row"><span>{{ row.status }}</span><b>{{ row.total }}</b></div>
+        {% else %}
+          <div class="board-row"><span>No messages</span><b>0</b></div>
+        {% endfor %}
+      </div>
+    </div>
+
+    <div class="dash-grid two">
+      <form class="pixel-form compact" method="post">
+        {% include "partials/form_csrf.html" %}
+        <input type="hidden" name="action" value="dispatch">
+        <h2>Dispatch queued messages</h2>
+        <p class="muted">Dispatch sends only when console or SMTP mode is configured. Queue mode intentionally refuses fake delivery.</p>
+        <button class="btn primary" type="submit">Dispatch up to 25</button>
+      </form>
+      <form class="pixel-form compact" method="post">
+        {% include "partials/form_csrf.html" %}
+        <input type="hidden" name="action" value="test_email">
+        <h2>Queue test email</h2>
+        <p class="muted">Use this before a launch call. Queue it first, then dispatch after configuring delivery.</p>
+        <label>Recipient
+          <input name="recipient" type="email" value="{{ config.TEST_EMAIL_RECIPIENT }}" required>
+        </label>
+        <button class="btn secondary" type="submit">Queue test email</button>
+      </form>
+    </div>
+
+    <div class="panel-list">
+      <h2>Latest messages</h2>
+      {% for item in outbox %}
+        <div class="list-row tall email-message-row">
+          <span>{{ item.recipient }} · {{ item.subject }}</span>
+          <b>{{ item.status }} · {{ item.message_type or 'transactional' }}</b>
+          <small>
+            Attempts: {{ item.attempt_count or 0 }} · {{ item.provider_reference or 'No provider reference' }} · queued {{ item.created_at }}{% if item.sent_at %} · sent {{ item.sent_at }}{% endif %}
+          </small>
+          {% if item.last_error %}<small class="danger-text">Last error: {{ item.last_error }}</small>{% endif %}
+          <small>{{ item.body }}</small>
+        </div>
+      {% else %}<p class="muted">No messages yet.</p>{% endfor %}
+    </div>
+  </section>
+</div>
+{% endblock %}

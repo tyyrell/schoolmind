@@ -1,0 +1,80 @@
+{
+  "img/brand/schoolmind-logo-concept.png": {
+    "webp": "img/brand/schoolmind-logo-concept.webp",
+    "width": 426,
+    "height": 362,
+    "purpose": "brand"
+  },
+  "img/og/schoolmind-og.png": {
+    "webp": "img/og/schoolmind-og.webp",
+    "width": 427,
+    "height": 362,
+    "purpose": "social-preview"
+  },
+  "img/pages/01_schoolmind_logo_concept.png": {
+    "webp": "img/pages/01_schoolmind_logo_concept.webp",
+    "width": 426,
+    "height": 362,
+    "purpose": "page-visual"
+  },
+  "img/pages/02_hero_student_ai_platform.png": {
+    "webp": "img/pages/02_hero_student_ai_platform.webp",
+    "width": 427,
+    "height": 362,
+    "purpose": "page-visual"
+  },
+  "img/pages/03_dashboard_overview_mockup.png": {
+    "webp": "img/pages/03_dashboard_overview_mockup.webp",
+    "width": 683,
+    "height": 362,
+    "purpose": "page-visual"
+  },
+  "img/pages/04_counselor_student_support.png": {
+    "webp": "img/pages/04_counselor_student_support.webp",
+    "width": 368,
+    "height": 312,
+    "purpose": "page-visual"
+  },
+  "img/pages/05_teacher_classroom_insights.png": {
+    "webp": "img/pages/05_teacher_classroom_insights.webp",
+    "width": 368,
+    "height": 312,
+    "purpose": "page-visual"
+  },
+  "img/pages/06_student_nour_ai_companion.png": {
+    "webp": "img/pages/06_student_nour_ai_companion.webp",
+    "width": 369,
+    "height": 312,
+    "purpose": "page-visual"
+  },
+  "img/pages/07_privacy_security_visual.png": {
+    "webp": "img/pages/07_privacy_security_visual.webp",
+    "width": 431,
+    "height": 312,
+    "purpose": "page-visual"
+  },
+  "img/pages/08_school_admin_operations.png": {
+    "webp": "img/pages/08_school_admin_operations.webp",
+    "width": 368,
+    "height": 350,
+    "purpose": "page-visual"
+  },
+  "img/pages/09_mobile_app_experience.png": {
+    "webp": "img/pages/09_mobile_app_experience.webp",
+    "width": 368,
+    "height": 350,
+    "purpose": "page-visual"
+  },
+  "img/pages/10_school_partnership_meeting.png": {
+    "webp": "img/pages/10_school_partnership_meeting.webp",
+    "width": 369,
+    "height": 350,
+    "purpose": "page-visual"
+  },
+  "img/pages/11_abstract_ai_data_background.png": {
+    "webp": "img/pages/11_abstract_ai_data_background.webp",
+    "width": 431,
+    "height": 350,
+    "purpose": "page-visual"
+  }
+}

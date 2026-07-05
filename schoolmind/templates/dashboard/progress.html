@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% block title %}{{ t('progress.title') }} · SchoolMind{% endblock %}
+{% block content %}
+<div class="dashboard-layout">
+  {% include "partials/dashboard_nav.html" %}
+  <section class="dash-main">
+    <div class="dash-head">
+      <span class="eyebrow">{{ t('nav.progress') }}</span>
+      <h1>{{ t('progress.title') }}</h1>
+      <p>Your saved goals, practice, calm routines, and latest wellbeing scan in one place.</p>
+    </div>
+
+    <div class="metric-strip">
+      <div class="metric-card"><small>Game sessions</small><strong>{{ game_totals.count }}</strong><p class="muted">{{ game_totals.seconds // 60 }} practice minutes</p></div>
+      <div class="metric-card"><small>Average game score</small><strong>{{ game_totals.avg_score|round|int }}</strong><progress class="meter-progress" value="{{ game_totals.avg_score|round|int }}" max="100">{{ game_totals.avg_score|round|int }}%</progress></div>
+      <div class="metric-card"><small>Breathing sessions</small><strong>{{ breathing_totals.count }}</strong><p class="muted">{{ breathing_totals.seconds // 60 }} calm minutes</p></div>
+      <div class="metric-card"><small>Mood lift</small><strong>{{ breathing_totals.mood_delta|round(1) }}</strong><p class="muted">Average after-before change</p></div>
+    </div>
+
+    {% if latest_assessment %}
+      <div class="panel-list insight-panel">
+        <h2>Latest wellbeing scan</h2>
+        <div class="list-row tall">
+          <span>{{ latest_assessment.primary_need|replace('_', ' ')|title }}</span>
+          <b class="risk {{ latest_assessment.risk_level }}">{{ latest_assessment.score }}</b>
+          <small>{{ latest_assessment.recommendation }}</small>
+          <small>{{ latest_assessment.created_at }}</small>
+        </div>
+      </div>
+    {% endif %}
+
+    <div class="dash-grid two">
+      <div class="panel-list">
+        <h2>Goals</h2>
+        {% for goal in goals %}
+          <article class="list-row tall">
+            <span>{{ goal.title }}</span>
+            <b>{{ goal.progress }}%</b>
+            <small>{{ goal.description }}</small>
+            <progress class="meter-progress" value="{{ goal.progress }}" max="100">{{ goal.progress }}%</progress>
+          </article>
+        {% else %}<p class="muted">{{ t('common.empty') }}</p>{% endfor %}
+      </div>
+      <div class="panel-list">
+        <h2>Recent practice</h2>
+        {% for score in recent_scores %}
+          <div class="list-row"><span>{{ score.game_name|replace('_', ' ')|title }}</span><b>{{ score.score }}</b><small>{{ score.created_at }}</small></div>
+        {% else %}<p class="muted">{{ t('common.empty') }}</p>{% endfor %}
+      </div>
+    </div>
+  </section>
+</div>
+{% endblock %}

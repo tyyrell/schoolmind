@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+{% block title %}Teacher pulse · SchoolMind{% endblock %}
+{% block content %}
+<div class="dashboard-layout">
+  {% include "partials/dashboard_nav.html" %}
+  <section class="dash-main">
+    <div class="dash-head">
+      <span class="eyebrow">Teacher pulse</span>
+      <h1>Aggregated classroom view only.</h1>
+      <p>Teachers see patterns and classroom moves, not private student journals or sensitive individual labels.</p>
+    </div>
+
+    {% include "partials/role_command_center.html" %}
+
+    {% if role_board.privacy_notes %}
+      <section class="role-note-grid" aria-label="Teacher privacy boundaries">
+        {% for note in role_board.privacy_notes %}
+          <article class="role-note-card">
+            <h3>Privacy boundary</h3>
+            <p>{{ note }}</p>
+          </article>
+        {% endfor %}
+      </section>
+    {% endif %}
+
+    <div class="metric-strip">
+      <div class="metric-card"><small>Support requests</small><strong>{{ requests_count }}</strong></div>
+      <div class="metric-card"><small>Privacy mode</small><strong>ON</strong><p class="muted">No private writing is shown here.</p></div>
+    </div>
+
+    <div class="dash-grid two">
+      <div class="panel-list">
+        <h2>Class wellbeing pulse</h2>
+        {% for row in assessment_rows %}
+          <div class="list-row tall">
+            <span>{{ row.group_name or 'Unassigned' }}</span>
+            <b>{{ row.avg_score or 'No scans' }}</b>
+            <small>{{ row.students }} students · stress {{ row.avg_stress or '-' }} · sleep {{ row.avg_sleep or '-' }} · belonging {{ row.avg_belonging or '-' }}</small>
+          </div>
+        {% else %}<p class="muted">No assigned groups yet.</p>{% endfor %}
+      </div>
+      <div class="panel-list">
+        <h2>Suggested classroom moves</h2>
+        {% for move in class_moves %}
+          <div class="list-row tall"><span>{{ move }}</span><b>Action</b><small>Use as a gentle classroom adjustment, not a student label.</small></div>
+        {% endfor %}
+      </div>
+    </div>
+
+    <div class="panel-list">
+      <h2>Class groups</h2>
+      {% for row in rows %}
+      <div class="list-row"><span>{{ row.group_name or 'Unassigned' }}</span><b>{{ row.students }} students</b><small>Pulse {{ '%.1f'|format(row.pulse or 4) }}/4</small></div>
+      {% else %}<p class="muted">No assigned groups yet.</p>{% endfor %}
+    </div>
+
+    <div class="panel-list">
+      <h2>Student practice summary</h2>
+      {% for row in practice_rows %}
+        <div class="list-row tall">
+          <span>{{ row.group_name or 'Unassigned' }}</span>
+          <b>{{ row.active_goals or 0 }} active goals</b>
+          <small>{{ row.game_sessions or 0 }} skill games · {{ row.breathing_sessions or 0 }} breathing sessions</small>
+        </div>
+      {% else %}<p class="muted">No practice records yet.</p>{% endfor %}
+    </div>
+  </section>
+</div>
+{% endblock %}

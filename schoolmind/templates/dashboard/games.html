@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block title %}Games · SchoolMind{% endblock %}
+{% block content %}
+<div class="dashboard-layout">
+  {% include "partials/dashboard_nav.html" %}
+  <section class="dash-main">
+    <div class="dash-head"><span class="eyebrow">{{ t('games.title') }}</span><h1>Short skill games, not empty entertainment.</h1><p>{{ t('games.subtitle') }}</p></div>
+    <div class="panel-list">
+      <h2>{{ t('games.category') }}</h2>
+      <div class="chip-row">
+        <a class="chip {{ 'active' if not selected_category else '' }}" href="{{ url_for('dashboard.games') }}">{{ t('games.all') }}</a>
+        {% for category in categories %}
+          <a class="chip {{ 'active' if selected_category == category else '' }}" href="{{ url_for('dashboard.games', category=category) }}">{{ category|replace('_', ' ')|title }}</a>
+        {% endfor %}
+      </div>
+    </div>
+    <div class="feature-grid four">
+      {% for game in catalog %}
+        <form class="feature-card game-card" method="post" data-game-card>
+          {% include "partials/form_csrf.html" %}
+          <input type="hidden" name="game_name" value="{{ game.id }}">
+          <input type="hidden" name="score" value="{{ game.points }}" data-game-score>
+          <input type="hidden" name="duration_seconds" value="{{ game.minutes * 60 }}">
+          <span class="pixel-icon">{{ loop.index }}</span><h3>{{ game.name }}</h3><p>{{ game.prompt }}</p><strong>{{ game.minutes }} min · {{ game.skill }}</strong>
+          <small class="muted">{{ game.category|replace('_', ' ')|title }} · {{ game.points }} {{ t('games.score') }}</small>
+          <div class="game-options" role="group" aria-label="{{ game.name }}">
+            {% for option in game.options %}
+              <button class="game-option" type="button" data-game-option data-score="{{ game.points if loop.first else game.points - (loop.index * 8) }}">{{ option }}</button>
+            {% endfor %}
+          </div>
+          <p class="game-feedback" data-game-feedback>{{ t('games.choose_option') }}</p>
+          {% if game.id in completed %}<progress class="meter-progress" value="{{ game.points }}" max="100">{{ game.points }}%</progress>{% endif %}
+          <button class="btn ghost" type="submit" data-game-submit disabled>{{ t('games.complete') }}</button>
+        </form>
+      {% endfor %}
+    </div>
+    <div class="panel-list">
+      <h2>{{ t('games.recent') }}</h2>
+      {% for score in scores %}
+        <div class="list-row"><span>{{ score.game_name|replace('_', ' ')|title }}</span><b>{{ score.score }}</b><small>{{ score.duration_seconds }} sec · {{ score.created_at }}</small></div>
+      {% else %}<p class="muted">No game practice yet.</p>{% endfor %}
+    </div>
+  </section>
+</div>
+{% endblock %}

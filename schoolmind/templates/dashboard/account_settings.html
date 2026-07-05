@@ -1,0 +1,108 @@
+{% extends "base.html" %}
+{% block title %}{{ t('settings.title') }} · SchoolMind{% endblock %}
+{% block content %}
+<div class="dashboard-layout">
+  {% include "partials/dashboard_nav.html" %}
+  <section class="dash-main">
+    <div class="dash-head">
+      <span class="eyebrow">{{ t('nav.settings') }}</span>
+      <h1>{{ t('settings.title') }}</h1>
+      <p>{{ t('settings.subtitle') }}</p>
+    </div>
+    <nav class="section-tabs" aria-label="{{ t('settings.title') }}">
+      <a href="#profile">{{ t('settings.profile') }}</a>
+      <a href="#display">{{ t('settings.accessibility') }}</a>
+      <a href="#notifications">{{ t('settings.notifications') }}</a>
+      <a href="#security">{{ t('settings.security') }}</a>
+      <a href="#privacy">{{ t('settings.privacy') }}</a>
+      <button class="btn ghost compact-btn" type="button" data-open-personalization>{{ t('personalize.reopen') }}</button>
+    </nav>
+
+    <div class="dash-grid two">
+      <form class="pixel-form compact" id="profile" method="post">
+        {% include "partials/form_csrf.html" %}
+        <input type="hidden" name="action" value="profile">
+        <h2>{{ t('settings.profile') }}</h2>
+        <label>{{ t('settings.display_name') }}<input name="name" value="{{ current_user.name }}" required></label>
+        <div class="board-row"><span>Email</span><b>{{ current_user.email }}</b></div>
+        <div class="board-row"><span>Role</span><b>{{ current_user.role|title }}</b></div>
+        <div class="board-row"><span>{{ t('settings.google_status') }}</span><b>{{ t('settings.linked') if current_user.google_sub else t('settings.not_linked') }}</b></div>
+        <button class="btn primary" type="submit">{{ t('common.save') }}</button>
+      </form>
+
+      <form class="pixel-form compact" id="display" method="post">
+        {% include "partials/form_csrf.html" %}
+        <input type="hidden" name="action" value="preferences">
+        <h2>{{ t('settings.accessibility') }}</h2>
+        <div class="form-grid">
+          <label>{{ t('settings.language') }}
+            <select name="language">
+              {% for code, meta in languages.items() %}
+                <option value="{{ code }}" {% if preferences.language == code %}selected{% endif %}>{{ meta.name }}</option>
+              {% endfor %}
+            </select>
+          </label>
+          <label>{{ t('settings.theme') }}
+            <select name="theme">
+              {% for code, label in themes.items() %}
+                <option value="{{ code }}" {% if preferences.theme == code %}selected{% endif %}>{{ label }}</option>
+              {% endfor %}
+            </select>
+          </label>
+          <label>{{ t('settings.font_size') }}
+            <select name="font_size">
+              {% for code, label in font_sizes.items() %}
+                <option value="{{ code }}" {% if preferences.font_size == code %}selected{% endif %}>{{ label }}</option>
+              {% endfor %}
+            </select>
+          </label>
+        </div>
+        <label class="inline-check"><input type="checkbox" name="reduced_motion" {% if preferences.reduced_motion %}checked{% endif %}>{{ t('settings.reduced_motion') }}</label>
+        <label class="inline-check"><input type="checkbox" name="high_contrast" {% if preferences.high_contrast %}checked{% endif %}>{{ t('settings.high_contrast') }}</label>
+        <label class="inline-check"><input type="checkbox" name="dyslexia_friendly" {% if preferences.dyslexia_friendly %}checked{% endif %}>{{ t('settings.dyslexia') }}</label>
+        <button class="btn primary" type="submit">{{ t('common.save') }}</button>
+      </form>
+    </div>
+
+    <div class="dash-grid two">
+      <form class="pixel-form compact" id="notifications" method="post">
+        {% include "partials/form_csrf.html" %}
+        <input type="hidden" name="action" value="notifications">
+        <h2>{{ t('settings.notifications') }}</h2>
+        <p class="muted">{{ t('settings.notification_note') }}</p>
+        <label class="inline-check"><input type="checkbox" name="notify_email" {% if preferences.notify_email %}checked{% endif %}>{{ t('settings.email_notifications') }}</label>
+        <label class="inline-check"><input type="checkbox" name="notify_support" {% if preferences.notify_support %}checked{% endif %}>{{ t('settings.support_notifications') }}</label>
+        <button class="btn ghost" type="submit">{{ t('common.save') }}</button>
+      </form>
+
+      <form class="pixel-form compact" id="security" method="post">
+        {% include "partials/form_csrf.html" %}
+        <input type="hidden" name="action" value="password">
+        <h2>{{ t('settings.security') }}</h2>
+        <label>{{ t('settings.current_password') }}<input type="password" name="current_password" autocomplete="current-password"></label>
+        <label>{{ t('settings.new_password') }}<input type="password" name="new_password" minlength="8" autocomplete="new-password"></label>
+        <button class="btn ghost" type="submit">{{ t('settings.password_updated') }}</button>
+      </form>
+    </div>
+    <div class="dash-grid two">
+      <section class="panel-list" id="privacy">
+        <h2>{{ t('settings.privacy') }}</h2>
+        <div class="list-row tall"><span>{{ t('settings.consent') }}</span><b>{{ 'Required' if current_user.role == 'student' else 'Role based' }}</b><small>{{ t('settings.privacy_note') }}</small></div>
+        <div class="row-actions">
+          <a class="btn ghost" href="{{ url_for('public.privacy') }}">Privacy</a>
+          <a class="btn ghost" href="{{ url_for('public.terms') }}">Terms</a>
+          {% if current_user.role == 'admin' %}<a class="btn ghost" href="{{ url_for('api.export_workspace_json') }}">Workspace export</a>{% endif %}
+        </div>
+      </section>
+      <section class="panel-list">
+        <h2>{{ t('settings.account_actions') }}</h2>
+        <div class="row-actions">
+          <a class="btn ghost" href="{{ url_for('dashboard.app_home') }}">{{ t('nav.workspace') }}</a>
+          <a class="btn ghost" href="{{ url_for('dashboard.help_center') }}">{{ t('nav.help') }}</a>
+          <a class="btn primary" href="{{ url_for('auth.logout') }}">{{ t('nav.logout') }}</a>
+        </div>
+      </section>
+    </div>
+  </section>
+</div>
+{% endblock %}

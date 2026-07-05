@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block title %}Student Data Notice · SchoolMind AI{% endblock %}
+{% block content %}
+<section class="section page-hero compact legal-hero">
+  <span class="eyebrow">Student data notice</span>
+  <h1>Students and guardians deserve plain language, not buried legal text.</h1>
+  <p class="lead">This notice explains SchoolMind AI in safer, simpler language for schools to adapt before launch.</p>
+  <p class="legal-note">{{ legal_notice }}</p>
+</section>
+
+<section class="section company-grid two policy-grid">
+  {% for item in notice_points %}
+    <article class="company-card policy-card"><h3>{{ item.title }}</h3><p>{{ item.body }}</p></article>
+  {% endfor %}
+</section>
+
+<section class="section final-cta-section">
+  <span class="eyebrow">School-owned notice</span>
+  <h2>Adapt this page before giving it to students.</h2>
+  <p>The school should add its privacy contact, local support process, consent language, emergency instructions, and data request route. A generic notice is not enough.</p>
+  <div class="hero-actions"><a class="btn primary" href="{{ url_for('public.contact') }}">Ask privacy questions</a><a class="btn ghost" href="{{ url_for('public.privacy') }}">Read privacy policy</a></div>
+</section>
+{% endblock %}

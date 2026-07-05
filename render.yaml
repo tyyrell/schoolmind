@@ -1,0 +1,72 @@
+services:
+  - type: web
+    name: schoolmind-ai
+    env: python
+    plan: starter
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn wsgi:app --workers ${WEB_CONCURRENCY:-2} --threads ${GUNICORN_THREADS:-8} --timeout 90
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.12.7
+      - key: APP_ENV
+        value: production
+      - key: SESSION_COOKIE_SECURE
+        value: "true"
+      - key: SESSION_COOKIE_NAME
+        value: __Host-schoolmind_session
+      - key: DATABASE_ENGINE
+        value: postgres
+      - key: DATABASE_URL
+        sync: false
+      - key: DATABASE_SSLMODE
+        value: require
+      - key: DATABASE_POOLING_MODE
+        value: external
+      - key: DATABASE_CONNECT_TIMEOUT_SECONDS
+        value: "10"
+      - key: DATABASE_STATEMENT_TIMEOUT_MS
+        value: "30000"
+      - key: DATABASE_APPLICATION_NAME
+        value: schoolmind-ai
+      - key: AUTO_INIT_DB
+        value: "true"
+      - key: RUN_MIGRATIONS_ON_BOOT
+        value: "true"
+      - key: PUBLIC_BASE_URL
+        sync: false
+      - key: BILLING_WEBHOOK_SECRET
+        generateValue: true
+      - key: PLATFORM_ADMIN_EMAIL
+        sync: false
+      - key: PLATFORM_ADMIN_PASSWORD
+        generateValue: true
+      - key: SEED_DEMO_DATA
+        value: "false"
+      - key: ENABLE_DEMO_SEED
+        value: "false"
+      - key: TRUST_PROXY_HEADERS
+        value: "true"
+      - key: RATE_LIMIT_BACKEND
+        value: memory
+      - key: CSP_REPORT_ONLY
+        value: "false"
+      - key: DEMO_MODE
+        value: "false"
+      - key: ALLOW_SELF_REGISTER
+        value: "true"
+      - key: SCHOOLMIND_REQUIRE_INVITES
+        value: "false"
+      - key: WEB_CONCURRENCY
+        value: "2"
+      - key: GUNICORN_THREADS
+        value: "8"
+      - key: SECRET_KEY
+        generateValue: true
+      - key: SUPPORT_EMAIL
+        value: support@schoolmind.ai
+      - key: CHECKOUT_STARTER_URL
+        sync: false
+      - key: CHECKOUT_GROWTH_URL
+        sync: false
+      - key: CHECKOUT_SCALE_URL
+        sync: false

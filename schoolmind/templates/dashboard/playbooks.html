@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block title %}Playbooks · SchoolMind{% endblock %}
+{% block content %}
+<div class="dashboard-layout">
+  {% include "partials/dashboard_nav.html" %}
+  <section class="dash-main">
+    <div class="dash-head">
+      <span class="eyebrow">Human workflow</span>
+      <h1>Signals mean nothing without action.</h1>
+      <p>Support owner: <strong>{{ settings.support_owner or 'not configured' }}</strong> · escalation target: {{ settings.escalation_window_minutes }} minutes.</p>
+    </div>
+    <div class="dash-grid two">
+      <form class="pixel-form compact" method="post">
+        {% include "partials/form_csrf.html" %}
+        <h2>Create playbook</h2>
+        <label>Title<input name="title" required></label>
+        <label>Trigger<select name="trigger_level"><option value="watch">Watch</option><option value="support">Support</option><option value="urgent">Urgent</option></select></label>
+        <label>Action steps<textarea name="action_steps" rows="7" required></textarea></label>
+        <button class="btn primary" type="submit">Save playbook</button>
+      </form>
+      <div class="panel-list">
+        <h2>Playbooks</h2>
+        {% for item in playbooks %}
+          <article class="list-row tall"><span>{{ item.title }}</span><b class="risk {{ item.trigger_level }}">{{ item.trigger_level }}</b><small>{{ item.action_steps }}</small></article>
+        {% else %}<p class="muted">No playbooks.</p>{% endfor %}
+      </div>
+    </div>
+  </section>
+</div>
+{% endblock %}

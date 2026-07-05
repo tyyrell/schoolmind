@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block title %}Data Retention · SchoolMind AI{% endblock %}
+{% block content %}
+<section class="section page-hero compact">
+  <span class="eyebrow">Data retention</span>
+  <h1>Student support data should not live forever by accident.</h1>
+  <p class="lead">SchoolMind AI gives school admins a retention setting and cleanup workflow. Real deployments should align this with school policy, local law, and consent commitments.</p>
+</section>
+<section class="section company-split">
+  <div>
+    <h2>Default retention posture</h2>
+    <ul class="company-list">
+      <li>Default retention window is configurable by the school admin.</li>
+      <li>Cleanup should be reviewed before production use.</li>
+      <li>Backups and exports must be governed by the same policy.</li>
+      <li>Deletion and access requests need a clear school-owned process.</li>
+    </ul>
+  </div>
+  <div class="company-image"><picture class="smart-picture"><source srcset="{{ url_for('static', filename='img/pages/07_privacy_security_visual.webp') }}" type="image/webp"><img src="{{ url_for('static', filename='img/pages/07_privacy_security_visual.png') }}" alt="Privacy data retention visual" loading="lazy" decoding="async" width="431" height="312"></picture></div>
+</section>
+{% endblock %}

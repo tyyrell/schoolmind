@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block title %}Product Overview · SchoolMind AI{% endblock %}
+{% block content %}
+<section class="section page-hero compact">
+  <span class="eyebrow">Product overview</span>
+  <h1>One supervised operating system for school support.</h1>
+  <p class="lead">SchoolMind AI brings students, teachers, counselors, and school leaders into a governed workflow for educational wellbeing indicators, support follow-up, consent, and operational readiness.</p>
+  <div class="hero-actions"><a class="btn primary" href="{{ url_for('public.try_demo') }}">Try instantly</a><a class="btn ghost" href="{{ url_for('public.request_demo') }}">Request guided demo</a></div>
+</section>
+<section class="section company-split">
+  <div>
+    <span class="eyebrow">Platform architecture</span>
+    <h2>Explore first. Register when the school needs real data and governance.</h2>
+    <p class="lead">Visitors can enter a limited sandbox immediately. Production use begins only when a school creates a workspace, reviews privacy requirements, invites staff, imports users, and connects billing.</p>
+    <ul class="company-list">
+      <li>Instant role-based demo for students, teachers, counselors, and admins.</li>
+      <li>Workspace setup for school profile, roles, consent, support owner, and data retention.</li>
+      <li>Privacy-aware data boundaries between private reflection, counselor workflow, and aggregate classroom insight.</li>
+      <li>Subscription controls for Standard, Pro, and custom school deployments.</li>
+    </ul>
+  </div>
+  <div class="company-image"><picture class="smart-picture"><source srcset="{{ url_for('static', filename='img/pages/03_dashboard_overview_mockup.webp') }}" type="image/webp"><img src="{{ url_for('static', filename='img/pages/03_dashboard_overview_mockup.png') }}" alt="SchoolMind AI dashboard overview" loading="lazy" decoding="async" width="431" height="350"></picture></div>
+</section>
+<section class="section">
+  <div class="section-head">
+    <span class="eyebrow">Core modules</span>
+    <h2>Built as a school workflow, not a pile of disconnected features.</h2>
+  </div>
+  <div class="company-grid four page-directory">
+    <article class="company-card"><span class="pixel-icon">01</span><h3>Student workspace</h3><p>Check-ins, journal, goals, progress, mood diary, calming tools, and supervised Nour prompts.</p><a href="{{ url_for('public.students') }}">Student experience</a></article>
+    <article class="company-card"><span class="pixel-icon">02</span><h3>Teacher pulse</h3><p>Class-level indicators and practical context without exposing private journals or counselor notes.</p><a href="{{ url_for('public.teachers') }}">Teacher view</a></article>
+    <article class="company-card"><span class="pixel-icon">03</span><h3>Counselor workflow</h3><p>Support queue, student briefs, playbooks, notes, plans, follow-up, and human review reminders.</p><a href="{{ url_for('public.counselors') }}">Counselor hub</a></article>
+    <article class="company-card"><span class="pixel-icon">04</span><h3>School administration</h3><p>Users, consent, billing, imports, data operations, security, backups, and readiness controls.</p><a href="{{ url_for('public.schools') }}">School controls</a></article>
+  </div>
+</section>
+<section class="section table-card">
+  <table>
+    <thead><tr><th>Layer</th><th>What it does</th><th>What it deliberately avoids</th></tr></thead>
+    <tbody>
+      <tr><td>AI-assisted support</td><td>Helps phrase educational support prompts, summarize safe context, and surface non-diagnostic indicators.</td><td>Medical diagnosis, therapy, emergency response, or replacing staff judgment.</td></tr>
+      <tr><td>Role permissions</td><td>Gives each role the minimum useful view for their work.</td><td>Turning teachers into counselors or exposing private student reflection broadly.</td></tr>
+      <tr><td>School governance</td><td>Connects consent, retention, support protocol, billing, and audit-ready administration.</td><td>Letting a public demo become a production system accidentally.</td></tr>
+    </tbody>
+  </table>
+</section>
+{% endblock %}

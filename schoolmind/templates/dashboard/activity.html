@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block title %}{{ t('nav.activity') }} · SchoolMind{% endblock %}
+{% block content %}
+<div class="dashboard-layout">
+  {% include "partials/dashboard_nav.html" %}
+  <section class="dash-main">
+    <div class="dash-head">
+      <span class="eyebrow">{{ t('nav.activity') }}</span>
+      <h1>{{ t('activity.title') }}</h1>
+      <p>{{ t('activity.subtitle') }}</p>
+    </div>
+    <div class="panel-list">
+      <h2>{{ t('activity.recent') }}</h2>
+      {% for item in items %}
+        <article class="list-row tall">
+          <span>{{ item.type }}</span>
+          <b>{{ item.status }}</b>
+          <small>{{ item.detail or t('common.empty') }}</small>
+          <small>{{ item.created_at }}</small>
+        </article>
+      {% else %}
+        <p class="muted">{{ t('common.empty') }}</p>
+      {% endfor %}
+    </div>
+  </section>
+</div>
+{% endblock %}

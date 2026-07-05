@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% block title %}Privacy · SchoolMind AI{% endblock %}
+{% block content %}
+<section class="section page-hero compact legal-hero">
+  <span class="eyebrow">Privacy</span>
+  <h1>Student data needs governance before it needs dashboards.</h1>
+  <p class="lead">SchoolMind AI is designed for school-controlled workspaces, role-based visibility, consent records, retention planning, and human-supervised educational support workflows.</p>
+  <p class="legal-note">{{ legal_notice }}</p>
+</section>
+
+<section class="section company-grid three policy-grid">
+  {% for item in commitments %}
+    <article class="company-card policy-card">
+      <h3>{{ item.title }}</h3>
+      <p>{{ item.body }}</p>
+    </article>
+  {% endfor %}
+</section>
+
+<section class="section company-split legal-split">
+  <div class="company-image"><picture class="smart-picture"><source srcset="{{ url_for('static', filename='img/pages/07_privacy_security_visual.webp') }}" type="image/webp"><img src="{{ url_for('static', filename='img/pages/07_privacy_security_visual.png') }}" alt="Privacy controls" loading="lazy" decoding="async" width="431" height="312"></picture></div>
+  <div>
+    <span class="eyebrow">Production boundary</span>
+    <h2>Do not use real student data until the school is ready.</h2>
+    <p class="lead">A school should confirm consent, data owner, support owner, staff access, retention, and escalation rules before importing real student records.</p>
+    <div class="hero-actions"><a class="btn primary" href="{{ url_for('public.data_processing_agreement') }}">Review DPA draft</a><a class="btn ghost" href="{{ url_for('public.student_data_notice') }}">Student notice</a></div>
+  </div>
+</section>
+
+<section class="section table-card legal-table">
+  <span class="eyebrow">Readiness matrix</span>
+  <h2>What is ready vs. what still needs approval</h2>
+  <table>
+    <thead><tr><th>Area</th><th>Product posture</th><th>Before production</th></tr></thead>
+    <tbody>
+      {% for area, posture, required in readiness_matrix %}
+        <tr><td>{{ area }}</td><td>{{ posture }}</td><td>{{ required }}</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</section>
+
+<section class="section policy-section">
+  <div>
+    <span class="eyebrow">Access and deletion requests</span>
+    <h2>Requests need a controlled workflow, not improvisation.</h2>
+    <p class="lead">Student and guardian requests should be handled through the school’s authorized privacy contact. The platform should support the process; it should not bypass school governance.</p>
+  </div>
+  <ol class="legal-steps">
+    {% for step in data_rights_workflow %}<li>{{ step }}</li>{% endfor %}
+  </ol>
+</section>
+{% endblock %}

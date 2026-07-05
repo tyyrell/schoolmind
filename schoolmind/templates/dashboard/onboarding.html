@@ -1,0 +1,135 @@
+{% extends "base.html" %}
+{% block title %}School launch onboarding · SchoolMind AI{% endblock %}
+{% block content %}
+<div class="dashboard-layout onboarding-workspace">
+  {% include "partials/dashboard_nav.html" %}
+  <section class="dash-main">
+    <div class="dash-head launch-head">
+      <span class="eyebrow">School launch onboarding</span>
+      <h1>{{ done }}/{{ total }} launch blockers cleared.</h1>
+      <p>This is the school admin control path. It forces profile, policy, billing, consent, staff, roster, and human escalation readiness before the workspace is treated as real school production.</p>
+      <div class="stacked-actions">
+        <a class="btn primary" href="{{ url_for('dashboard.admin_import') }}">Import roster</a>
+        <a class="btn ghost" href="{{ url_for('dashboard.admin_invites') }}">Invite staff</a>
+        <a class="btn ghost" href="{{ url_for('dashboard.admin_consent') }}">Review consent</a>
+      </div>
+    </div>
+
+    <div class="launch-score-card readiness-{{ onboarding.readiness }}">
+      <div>
+        <span class="eyebrow">Readiness score</span>
+        <strong>{{ onboarding.percent }}%</strong>
+        <p>{{ 'Ready for controlled launch review.' if onboarding.can_mark_ready else 'Not ready for real student data. Finish the blockers below.' }}</p>
+      </div>
+      <progress value="{{ done }}" max="{{ total }}">{{ onboarding.percent }}%</progress>
+      <div class="launch-status-grid">
+        <div><small>Launch stage</small><b>{{ settings.launch_stage|replace('_', ' ')|title }}</b></div>
+        <div><small>Launch path</small><b>{{ settings.launch_mode|replace('_', ' ')|title }}</b></div>
+        <div><small>Primary language</small><b>{{ settings.launch_language|upper }}</b></div>
+        <div><small>Trial plan</small><b>{{ subscription.plan|title if subscription else 'Missing' }}</b></div>
+      </div>
+    </div>
+
+    {% if onboarding.next_task %}
+      <div class="pilot-alert">
+        <strong>Next required action: {{ onboarding.next_task.title }}</strong>
+        <span>{{ onboarding.next_task.summary }}</span>
+        <a class="btn ghost" href="{{ url_for(onboarding.next_task.endpoint) }}">{{ onboarding.next_task.action_label }}</a>
+      </div>
+    {% else %}
+      <div class="pilot-alert positive">
+        <strong>Checklist complete.</strong>
+        <span>The workspace can be marked launch-ready, but do not use real student data until the school's consent and governance process is approved.</span>
+      </div>
+    {% endif %}
+
+    <div class="metric-strip launch-metrics">
+      <div class="metric-card"><small>Expected students</small><strong>{{ settings.expected_students }}</strong></div>
+      <div class="metric-card"><small>Actual students</small><strong>{{ counts.students }}</strong></div>
+      <div class="metric-card"><small>Staff</small><strong>{{ counts.teachers + counts.counselors + counts.admins }}</strong></div>
+      <div class="metric-card"><small>Invites</small><strong>{{ invite_count }}</strong></div>
+      <div class="metric-card"><small>Consent records</small><strong>{{ consent_count }}</strong></div>
+      <div class="metric-card"><small>Import batches</small><strong>{{ import_count }}</strong></div>
+    </div>
+
+    <div class="dash-grid two launch-setup-grid">
+      <form class="pixel-form compact launch-profile-form" method="post">
+        {% include "partials/form_csrf.html" %}
+        <input type="hidden" name="action" value="launch_profile">
+        <h2>1. Launch profile</h2>
+        <p class="muted">This is not marketing copy. It is the internal owner map needed before a school starts using real workflows.</p>
+        <div class="form-grid">
+          <label>Country / region<input name="country" value="{{ school.country }}" required></label>
+          <label>Primary launch language
+            <select name="launch_language">
+              <option value="en" {% if settings.launch_language == 'en' %}selected{% endif %}>English</option>
+              <option value="ar" {% if settings.launch_language == 'ar' %}selected{% endif %}>Arabic</option>
+            </select>
+          </label>
+          <label>Launch path
+            <select name="launch_mode">
+              <option value="instant_demo" {% if settings.launch_mode == 'instant_demo' %}selected{% endif %}>Instant limited demo</option>
+              <option value="self_serve_trial" {% if settings.launch_mode == 'self_serve_trial' %}selected{% endif %}>30-day self-serve trial</option>
+              <option value="guided_pilot" {% if settings.launch_mode == 'guided_pilot' %}selected{% endif %}>Guided pilot</option>
+              <option value="district_rollout" {% if settings.launch_mode == 'district_rollout' %}selected{% endif %}>District rollout</option>
+            </select>
+          </label>
+          <label>Expected students<input name="expected_students" type="number" min="0" max="100000" value="{{ settings.expected_students }}"></label>
+          <label>Expected staff<input name="expected_staff" type="number" min="0" max="10000" value="{{ settings.expected_staff }}"></label>
+          <label>Approval owner<input name="approval_owner" value="{{ settings.approval_owner }}" placeholder="Principal, operations lead, or project owner"></label>
+          <label>Data owner<input name="data_owner" value="{{ settings.data_owner }}" placeholder="Privacy lead or data protection owner"></label>
+          <label>Support inbox<input name="support_email" type="email" value="{{ settings.support_email }}" placeholder="support-team@school.edu"></label>
+        </div>
+        <label>Pilot or launch goal<textarea name="pilot_goal" rows="4" placeholder="Example: evaluate counselor workflow with Grade 9 before a full launch.">{{ settings.pilot_goal }}</textarea></label>
+        <button class="btn primary" type="submit">Save launch profile</button>
+      </form>
+
+      <div class="panel-list launch-owner-map">
+        <h2>2. Owner map</h2>
+        <div class="list-row tall"><span>Approval owner</span><b>{{ settings.approval_owner or 'Missing' }}</b><small>Who can approve launch scope and school rollout decisions.</small></div>
+        <div class="list-row tall"><span>Data owner</span><b>{{ settings.data_owner or 'Missing' }}</b><small>Who owns privacy questions, deletion requests, consent, and exports.</small></div>
+        <div class="list-row tall"><span>Support inbox</span><b>{{ settings.support_email or 'Missing' }}</b><small>Where operational support and escalation messages should be routed.</small></div>
+        <div class="list-row tall"><span>Support owner</span><b>{{ settings.support_owner or 'Missing' }}</b><small>Configured in school policy settings.</small></div>
+      </div>
+    </div>
+
+    <div class="panel-list launch-checklist">
+      <h2>3. Operational launch checklist</h2>
+      {% for task in tasks %}
+        <div class="list-row tall launch-task {{ 'done' if completed[task.key] else 'missing' }}">
+          <span>{{ task.title }}</span>
+          <b class="risk {{ 'steady' if completed[task.key] else 'support' }}">{{ 'Done' if completed[task.key] else 'Missing' }}</b>
+          <small>{{ task.category }} · {{ task.summary }}</small>
+          <a class="btn ghost" href="{{ url_for(task.endpoint) }}">{{ task.action_label }}</a>
+        </div>
+      {% endfor %}
+    </div>
+
+    <div class="dash-grid three launch-routing-grid">
+      <a class="feature-card clickable" href="{{ url_for('dashboard.admin_settings') }}"><span class="pixel-icon">01</span><h3>Policy settings</h3><p>Support owner, consent requirement, retention, escalation window, and human escalation instructions.</p></a>
+      <a class="feature-card clickable" href="{{ url_for('dashboard.admin_invites') }}"><span class="pixel-icon">02</span><h3>Staff invites</h3><p>Queue teacher, counselor, and admin invitations before any real school pilot.</p></a>
+      <a class="feature-card clickable" href="{{ url_for('dashboard.admin_import') }}"><span class="pixel-icon">03</span><h3>Roster import</h3><p>Bring in students with CSV only after consent and internal governance are understood.</p></a>
+      <a class="feature-card clickable" href="{{ url_for('dashboard.admin_billing') }}"><span class="pixel-icon">04</span><h3>Billing path</h3><p>Confirm trial, monthly, annual, or guided pilot terms before presenting the workspace commercially.</p></a>
+      <a class="feature-card clickable" href="{{ url_for('dashboard.admin_operations') }}"><span class="pixel-icon">05</span><h3>Operations</h3><p>Check email mode, secret readiness, overdue alerts, engagement loops, and plan usage.</p></a>
+      <a class="feature-card clickable" href="{{ url_for('dashboard.admin_database') }}"><span class="pixel-icon">06</span><h3>Database readiness</h3><p>Review database engine, release safety checks, table counts, and production warnings.</p></a>
+    </div>
+
+    <div class="dash-grid two launch-controls">
+      <form class="pixel-form compact" method="post">
+        {% include "partials/form_csrf.html" %}
+        <input type="hidden" name="action" value="mark_ready">
+        <h2>Mark launch-ready</h2>
+        <p class="muted">This is intentionally blocked until every checklist item is done. It is an internal readiness marker, not legal approval.</p>
+        <button class="btn primary" type="submit" {% if not onboarding.can_mark_ready %}disabled{% endif %}>Mark workspace launch-ready</button>
+      </form>
+      <form class="pixel-form compact danger-zone" method="post">
+        {% include "partials/form_csrf.html" %}
+        <input type="hidden" name="action" value="reset_launch">
+        <h2>Reset readiness</h2>
+        <p class="muted">Use this if pricing, consent, support ownership, or launch scope changes before a real school rollout.</p>
+        <button class="btn ghost" type="submit">Reset to setup mode</button>
+      </form>
+    </div>
+  </section>
+</div>
+{% endblock %}

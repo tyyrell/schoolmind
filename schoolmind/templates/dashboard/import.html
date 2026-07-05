@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block title %}Import users · SchoolMind{% endblock %}
+{% block content %}
+<div class="dashboard-layout">
+  {% include "partials/dashboard_nav.html" %}
+  <section class="dash-main">
+    <div class="dash-head">
+      <span class="eyebrow">Bulk import</span>
+      <h1>Create accounts without wasting admin time.</h1>
+      <p>Required CSV headers: name,email,role. Optional: group_name,password.</p>
+    </div>
+    <form class="pixel-form compact" method="post">
+      {% include "partials/form_csrf.html" %}
+      <h2>Paste CSV</h2>
+      <label>Rows<textarea name="csv_rows" rows="12" placeholder="name,email,role,group_name,password&#10;Alex Student,alex@example.com,student,Grade 10-A,change-me-123"></textarea></label>
+      <button class="btn primary" type="submit">Import users</button>
+    </form>
+    <div class="panel-list">
+      <h2>Recent imports</h2>
+      {% for batch in batches %}
+        <div class="list-row tall"><span>{{ batch.imported_count }} imported · {{ batch.skipped_count }} skipped</span><b>{{ batch.created_at }}</b><small>{{ batch.note or 'No notes' }}</small></div>
+      {% else %}<p class="muted">No imports yet.</p>{% endfor %}
+    </div>
+  </section>
+</div>
+{% endblock %}

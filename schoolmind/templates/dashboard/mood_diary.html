@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block title %}Mood Diary · SchoolMind{% endblock %}
+{% block content %}
+<div class="dashboard-layout">
+  {% include "partials/dashboard_nav.html" %}
+  <section class="dash-main">
+    <div class="dash-head"><span class="eyebrow">Mood diary</span><h1>Patterns, not labels.</h1><p>See how check-ins and scans move over time.</p></div>
+    <div class="dash-grid two">
+      <div class="panel-list"><h2>Check-ins</h2>{% for item in checkins %}<div class="list-row"><span>Mood {{ item.mood }} · Stress {{ item.stress }}</span><b class="risk {{ item.risk_level }}">{{ item.risk_level }}</b><small>{{ item.created_at }}</small></div>{% else %}<p class="muted">No check-ins yet.</p>{% endfor %}</div>
+      <div class="panel-list"><h2>Wellbeing scans</h2>{% for item in assessments %}<div class="list-row tall"><span>{{ item.primary_need|replace('_', ' ')|title }}</span><b>{{ item.score }}</b><small>{{ item.recommendation }}</small></div>{% else %}<p class="muted">No scans yet.</p>{% endfor %}</div>
+    </div>
+  </section>
+</div>
+{% endblock %}

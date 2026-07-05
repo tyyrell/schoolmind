@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block title %}Daily Tips · SchoolMind{% endblock %}
+{% block content %}
+<div class="dashboard-layout">
+  {% include "partials/dashboard_nav.html" %}
+  <section class="dash-main">
+    <div class="dash-head"><span class="eyebrow">Daily tips</span><h1>Three useful moves for today.</h1><p>{% if latest %}Based on your latest focus: {{ latest.primary_need|replace('_', ' ')|title }}.{% else %}Complete a scan to personalize tips.{% endif %}</p></div>
+    <div class="feature-grid three">
+      {% for tip in tips %}
+        <article class="feature-card"><span class="pixel-icon">{{ loop.index }}</span><h3>Tip {{ loop.index }}</h3><p>{{ tip }}</p></article>
+      {% endfor %}
+    </div>
+  </section>
+</div>
+{% endblock %}

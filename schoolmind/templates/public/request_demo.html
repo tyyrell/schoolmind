@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% block title %}Request Demo · SchoolMind AI{% endblock %}
+{% block content %}
+<section class="section company-split">
+  <div>
+    <span class="eyebrow">Request demo</span>
+    <h1>For schools that need a serious walkthrough, not a random signup.</h1>
+    <p class="lead">Use this page when a school wants pricing discussion, guided pilot planning, privacy/security answers, implementation help, or a formal product walkthrough.</p>
+    <div class="stat-band">
+      <article><strong>30 days</strong><span>Trial available</span></article>
+      <article><strong>$50</strong><span>Standard monthly</span></article>
+      <article><strong>$120</strong><span>Pro monthly</span></article>
+    </div>
+    <ul class="company-list">
+      <li>Estimate student count and staff roles.</li>
+      <li>Decide if self-serve trial or guided pilot is safer.</li>
+      <li>Prepare privacy, consent, and support protocol questions.</li>
+    </ul>
+  </div>
+  <form class="pixel-form" method="post" action="{{ url_for('public.contact') }}">
+    {% include "partials/form_csrf.html" %}
+    <input type="hidden" name="lead_type" value="demo">
+    <label>Name<input name="name" required></label>
+    <label>School or organization<input name="school_name" required></label>
+    <label>Email<input name="email" type="email" required></label>
+    <label>Estimated students<input name="student_count" inputmode="numeric" placeholder="Example: 450"></label>
+    <label>Preferred path
+      <select name="preferred_path">
+        <option value="demo_first">Guided demo first</option>
+        <option value="self_serve_trial">Self-serve 30-day trial</option>
+        <option value="guided_pilot">Guided pilot</option>
+        <option value="not_sure">Not sure yet</option>
+      </select>
+    </label>
+    <label>Likely plan
+      <select name="requested_plan">
+        <option value="starter">Standard · $50/month</option>
+        <option value="growth">Pro · $120/month</option>
+        <option value="scale">Custom / guided pilot</option>
+        <option value="">Not sure</option>
+      </select>
+    </label>
+    <label>Preferred billing after trial
+      <select name="billing_cycle">
+        <option value="monthly">Monthly</option>
+        <option value="annual">Annual</option>
+      </select>
+    </label>
+    <label>What do you want to evaluate?<textarea name="message" rows="7" required>We want to request a guided demo for SchoolMind AI. Please help us evaluate pricing, student count, privacy requirements, and whether we should start with a 30-day trial or guided pilot.</textarea></label>
+    <button class="btn primary" type="submit">Send demo request</button>
+    <p class="muted">This stores the lead and queues a notification. Connect a real email provider before production so requests do not stay only inside the app.</p>
+  </form>
+</section>
+{% endblock %}

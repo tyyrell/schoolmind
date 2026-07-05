@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %}Data Processing Agreement Draft · SchoolMind AI{% endblock %}
+{% block content %}
+<section class="section page-hero compact legal-hero">
+  <span class="eyebrow">DPA draft</span>
+  <h1>A school data product needs a data processing agreement before production use.</h1>
+  <p class="lead">This page is a practical DPA outline for SchoolMind AI evaluations. It explains what a final agreement must cover before real student data is processed.</p>
+  <p class="legal-note">{{ legal_notice }}</p>
+</section>
+
+<section class="section company-grid two policy-grid">
+  {% for item in dpa_sections %}
+    <article class="company-card policy-card"><h3>{{ item.title }}</h3><p>{{ item.body }}</p></article>
+  {% endfor %}
+</section>
+
+<section class="section table-card legal-table">
+  <span class="eyebrow">Required production fields</span>
+  <h2>Do not leave the DPA generic.</h2>
+  <table>
+    <thead><tr><th>Field</th><th>Why it matters</th></tr></thead>
+    <tbody>
+      <tr><td>School legal entity</td><td>Identifies the customer and data owner/controller relationship.</td></tr>
+      <tr><td>Data categories</td><td>Defines account, roster, support, journal, audit, billing, and contact data scope.</td></tr>
+      <tr><td>Student age range</td><td>Controls guardian consent, notice language, and access workflows.</td></tr>
+      <tr><td>Hosting region</td><td>Supports data residency, subprocessors, and transfer decisions.</td></tr>
+      <tr><td>Retention period</td><td>Prevents indefinite storage by accident.</td></tr>
+      <tr><td>Incident contact</td><td>Defines who receives security and privacy notifications.</td></tr>
+    </tbody>
+  </table>
+</section>
+{% endblock %}

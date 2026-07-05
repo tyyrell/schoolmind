@@ -1,0 +1,64 @@
+<button class="workspace-menu-btn" type="button" data-side-toggle aria-controls="workspace-nav" aria-expanded="false">{{ t('nav.workspace_menu') }}</button>
+<div class="side-scrim" data-side-scrim hidden></div>
+<aside class="side-panel" id="workspace-nav" data-side-panel aria-label="{{ t('nav.workspace') }}">
+  <div class="side-card">
+    <span class="eyebrow">{{ t('nav.workspace') }}</span>
+    <h2>{{ current_user.school_name }}</h2>
+    <p>{{ current_user.name }} · {{ current_user.role|title }}</p>
+    <button class="side-close" type="button" data-side-close aria-label="{{ t('nav.close_menu') }}">×</button>
+  </div>
+  <nav class="side-nav">
+    <span class="nav-group">{{ t('nav.group.overview') }}</span>
+    <a href="{{ url_for('dashboard.app_home') }}">{{ t('nav.home') }}</a>
+    {% if current_user.role == 'student' %}
+      <span class="nav-group">{{ t('nav.group.student_tools') }}</span>
+      <a href="{{ url_for('dashboard.student_home') }}">{{ t('nav.student_console') }}</a>
+      <a href="{{ url_for('dashboard.journal_studio') }}">{{ t('nav.journal') }}</a>
+      <a href="{{ url_for('dashboard.companion_studio') }}">{{ t('nav.nour') }}</a>
+      <a href="{{ url_for('dashboard.student_goals') }}">{{ t('nav.goals') }}</a>
+      <a href="{{ url_for('dashboard.games') }}">{{ t('nav.games') }}</a>
+      <span class="nav-group">{{ t('nav.group.insights') }}</span>
+      <a href="{{ url_for('dashboard.progress_hub') }}">{{ t('nav.progress') }}</a>
+      <a href="{{ url_for('dashboard.weekly_summary') }}">{{ t('nav.weekly') }}</a>
+      <a href="{{ url_for('dashboard.support_plans') }}">{{ t('nav.support_plans') }}</a>
+      <a href="{{ url_for('dashboard.breathing_center') }}">{{ t('nav.breathing') }}</a>
+      <a href="{{ url_for('dashboard.mood_diary') }}">{{ t('nav.mood_diary') }}</a>
+      <a href="{{ url_for('dashboard.daily_tips') }}">{{ t('nav.daily_tips') }}</a>
+      <a href="{{ url_for('dashboard.resources') }}">{{ t('nav.resources') }}</a>
+    {% endif %}
+    {% if current_user.role in ['teacher'] %}
+      <span class="nav-group">{{ t('nav.group.insights') }}</span>
+      <a href="{{ url_for('dashboard.teacher_home') }}">{{ t('nav.class_pulse') }}</a>
+    {% endif %}
+    {% if current_user.role in ['counselor', 'admin'] %}
+      <span class="nav-group">{{ t('nav.group.support') }}</span>
+      <a href="{{ url_for('dashboard.counselor_home') }}">{{ t('nav.counselor_hub') }}</a>
+      <a href="{{ url_for('dashboard.counselor_playbooks') }}">{{ t('nav.playbooks') }}</a>
+      <a href="{{ url_for('dashboard.reports') }}">{{ t('nav.reports') }}</a>
+      <a href="{{ url_for('api.export_students') }}">{{ t('nav.csv_export') }}</a>
+    {% endif %}
+    {% if current_user.role == 'admin' %}
+      <span class="nav-group">{{ t('nav.group.admin') }}</span>
+      <a href="{{ url_for('dashboard.onboarding') }}">{{ t('nav.launch') }}</a>
+      <a href="{{ url_for('dashboard.admin_home') }}">{{ t('nav.admin') }}</a>
+      <a href="{{ url_for('dashboard.admin_operations') }}">{{ t('nav.operations') }}</a>
+      <a href="{{ url_for('dashboard.admin_security') }}">{{ t('nav.security') }}</a>
+      <a href="{{ url_for('dashboard.admin_invites') }}">{{ t('nav.invites') }}</a>
+      <a href="{{ url_for('dashboard.admin_outbox') }}">{{ t('nav.outbox') }}</a>
+      <a href="{{ url_for('dashboard.admin_import') }}">{{ t('nav.import_users') }}</a>
+      <a href="{{ url_for('dashboard.admin_consent') }}">{{ t('nav.consent') }}</a>
+      <span class="nav-group">{{ t('nav.group.billing') }}</span>
+      <a href="{{ url_for('dashboard.admin_billing') }}">{{ t('nav.billing') }}</a>
+      <a href="{{ url_for('dashboard.admin_plan_limits') }}">{{ t('nav.plan_limits') }}</a>
+      <span class="nav-group">{{ t('nav.group.operations') }}</span>
+      <a href="{{ url_for('dashboard.admin_settings') }}">{{ t('nav.settings') }}</a>
+      <a href="{{ url_for('dashboard.admin_backups') }}">{{ t('nav.backup') }}</a>
+      <a href="{{ url_for('dashboard.admin_database') }}">{{ t('nav.database') }}</a>
+      <a href="{{ url_for('api.export_workspace_json') }}">{{ t('nav.backup_json') }}</a>
+    {% endif %}
+    <span class="nav-group">{{ t('nav.group.help') }}</span>
+    <a href="{{ url_for('dashboard.activity_center') }}">{{ t('nav.activity') }}</a>
+    <a href="{{ url_for('dashboard.help_center') }}">{{ t('nav.help') }}</a>
+    <a href="{{ url_for('dashboard.account_settings') }}">{{ t('nav.settings') }}</a>
+  </nav>
+</aside>

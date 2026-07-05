@@ -1,0 +1,68 @@
+name: CI
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install dependencies
+        run: python -m pip install -r requirements.txt
+
+      - name: Compile
+        run: python -m compileall -q .
+
+      - name: Tests
+        run: python run_tests.py
+
+      - name: Static project audit
+        run: python scripts/audit.py
+
+      - name: Production preflight
+        env:
+          APP_ENV: production
+          SESSION_COOKIE_SECURE: "true"
+          SECRET_KEY: release-check-secret-key-please-change-123456
+          PUBLIC_BASE_URL: https://schoolmind.example.com
+          DATABASE_PATH: /var/data/schoolmind.sqlite3
+          CHECKOUT_STARTER_URL: https://checkout.example.com/starter
+          CHECKOUT_GROWTH_URL: https://checkout.example.com/growth
+          CHECKOUT_SCALE_URL: https://checkout.example.com/scale
+          PLATFORM_ADMIN_EMAIL: owner@example.com
+          PLATFORM_ADMIN_PASSWORD: ReleaseCheckPassword123!
+          BILLING_WEBHOOK_SECRET: release-check-webhook-secret-change-me
+          SEED_DEMO_DATA: "false"
+          ENABLE_DEMO_SEED: "false"
+          DEMO_MODE: "false"
+          ALLOW_SELF_REGISTER: "false"
+          SCHOOLMIND_REQUIRE_INVITES: "true"
+          ALLOW_DEMO_DATA_IN_PRODUCTION: "false"
+        run: python scripts/preflight.py
+
+      - name: Route audit
+        run: python scripts/route_audit.py
+
+      - name: Action integrity
+        run: python scripts/action_integrity.py
+
+      - name: Translation coverage
+        run: python scripts/i18n_report.py
+
+      - name: Clean release artifacts
+        run: python scripts/clean_release.py
+
+      - name: Release artifact scan
+        run: python scripts/release_check.py

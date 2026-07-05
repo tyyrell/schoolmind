@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% block title %}{{ t('weekly.title') }} · SchoolMind{% endblock %}
+{% block content %}
+<div class="dashboard-layout">
+  {% include "partials/dashboard_nav.html" %}
+  <section class="dash-main">
+    <div class="dash-head">
+      <span class="eyebrow">{{ t('nav.weekly') }}</span>
+      <h1>{{ t('weekly.title') }}</h1>
+      <p>A seven-day view of check-ins, practice, breathing, scans, and support requests.</p>
+    </div>
+
+    <div class="metric-strip">
+      <div class="metric-card"><small>Check-ins</small><strong>{{ summary.checkins }}</strong><p class="muted">Average mood {{ summary.avg_mood or 'n/a' }}</p></div>
+      <div class="metric-card"><small>Stress</small><strong>{{ summary.avg_stress or 'n/a' }}</strong><p class="muted">Seven-day average</p></div>
+      <div class="metric-card"><small>Practice</small><strong>{{ summary.games }}</strong><p class="muted">Skill game sessions</p></div>
+      <div class="metric-card"><small>Breathing</small><strong>{{ summary.breathing_minutes }}</strong><p class="muted">Minutes recorded</p></div>
+    </div>
+
+    <div class="dash-grid two">
+      <div class="panel-list">
+        <h2>Check-ins</h2>
+        {% for item in checkins %}
+          <div class="list-row"><span>Mood {{ item.mood }} · Stress {{ item.stress }}</span><b class="risk {{ item.risk_level }}">{{ item.risk_level }}</b><small>{{ item.created_at }}</small></div>
+        {% else %}<p class="muted">{{ t('common.empty') }}</p>{% endfor %}
+      </div>
+      <div class="panel-list">
+        <h2>Wellbeing scans</h2>
+        {% for item in assessments %}
+          <div class="list-row tall"><span>{{ item.primary_need|replace('_', ' ')|title }}</span><b>{{ item.score }}</b><small>{{ item.recommendation }}</small></div>
+        {% else %}<p class="muted">{{ t('common.empty') }}</p>{% endfor %}
+      </div>
+      <div class="panel-list">
+        <h2>Games</h2>
+        {% for item in games %}
+          <div class="list-row"><span>{{ item.game_name|replace('_', ' ')|title }}</span><b>{{ item.score }}</b><small>{{ item.duration_seconds }} sec</small></div>
+        {% else %}<p class="muted">{{ t('common.empty') }}</p>{% endfor %}
+      </div>
+      <div class="panel-list">
+        <h2>Support</h2>
+        {% for item in support %}
+          <div class="list-row tall"><span>{{ item.topic }}</span><b>{{ item.status }}</b><small>{{ item.message }}</small></div>
+        {% else %}<p class="muted">{{ t('common.empty') }}</p>{% endfor %}
+      </div>
+    </div>
+  </section>
+</div>
+{% endblock %}

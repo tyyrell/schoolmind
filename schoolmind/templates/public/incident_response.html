@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block title %}Incident Response · SchoolMind AI{% endblock %}
+{% block content %}
+<section class="section page-hero compact legal-hero">
+  <span class="eyebrow">Incident response</span>
+  <h1>Security incidents need a written workflow before they happen.</h1>
+  <p class="lead">SchoolMind AI should be operated with a clear process for suspected unauthorized access, data exposure, account compromise, or provider failure.</p>
+  <p class="legal-note">{{ legal_notice }}</p>
+</section>
+
+<section class="section policy-section">
+  <div>
+    <span class="eyebrow">Response workflow</span>
+    <h2>From triage to remediation</h2>
+    <p class="lead">This is the public-facing overview. Production operations still need named owners, provider contacts, internal runbooks, and tested backups.</p>
+  </div>
+  <div class="company-grid one legal-flow">
+    {% for step in incident_steps %}
+      <article class="company-card policy-card"><h3>{{ step.title }}</h3><p>{{ step.body }}</p></article>
+    {% endfor %}
+  </div>
+</section>
+
+<section class="section table-card legal-table">
+  <span class="eyebrow">Before production</span>
+  <h2>Missing this is amateur work.</h2>
+  <table>
+    <thead><tr><th>Requirement</th><th>Status needed</th></tr></thead>
+    <tbody>
+      <tr><td>Named security owner</td><td>One person must own triage and escalation.</td></tr>
+      <tr><td>Provider contacts</td><td>Hosting, database, email, billing, and AI providers must be listed.</td></tr>
+      <tr><td>Backup restore test</td><td>Backups are worthless if restore is never tested.</td></tr>
+      <tr><td>Notification template</td><td>Schools need fast, clear, factual communication.</td></tr>
+    </tbody>
+  </table>
+</section>
+{% endblock %}

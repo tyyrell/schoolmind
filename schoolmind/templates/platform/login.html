@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block title %}Platform login · SchoolMind{% endblock %}
+{% block content %}
+<div class="auth-wrap">
+  <form class="pixel-form" method="post">
+    {% include "partials/form_csrf.html" %}
+    <span class="eyebrow">Platform owner</span>
+    <h1>Platform login</h1>
+    <p class="muted">For SaaS operator oversight. School admins should use the normal workspace login.</p>
+    <label>Email<input name="email" type="email" required autocomplete="email"></label>
+    <label>Password<input name="password" type="password" required autocomplete="current-password"></label>
+    <button class="btn primary" type="submit">Enter platform</button>
+  </form>
+</div>
+{% endblock %}

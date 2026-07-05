@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% block title %}30-Day Trial · SchoolMind AI{% endblock %}
+{% block content %}
+<section class="section company-split">
+  <div>
+    <span class="eyebrow">Self-serve evaluation trial</span>
+    <h1>Start with a 30-day trial when your school is ready to evaluate the platform safely.</h1>
+    <p class="lead">The trial is for supervised evaluation, not uncontrolled production use. Use demo mode first if you only want to explore the product, and use a guided pilot if your school needs privacy review, onboarding, or workflow design.</p>
+    <div class="hero-actions">
+      <a class="btn primary" href="{{ url_for('auth.start', plan='starter', billing_cycle='monthly') }}">Start Standard trial</a>
+      <a class="btn ghost" href="{{ url_for('auth.start', plan='growth', billing_cycle='monthly') }}">Start Pro trial</a>
+      <a class="btn ghost" href="{{ url_for('public.pilot') }}">Request guided pilot</a>
+    </div>
+  </div>
+  <div class="company-card trial-decision-card">
+    <h2>Pick the right path</h2>
+    <div class="decision-stack">
+      <article>
+        <strong>Instant demo</strong>
+        <span>Best for exploring screens without creating a real school workspace.</span>
+        <a href="{{ url_for('public.try_demo') }}">Try instantly</a>
+      </article>
+      <article>
+        <strong>30-day trial</strong>
+        <span>Best for a small supervised evaluation after your school understands data and consent boundaries.</span>
+        <a href="{{ url_for('auth.start') }}">Create workspace</a>
+      </article>
+      <article>
+        <strong>Guided pilot</strong>
+        <span>Best for large schools, multi-campus teams, privacy review, or operational rollout planning.</span>
+        <a href="{{ url_for('public.pilot') }}">Plan pilot</a>
+      </article>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="section-heading">
+    <span class="eyebrow">Trial rules</span>
+    <h2>What must be clear before real student data enters the workspace.</h2>
+  </div>
+  <div class="feature-grid three">
+    <article class="feature-card"><h3>Human review required</h3><p>SchoolMind AI provides educational indicators and workflow support. It does not make final decisions, diagnose students, or replace school staff judgment.</p></article>
+    <article class="feature-card"><h3>Consent and governance first</h3><p>Schools should review guardian consent, student notices, staff roles, and retention settings before using production student records.</p></article>
+    <article class="feature-card"><h3>No fake free plan</h3><p>The free path is a 30-day trial. After that, the school should move to monthly billing, annual billing, a guided pilot agreement, or pause usage.</p></article>
+  </div>
+</section>
+
+<section class="section company-split reverse">
+  <div class="company-card">
+    <span class="eyebrow">Standard</span>
+    <h2>$50/month</h2>
+    <p>For schools starting a supervised wellbeing workflow. Includes up to 300 students and core dashboards.</p>
+    <a class="btn primary" href="{{ url_for('auth.start', plan='starter', billing_cycle='monthly') }}">Start Standard trial</a>
+  </div>
+  <div class="company-card">
+    <span class="eyebrow">Pro</span>
+    <h2>$120/month</h2>
+    <p>For schools with active support teams. Includes up to 1,000 students, deeper workflows, and priority support.</p>
+    <a class="btn primary" href="{{ url_for('auth.start', plan='growth', billing_cycle='monthly') }}">Start Pro trial</a>
+  </div>
+</section>
+{% endblock %}

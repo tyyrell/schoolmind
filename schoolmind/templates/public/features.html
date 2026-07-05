@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block title %}Features · SchoolMind AI{% endblock %}
+{% block content %}
+<section class="section page-hero compact">
+  <span class="eyebrow">Features</span>
+  <h1>Feature depth that supports a real school workflow.</h1>
+  <p class="lead">The product is organized around the actions a school must actually run: explore, configure, collect signals, review safely, coordinate support, report responsibly, and manage operations.</p>
+</section>
+<section class="section company-grid three feature-catalog">
+  <article class="company-card"><h3>Instant limited demo</h3><p>Visitors enter a role-based sandbox immediately and see reminders when they reach locked production actions.</p></article>
+  <article class="company-card"><h3>30-day trial</h3><p>Schools can evaluate Standard or Pro before payment while keeping production data governance explicit.</p></article>
+  <article class="company-card"><h3>Bilingual foundation</h3><p>English is default, Arabic is supported with RTL layout, and the language switcher preserves the current page.</p></article>
+  <article class="company-card"><h3>Student support tools</h3><p>Check-ins, assessment, journal, goals, mood diary, daily tips, progress, and support requests.</p></article>
+  <article class="company-card"><h3>Nour AI-assisted companion</h3><p>Educational support prompts and safe routing language with clear human-supervision boundaries.</p></article>
+  <article class="company-card"><h3>Teacher aggregate pulse</h3><p>Class-level insight that avoids exposing private journals or counselor-only notes.</p></article>
+  <article class="company-card"><h3>Counselor workflow</h3><p>Support queues, student detail views, playbooks, intervention actions, and support plans.</p></article>
+  <article class="company-card"><h3>Admin operations</h3><p>Invites, imports, consent, billing, plan limits, backups, database readiness, and security controls.</p></article>
+  <article class="company-card"><h3>Audit and export</h3><p>Workspace exports and audit events help schools understand operational activity and prepare for governance review.</p></article>
+</section>
+<section class="section company-split">
+  <div class="company-image"><picture class="smart-picture"><source srcset="{{ url_for('static', filename='img/pages/09_mobile_app_experience.webp') }}" type="image/webp"><img src="{{ url_for('static', filename='img/pages/09_mobile_app_experience.png') }}" alt="Mobile SchoolMind AI interface" loading="lazy" decoding="async" width="368" height="350"></picture></div>
+  <div>
+    <span class="eyebrow">Feature discipline</span>
+    <h2>Good features have limits.</h2>
+    <p class="lead">SchoolMind AI must be useful without pretending to be a clinician, lawyer, or emergency service. That boundary is part of the product, not a weakness.</p>
+    <div class="row-actions"><a class="btn primary" href="{{ url_for('public.safety') }}">Review AI safety</a><a class="btn ghost" href="{{ url_for('public.human_review') }}">Human review model</a></div>
+  </div>
+</section>
+{% endblock %}

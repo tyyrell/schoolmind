@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block title %}Resources · SchoolMind{% endblock %}
+{% block content %}
+<div class="dashboard-layout">
+  {% include "partials/dashboard_nav.html" %}
+  <section class="dash-main">
+    <div class="dash-head"><span class="eyebrow">Resources</span><h1>Support library for real school moments.</h1><p>Short, practical resources students can use before problems become large.</p></div>
+    <div class="panel-list">
+      <h2>Resource type</h2>
+      <div class="chip-row">
+        <a class="chip {{ 'active' if not selected_type else '' }}" href="{{ url_for('dashboard.resources') }}">All resources</a>
+        {% for type in types %}
+          <a class="chip {{ 'active' if selected_type == type else '' }}" href="{{ url_for('dashboard.resources', type=type) }}">{{ type }}</a>
+        {% endfor %}
+      </div>
+    </div>
+    <div class="feature-grid four">
+      {% for item in resources %}
+        <article class="feature-card"><span class="pixel-icon">{{ loop.index }}</span><h3>{{ item.title }}</h3><p>{{ item.body }}</p><strong>{{ item.type }}</strong></article>
+      {% endfor %}
+    </div>
+  </section>
+</div>
+{% endblock %}

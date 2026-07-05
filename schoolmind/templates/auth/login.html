@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block title %}Login · SchoolMind{% endblock %}
+{% block content %}
+<section class="auth-wrap auth-login-wrap">
+  <div class="auth-card-stack">
+    <form class="pixel-form login-form" method="post">
+      {% include "partials/form_csrf.html" %}
+      <span class="eyebrow">Secure workspace</span>
+      <h1>Login</h1>
+      <label>Email<input name="email" type="email" autocomplete="email" required></label>
+      <label>Password<input name="password" type="password" autocomplete="current-password" required></label>
+      <button class="btn primary" type="submit">Enter workspace</button>
+      {% if google_enabled %}
+        <a class="btn ghost" href="{{ url_for('auth.google_start') }}">Continue with Google</a>
+      {% endif %}
+      <p class="muted">Password demo still works: student@schoolmind.ai / demo12345</p>
+      <p class="muted"><a href="{{ url_for('auth.forgot_password') }}">Forgot password?</a></p>
+    </form>
+
+    <div class="login-demo-strip" aria-label="Quick demo roles">
+      <div>
+        <strong>Try without friction</strong>
+        <span class="muted">Enter a guided demo instantly:</span>
+      </div>
+      <div class="chip-row">
+        {% for key, label in {'student': 'Student', 'teacher': 'Teacher', 'counselor': 'Counselor', 'admin': 'Admin'}.items() %}
+          <form action="{{ url_for('public.instant_experience', role=key) }}" method="post">
+            {% include "partials/form_csrf.html" %}
+            <button class="chip" type="submit">{{ label }}</button>
+          </form>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

@@ -1,0 +1,16 @@
+{
+  "name": "SchoolMind AI",
+  "short_name": "SchoolMind",
+  "description": "Bilingual school wellbeing and human-supervised support platform.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#06111f",
+  "theme_color": "#06111f",
+  "icons": [
+    {
+      "src": "/static/img/brand/favicon.svg",
+      "sizes": "64x64",
+      "type": "image/svg+xml"
+    }
+  ]
+}

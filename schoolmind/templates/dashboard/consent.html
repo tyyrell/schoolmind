@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %}Consent center · SchoolMind{% endblock %}
+{% block content %}
+<div class="dashboard-layout">
+  {% include "partials/dashboard_nav.html" %}
+  <section class="dash-main">
+    <div class="dash-head">
+      <span class="eyebrow">Consent center</span>
+      <h1>Record consent before real student use.</h1>
+      <p>This is operational tracking, not a substitute for legal documents.</p>
+    </div>
+    <div class="dash-grid two">
+      <form class="pixel-form compact" method="post">
+        {% include "partials/form_csrf.html" %}
+        <h2>Add consent record</h2>
+        <label>Student<select name="student_id">{% for student in students %}<option value="{{ student.id }}">{{ student.name }} · {{ student.email }}</option>{% endfor %}</select></label>
+        <label>Guardian name<input name="guardian_name" required></label>
+        <label>Guardian email<input name="guardian_email" type="email" required></label>
+        <label>Status<select name="status"><option value="pending">Pending</option><option value="recorded">Recorded</option><option value="declined">Declined</option></select></label>
+        <label>Note<textarea name="note" rows="4"></textarea></label>
+        <button class="btn primary" type="submit">Save record</button>
+      </form>
+      <div class="panel-list">
+        <h2>Records</h2>
+        {% for item in records %}
+          <div class="list-row tall"><span>{{ item.student_name }} · {{ item.guardian_name }}</span><b>{{ item.status }}</b><small>{{ item.guardian_email }} · {{ item.note }}</small></div>
+        {% else %}<p class="muted">No consent records yet.</p>{% endfor %}
+      </div>
+    </div>
+  </section>
+</div>
+{% endblock %}

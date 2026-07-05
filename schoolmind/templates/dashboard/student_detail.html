@@ -1,0 +1,113 @@
+{% extends "base.html" %}
+{% block title %}Student detail · SchoolMind{% endblock %}
+{% block content %}
+<div class="dashboard-layout">
+  {% include "partials/dashboard_nav.html" %}
+  <section class="dash-main">
+    <div class="dash-head">
+      <span class="eyebrow">Case detail</span>
+      <h1>{{ student.name }}</h1>
+      <p>{{ student.email }} · {{ student.group_name or 'Unassigned' }}</p>
+    </div>
+
+    <div class="panel-list support-brief {{ case_brief.level }}">
+      <h2>Student support brief</h2>
+      <div class="list-row tall">
+        <span>{{ case_brief.focus }}</span>
+        <b class="risk {{ case_brief.level }}">{{ case_brief.level }}</b>
+        <small>{{ case_brief.recommendation }}</small>
+        <small>{{ case_brief.open_plans }} active plan{{ '' if case_brief.open_plans == 1 else 's' }} · {{ case_brief.recent_inputs }} recent inputs reviewed</small>
+      </div>
+    </div>
+
+    <div class="dash-grid two">
+      <form class="pixel-form compact" method="post" action="{{ url_for('dashboard.counselor_intervention') }}">
+        {% include "partials/form_csrf.html" %}
+        <input type="hidden" name="student_id" value="{{ student.id }}">
+        <h2>Record intervention</h2>
+        <label>Action<input name="action" value="Support follow-up"></label>
+        <label>Note<textarea name="note" rows="4" required></textarea></label>
+        <button class="btn primary" type="submit">Save action and close open signals</button>
+      </form>
+      <form class="pixel-form compact" method="post" action="{{ url_for('dashboard.counselor_create_plan', user_id=student.id) }}">
+        {% include "partials/form_csrf.html" %}
+        <h2>Create support plan</h2>
+        <label>Focus area<input name="focus_area" value="{{ case_brief.focus }}"></label>
+        <label>Goal<textarea name="goal" rows="2" required>Improve {{ case_brief.focus|lower }} with a clear support step and no student labeling.</textarea></label>
+        <label>Next step<textarea name="next_step" rows="3" required>{{ case_brief.recommendation }}</textarea></label>
+        <label>Cadence<input name="cadence" value="Two check-ins this week"></label>
+        <button class="btn ghost" type="submit">Add plan</button>
+      </form>
+    </div>
+
+    <div class="dash-grid three">
+      <div class="panel-list">
+        <h2>Support plans</h2>
+        {% for plan in plans %}
+          <div class="list-row tall">
+            <span>{{ plan.focus_area }}</span><b>{{ plan.status }}</b>
+            <small>{{ plan.goal }}</small>
+            <small>{{ plan.next_step }} · {{ plan.cadence }} · {{ plan.creator_name or 'Generated' }}</small>
+          </div>
+        {% else %}<p class="muted">No support plans yet.</p>{% endfor %}
+      </div>
+      <div class="panel-list">
+        <h2>Wellbeing scans</h2>
+        {% for item in assessments %}
+          <div class="list-row tall">
+            <span>{{ item.primary_need|replace('_', ' ')|title }}</span><b class="risk {{ item.risk_level }}">{{ item.score }}</b>
+            <small>{{ item.recommendation }}</small>
+            <small>Mood {{ item.mood }} · Stress {{ item.stress }} · Sleep {{ item.sleep }} · Belonging {{ item.belonging }}</small>
+          </div>
+        {% else %}<p class="muted">No wellbeing scans.</p>{% endfor %}
+      </div>
+      <div class="panel-list">
+        <h2>Events</h2>
+        {% for event in events %}
+          <div class="list-row tall">
+            <span>{{ event.title }}</span><b class="risk {{ event.risk_level }}">{{ event.risk_level }} · {{ event.status }}</b>
+            <small>{{ event.detail }}</small>
+            <small>Assigned: {{ event.assigned_name or 'Unassigned' }} · Created: {{ event.created_at }}</small>
+            {% if event.status == 'open' %}
+              <form class="inline-action" method="post" action="{{ url_for('dashboard.counselor_alert_action', event_id=event.id) }}">
+                {% include "partials/form_csrf.html" %}
+                <input type="hidden" name="action" value="escalated">
+                <input name="note" placeholder="Escalation note" required>
+                <button class="btn ghost" type="submit">Escalate</button>
+              </form>
+            {% endif %}
+          </div>
+        {% else %}<p class="muted">No events.</p>{% endfor %}
+      </div>
+    </div>
+
+    <div class="dash-grid three">
+      <div class="panel-list"><h2>Check-ins</h2>{% for checkin in checkins %}<div class="list-row tall"><span>Mood {{ checkin.mood }} · Stress {{ checkin.stress }} · Energy {{ checkin.energy }}</span><b class="risk {{ checkin.risk_level }}">{{ checkin.risk_level }}</b><small>{{ checkin.note }}</small></div>{% else %}<p class="muted">No check-ins.</p>{% endfor %}</div>
+      <div class="panel-list"><h2>Journal</h2>{% for journal in journals %}<div class="list-row tall"><span>{{ journal.body }}</span><b class="risk {{ journal.risk_level }}">{{ journal.risk_level }}</b><small>{{ journal.ai_summary }}</small></div>{% else %}<p class="muted">No journal entries.</p>{% endfor %}</div>
+      <div class="panel-list"><h2>Case actions</h2>{% for item in case_actions %}<div class="list-row tall"><span>{{ item.action }} · {{ item.event_title }}</span><b>{{ item.counselor_name }}</b><small>{{ item.note }} · {{ item.created_at }}</small></div>{% else %}<p class="muted">No case actions yet.</p>{% endfor %}</div>
+    </div>
+
+    <div class="dash-grid two">
+      <div class="panel-list"><h2>Interventions</h2>{% for intervention in interventions %}<div class="list-row tall"><span>{{ intervention.action }}</span><b>{{ intervention.counselor_name }}</b><small>{{ intervention.note }}</small></div>{% else %}<p class="muted">No interventions yet.</p>{% endfor %}</div>
+      <div class="panel-list"><h2>Consent records</h2>{% for item in consent %}<div class="list-row tall"><span>{{ item.guardian_name }}</span><b>{{ item.status }}</b><small>{{ item.guardian_email }} · {{ item.note }}</small></div>{% else %}<p class="muted">No consent records.</p>{% endfor %}</div>
+    </div>
+
+    <div class="dash-grid three">
+      <div class="panel-list"><h2>Goals</h2>{% for goal in goals %}<div class="list-row tall"><span>{{ goal.title }}</span><b>{{ goal.progress }}%</b><small>{{ goal.category }} · {{ goal.status }} · {{ goal.description }}</small></div>{% else %}<p class="muted">No goals yet.</p>{% endfor %}</div>
+      <div class="panel-list"><h2>Games</h2>{% for game in games %}<div class="list-row tall"><span>{{ game.game_name|replace('_', ' ')|title }}</span><b>{{ game.score }}</b><small>{{ game.duration_seconds }} seconds · {{ game.created_at }}</small></div>{% else %}<p class="muted">No game practice.</p>{% endfor %}</div>
+      <div class="panel-list"><h2>Breathing</h2>{% for item in breathing %}<div class="list-row tall"><span>{{ item.technique }}</span><b>{{ item.cycles }} cycles</b><small>Mood {{ item.mood_before }} to {{ item.mood_after }} · {{ item.created_at }}</small></div>{% else %}<p class="muted">No breathing sessions.</p>{% endfor %}</div>
+    </div>
+
+    <div class="panel-list">
+      <h2>Nour support context</h2>
+      {% for item in ai_messages %}
+        <div class="list-row tall">
+          <span>{{ item.role|title }}</span>
+          <b class="risk {{ item.risk_level }}">{{ item.risk_level }}</b>
+          <small>{{ item.message }}</small>
+        </div>
+      {% else %}<p class="muted">No Nour messages yet.</p>{% endfor %}
+    </div>
+  </section>
+</div>
+{% endblock %}

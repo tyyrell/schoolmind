@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block title %}Subprocessors · SchoolMind AI{% endblock %}
+{% block content %}
+<section class="section page-hero compact">
+  <span class="eyebrow">Subprocessors</span>
+  <h1>External services must be listed before a serious production rollout.</h1>
+  <p class="lead">This page is intentionally explicit: the code can support database, email, hosting, billing, and optional AI providers, but production operators must publish the actual providers they enable.</p>
+</section>
+<section class="section table-card">
+  <table>
+    <thead><tr><th>Category</th><th>Status</th><th>Production decision needed</th></tr></thead>
+    <tbody>
+      <tr><td>Hosting</td><td>Deployment-ready</td><td>Publish final host and region.</td></tr>
+      <tr><td>Database</td><td>PostgreSQL-ready</td><td>Provide Supabase/Postgres project and region.</td></tr>
+      <tr><td>Email</td><td>Provider-ready</td><td>Choose Resend, SendGrid, Postmark, or SMTP provider.</td></tr>
+      <tr><td>Billing</td><td>Checkout-ready</td><td>Choose provider and webhook configuration.</td></tr>
+      <tr><td>AI provider</td><td>Optional</td><td>Publish provider only if external AI APIs are connected.</td></tr>
+    </tbody>
+  </table>
+</section>
+{% endblock %}

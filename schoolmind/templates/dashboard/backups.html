@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block title %}Backup and restore · SchoolMind{% endblock %}
+{% block content %}
+<div class="dashboard-layout">
+  {% include "partials/dashboard_nav.html" %}
+  <section class="dash-main">
+    <div class="dash-head">
+      <span class="eyebrow">Backup and restore</span>
+      <h1>Workspace data controls.</h1>
+      <p>Export is available now. Restore is intentionally manual because importing student support records blindly is dangerous and must be reviewed before production use.</p>
+    </div>
+    <div class="metric-strip">
+      <div class="metric-card"><small>Workspace</small><strong>{{ school.slug }}</strong></div>
+      <div class="metric-card"><small>Retention</small><strong>{{ settings.data_retention_days }} days</strong></div>
+      <div class="metric-card"><small>Consent required</small><strong>{{ 'Yes' if settings.guardian_consent_required else 'No' }}</strong></div>
+      <div class="metric-card"><small>Last export</small><strong>{{ latest_export.created_at if latest_export else 'None' }}</strong></div>
+    </div>
+    <div class="dash-grid two">
+      <div class="panel-list">
+        <h2>Export package</h2>
+        <p class="muted">The JSON export includes school settings, users, support workflow records, consent records, agreement acceptances, billing events, and audit history. Password hashes and reset tokens are not exported.</p>
+        <a class="btn primary" href="{{ url_for('api.export_workspace_json') }}">Download workspace JSON</a>
+      </div>
+      <div class="panel-list danger-zone">
+        <h2>Restore policy</h2>
+        <div class="list-row tall"><span>Automatic restore</span><b>Disabled</b><small>Blind restore can overwrite legal, consent, and support records.</small></div>
+        <div class="list-row tall"><span>Production restore</span><b>Manual runbook</b><small>Validate schema version, restore into staging, verify counts, then promote.</small></div>
+        <a class="btn ghost" href="{{ url_for('public.safety') }}">Open safety policy</a>
+      </div>
+    </div>
+    <div class="panel-list">
+      <h2>Current export counts</h2>
+      {% for item in counts %}
+        <div class="list-row"><span>{{ item.table }}</span><b>{{ item.total }}</b></div>
+      {% endfor %}
+    </div>
+  </section>
+</div>
+{% endblock %}

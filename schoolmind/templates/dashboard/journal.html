@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block title %}Journal · SchoolMind{% endblock %}
+{% block content %}
+<div class="dashboard-layout">
+  {% include "partials/dashboard_nav.html" %}
+  <section class="dash-main">
+    <div class="dash-head"><span class="eyebrow">Journal</span><h1>Write, reflect, route support early.</h1><p>Journal text stays inside the student support workflow.</p></div>
+    <div class="dash-grid two">
+      <form class="pixel-form compact {% if not consent_ok %}locked-section{% endif %}" method="post">
+        {% include "partials/form_csrf.html" %}
+        <h2>New entry</h2>
+        <label>Mood<select name="mood"><option value="5">5 Strong</option><option value="4">4 Good</option><option value="3" selected>3 Mixed</option><option value="2">2 Low</option><option value="1">1 Hard</option></select></label>
+        <label>Entry<textarea name="body" rows="10" placeholder="What should your support team understand today?"></textarea></label>
+        <button class="btn primary" type="submit" {% if not consent_ok %}disabled{% endif %}>Save reflection</button>
+      </form>
+      <div class="panel-list">
+        <h2>Reflection prompts</h2>
+        <div class="list-row tall"><span>What changed today?</span><b>Prompt</b><small>Name one pressure and one thing that helped.</small></div>
+        <div class="list-row tall"><span>What do you need?</span><b>Prompt</b><small>Ask for one specific action from a trusted adult.</small></div>
+        <div class="list-row tall"><span>What can wait?</span><b>Prompt</b><small>Move one low-priority task out of today's load.</small></div>
+      </div>
+    </div>
+    <div class="panel-list">
+      <h2>Recent entries</h2>
+      {% for item in journals %}
+        <article class="list-row tall"><span>{{ item.body }}</span><b class="risk {{ item.risk_level }}">{{ item.risk_level }}</b><small>{{ item.ai_summary }} · {{ item.created_at }}</small></article>
+      {% else %}<p class="muted">No entries yet.</p>{% endfor %}
+    </div>
+  </section>
+</div>
+{% endblock %}

@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block title %}Security · SchoolMind AI{% endblock %}
+{% block content %}
+<section class="section company-split">
+  <div>
+    <span class="eyebrow">Security overview</span>
+    <h1>Built around school trust, role boundaries, and production readiness.</h1>
+    <p class="lead">SchoolMind AI uses role-based access, CSRF protection, secure headers, audit events, data readiness checks, and school-level separation. Production deployments should connect PostgreSQL, email delivery, monitoring, backups, and a reviewed legal/privacy process.</p>
+    <div class="hero-actions"><a class="btn primary" href="{{ url_for('auth.start') }}">Start trial</a><a class="btn ghost" href="{{ url_for('public.contact') }}">Ask security questions</a></div>
+  </div>
+  <div class="company-image"><picture class="smart-picture"><source srcset="{{ url_for('static', filename='img/pages/07_privacy_security_visual.webp') }}" type="image/webp"><img src="{{ url_for('static', filename='img/pages/07_privacy_security_visual.png') }}" alt="SchoolMind AI security and privacy" loading="lazy" decoding="async" width="431" height="312"></picture></div>
+</section>
+<section class="section">
+  <div class="company-grid three">
+    <article class="company-card"><span class="pixel-icon">R</span><h3>Role boundaries</h3><p>Students, teachers, counselors, school admins, and platform admins have different workspaces and access levels.</p></article>
+    <article class="company-card"><span class="pixel-icon">C</span><h3>Controlled demo</h3><p>The public demo blocks sensitive operations so visitors can explore without turning sandbox data into production data.</p></article>
+    <article class="company-card"><span class="pixel-icon">P</span><h3>Production checks</h3><p>Deployment readiness should include PostgreSQL, email delivery, payment webhooks, monitoring, and backup/restore practice.</p></article>
+  </div>
+</section>
+{% endblock %}

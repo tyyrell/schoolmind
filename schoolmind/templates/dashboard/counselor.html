@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+{% block title %}Counselor hub · SchoolMind{% endblock %}
+{% block content %}
+<div class="dashboard-layout">
+  {% include "partials/dashboard_nav.html" %}
+  <section class="dash-main">
+    <div class="dash-head">
+      <span class="eyebrow">Counselor hub</span>
+      <h1>Prioritize, understand, act.</h1>
+      <p>{{ overdue_count }} open alert{{ '' if overdue_count == 1 else 's' }} beyond the {{ settings.escalation_window_minutes }} minute escalation window.</p>
+    </div>
+
+    {% include "partials/role_command_center.html" %}
+
+    {% with title="Counselor review boundary", body="Signals are triage aids for authorized human review. SchoolMind AI does not diagnose; follow the school-approved protocol before any action, escalation, or documentation decision." %}{% include "partials/ai_safety_notice.html" %}{% endwith %}
+
+    <div class="metric-strip">
+      <div class="metric-card {{ 'urgent' if overdue_count else 'steady' }}"><small>SLA overdue</small><strong>{{ overdue_count }}</strong></div>
+      <div class="metric-card"><small>Open alerts</small><strong>{{ alerts|length }}</strong></div>
+      <div class="metric-card"><small>Support requests</small><strong>{{ requests|length }}</strong></div>
+      <div class="metric-card"><small>Students in view</small><strong>{{ students|length }}</strong></div>
+    </div>
+
+    <div class="panel-list">
+      <h2>Wellbeing focus queue</h2>
+      {% for item in focus_rows %}
+        <a class="list-row tall clickable" href="{{ url_for('dashboard.counselor_student', user_id=item.id) }}">
+          <span>{{ item.name }} · {{ item.group_name or 'Unassigned' }}</span>
+          {% if item.risk_level %}
+            <b class="risk {{ item.risk_level }}">{{ item.risk_level }} · {{ item.score }}</b>
+            <small>{{ item.primary_need|replace('_', ' ')|title }} · {{ item.recommendation }}</small>
+          {% else %}
+            <b>No scan</b>
+            <small>Ask the student to complete the wellbeing studio scan.</small>
+          {% endif %}
+        </a>
+      {% else %}<p class="muted">No students available.</p>{% endfor %}
+    </div>
+
+    <div class="dash-grid two">
+      <div class="panel-list">
+        <h2>Open alerts</h2>
+        {% for alert in alerts %}
+          <article class="list-row tall case-card {{ 'danger-zone' if alert.age_minutes >= settings.escalation_window_minutes else '' }}">
+            <span><a href="{{ url_for('dashboard.counselor_student', user_id=alert.student_id) }}">{{ alert.student_name }} · {{ alert.title }}</a></span>
+            <b class="risk {{ alert.risk_level }}">{{ alert.risk_level }}</b>
+            <small>{{ alert.detail }}</small>
+            <small>Age: {{ alert.age_minutes or 0 }} min · Assigned: {{ alert.assigned_name or 'Unassigned' }}</small>
+            <div class="case-actions">
+              <form method="post" action="{{ url_for('dashboard.counselor_alert_action', event_id=alert.id) }}">
+                {% include "partials/form_csrf.html" %}
+                <input type="hidden" name="action" value="assigned">
+                <button class="btn ghost" type="submit">Assign me</button>
+              </form>
+              <form method="post" action="{{ url_for('dashboard.counselor_alert_action', event_id=alert.id) }}">
+                {% include "partials/form_csrf.html" %}
+                <input type="hidden" name="action" value="closed">
+                <input name="note" placeholder="Closure note" required>
+                <button class="btn ghost" type="submit">Close</button>
+              </form>
+            </div>
+          </article>
+        {% else %}<p class="muted">No open alerts.</p>{% endfor %}
+      </div>
+      <div class="panel-list">
+        <h2>Support requests</h2>
+        {% for item in requests %}
+          <div class="list-row tall"><span>{{ item.student_name }} · {{ item.topic }}</span><b>{{ item.status }}</b><small>{{ item.message }}</small></div>
+        {% else %}<p class="muted">No support requests.</p>{% endfor %}
+      </div>
+    </div>
+
+    <div class="dash-grid two">
+      <div class="panel-list">
+        <h2>Students</h2>
+        {% for student in students %}
+          <a class="list-row clickable" href="{{ url_for('dashboard.counselor_student', user_id=student.id) }}">
+            <span>{{ student.name }} · {{ student.group_name or 'Unassigned' }}</span>
+            <b>{{ student.open_events or 0 }} open</b>
+            <small>{{ student.email }}</small>
+          </a>
+        {% endfor %}
+      </div>
+      <div class="panel-list">
+        <h2>Playbook preview</h2>
+        {% for item in playbooks[:3] %}
+          <article class="list-row tall"><span>{{ item.title }}</span><b class="risk {{ item.trigger_level }}">{{ item.trigger_level }}</b><small>{{ item.action_steps }}</small></article>
+        {% else %}<p class="muted">No playbooks.</p>{% endfor %}
+        <a class="btn ghost" href="{{ url_for('dashboard.counselor_playbooks') }}">Manage playbooks</a>
+      </div>
+    </div>
+  </section>
+</div>
+{% endblock %}
