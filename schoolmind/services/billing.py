@@ -45,16 +45,25 @@ def annual_price(plan):
 
 def annual_savings(plan):
     data = PLANS.get(plan, PLANS["starter"])
-    if not data.get("price") or not data.get("annual_price"):
+    try:
+        p = float(data.get("price") or 0)
+        a = float(data.get("annual_price") or 0)
+    except Exception:
         return 0
-    return max(0, int(data["price"]) * 12 - int(data["annual_price"]))
+    if not p or not a:
+        return 0
+    return round(max(0, p * 12 - a), 2)
 
 
 def annual_effective_monthly(plan):
     data = PLANS.get(plan, PLANS["starter"])
-    if not data.get("annual_price"):
+    try:
+        a = float(data.get("annual_price") or 0)
+    except Exception:
         return 0
-    return round(int(data["annual_price"]) / 12, 2)
+    if not a:
+        return 0
+    return round(a / 12, 2)
 
 
 def seats_for_plan(plan):
@@ -74,8 +83,14 @@ def extra_student_policy(plan):
 def pricing_catalog():
     catalog = []
     for key, plan in PLANS.items():
-        monthly = int(plan.get("price") or 0)
-        annual = int(plan.get("annual_price") or 0)
+        try:
+            monthly = float(plan.get("price") or 0)
+        except Exception:
+            monthly = 0.0
+        try:
+            annual = float(plan.get("annual_price") or 0)
+        except Exception:
+            annual = 0.0
         catalog.append({
             "key": key,
             "name": plan["name"],

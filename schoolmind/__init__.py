@@ -89,6 +89,13 @@ def create_app(test_config=None):
         g.request_started_at = time.perf_counter()
         session.permanent = True
         csrf_token()
+        # Persist language selection from a site cookie if present.
+        try:
+            lang_cookie = request.cookies.get("site_language")
+            if lang_cookie and not session.get("language"):
+                session["language"] = lang_cookie
+        except Exception:
+            pass
 
     app.teardown_appcontext(close_db)
     app.context_processor(inject_security_context)

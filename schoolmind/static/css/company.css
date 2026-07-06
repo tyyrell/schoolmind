@@ -105,6 +105,18 @@ body {
   box-shadow: var(--sm-shadow);
   overflow: hidden;
 }
+.hero-product-frame {
+  max-width: 540px;
+  width: 100%;
+  min-height: 32rem;
+  max-height: 38rem;
+}
+@media(max-width:900px){
+  .hero-product-frame { min-height: 28rem; max-height: 34rem; }
+}
+@media(max-width:760px){
+  .hero-product-frame { min-height: 24rem; max-height: 30rem; }
+}
 .company-visual::after {
   content: "";
   position: absolute;

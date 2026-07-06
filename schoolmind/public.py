@@ -298,7 +298,13 @@ def implementation():
 def public_preferences():
     session["language"] = normalize_language(request.form.get("language"))
     session["theme"] = normalize_theme(request.form.get("theme"))
-    return safe_referrer_redirect("public.index")
+    resp = safe_referrer_redirect("public.index")
+    try:
+        # Set a persistent cookie so client-side navigation can persist language
+        resp.set_cookie("site_language", session.get("language", "en"), max_age=60 * 60 * 24 * 365, httponly=False)
+    except Exception:
+        pass
+    return resp
 
 
 @bp.route("/preferences/personalize", methods=("POST",))
@@ -351,7 +357,12 @@ def personalize_preferences():
             (language, theme, font_size, reduced_motion, high_contrast, dyslexia_friendly, utcnow(), platform_admin["id"]),
         )
     flash("Experience preferences saved.", "success")
-    return safe_referrer_redirect("public.index")
+    resp = safe_referrer_redirect("public.index")
+    try:
+        resp.set_cookie("site_language", session.get("language", "en"), max_age=60 * 60 * 24 * 365, httponly=False)
+    except Exception:
+        pass
+    return resp
 
 
 @bp.route("/privacy")

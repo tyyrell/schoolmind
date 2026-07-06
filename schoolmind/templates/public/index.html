@@ -1,9 +1,15 @@
 {% extends "base.html" %}
 {% block title %}{{ t('home.title') }}{% endblock %}
 {% block head_extra %}
-<link rel="preload" as="image" href="{{ url_for('static', filename='img/pages/02_hero_student_ai_platform.webp') }}" type="image/webp">
+<link rel="preload" as="image" href="{{ url_for('static', filename='images/home-slider/en/01_ai_assisted_student_support.png') }}" type="image/png">
 {% endblock %}
 {% block content %}
+<section class="sm-home-slider" data-sm-home-slider aria-label="SchoolMind AI highlights">
+  <div class="sm-home-slider-track" data-sm-slider-track></div>
+  <button class="sm-home-slider-arrow sm-home-slider-prev" type="button" data-sm-slider-prev aria-label="Previous slide">‹</button>
+  <button class="sm-home-slider-arrow sm-home-slider-next" type="button" data-sm-slider-next aria-label="Next slide">›</button>
+  <div class="sm-home-slider-dots" data-sm-slider-dots aria-label="Slide navigation"></div>
+</section>
 <section class="hero company-hero conversion-hero" id="top">
   <div class="hero-copy">
     <span class="eyebrow">{{ t('home.eyebrow') }}</span>
@@ -35,13 +41,39 @@
       <span>{{ t('home.trust.no_diagnosis') }}</span>
     </div>
   </div>
-  <div class="company-visual hero-product-frame" aria-label="SchoolMind AI product preview">
-    <picture class="smart-picture"><source srcset="{{ url_for('static', filename='img/pages/02_hero_student_ai_platform.webp') }}" type="image/webp"><img src="{{ url_for('static', filename='img/pages/02_hero_student_ai_platform.png') }}" alt="Students using a modern AI-supported school platform" loading="eager" decoding="async" width="427" height="362" fetchpriority="high"></picture>
+  <div class="company-visual hero-product-frame sm-hero-visual" aria-label="SchoolMind AI product preview">
+    <picture class="smart-picture"><img src="{{ url_for('static', filename='images/home-slider/en/08_school_leaders_overview.png') }}" alt="School leaders overview dashboard" loading="eager" decoding="async" width="427" height="362" fetchpriority="high"></picture>
+
+    <!-- Futuristic AI hologram figure (decorative) -->
+    <div class="sm-ai-hologram" aria-hidden="true">
+      <div class="sm-hologram-ring"></div>
+      <div class="sm-hologram-figure">
+        <div class="sm-hologram-head"></div>
+        <div class="sm-hologram-torso"></div>
+        <div class="sm-hologram-scan"></div>
+        <div class="sm-hologram-particles">
+          <i style="left:20%; top:18%; animation-duration:10s; animation-delay:-1.2s; opacity:.75;"></i>
+          <i style="left:65%; top:22%; animation-duration:12s; animation-delay:-2.6s; opacity:.60;"></i>
+          <i style="left:30%; top:45%; animation-duration:11s; animation-delay:-3.2s; opacity:.70;"></i>
+          <i style="left:74%; top:55%; animation-duration:13s; animation-delay:-1.7s; opacity:.55;"></i>
+          <i style="left:18%; top:62%; animation-duration:14s; animation-delay:-2.1s; opacity:.40;"></i>
+          <i style="left:52%; top:70%; animation-duration:9.5s; animation-delay:-0.9s; opacity:.65;"></i>
+          <i style="left:44%; top:28%; animation-duration:12.5s; animation-delay:-1.4s; opacity:.58;"></i>
+          <i style="left:68%; top:40%; animation-duration:10.8s; animation-delay:-2.9s; opacity:.48;"></i>
+        </div>
+      </div>
+    </div>
+
     <div class="visual-caption">
       <strong>{{ t('home.visual.caption.title') }}</strong>
       <span>{{ t('home.visual.caption.body') }}</span>
     </div>
+    <div class="side-visuals" aria-hidden="true">
+      <div class="visual left"><a href="{{ url_for('public.request_demo') }}"><img src="{{ url_for('static', filename='images/home-slider/en/09_stronger_parent_communication.png') }}" alt="Stronger parent communication dashboard" width="180" height="120"></a></div>
+      <div class="visual right"><a href="{{ url_for('public.pilot') }}"><img src="{{ url_for('static', filename='images/home-slider/en/10_early_alerts_timely_support.png') }}" alt="Early alerts and timely support dashboard" width="180" height="120"></a></div>
+    </div>
   </div>
+
 </section>
 
 <section class="decision-strip" aria-label="SchoolMind AI business summary">
@@ -91,7 +123,55 @@
     </div>
   </div>
   <div class="company-image">
-    <picture class="smart-picture"><source srcset="{{ url_for('static', filename='img/pages/03_dashboard_overview_mockup.webp') }}" type="image/webp"><img src="{{ url_for('static', filename='img/pages/03_dashboard_overview_mockup.png') }}" alt="SchoolMind AI dashboard overview mockup" loading="lazy" decoding="async" width="683" height="362"></picture>
+    <picture class="smart-picture"><img src="{{ url_for('static', filename='images/home-slider/en/03_understand_classroom_pulse.png') }}" alt="Classroom pulse and teacher insights dashboard" loading="lazy" decoding="async" width="683" height="362"></picture>
+  </div>
+</section>
+
+<section id="teacher-insights" class="section company-split feature-visual-section">
+  <div class="company-image">
+    <img src="{{ url_for('static', filename='images/home-slider/en/07_teacher_ready_insights.png') }}" alt="Teacher ready insights dashboard" loading="lazy" decoding="async" width="683" height="362">
+  </div>
+  <div>
+    <span class="eyebrow">{{ t('home.slider.teacher_insights.label') }}</span>
+    <h2>{{ t('home.slider.teacher_insights.title') }}</h2>
+    <p>{{ t('home.slider.teacher_insights.body') }}</p>
+    <a class="btn ghost" href="{{ url_for('public.teachers') }}">{{ t('home.roles.teachers.link') }}</a>
+  </div>
+</section>
+
+<section id="school-leaders" class="section company-split feature-visual-section reverse-layout">
+  <div>
+    <span class="eyebrow">{{ t('home.slider.leaders_overview.label') }}</span>
+    <h2>{{ t('home.slider.leaders_overview.title') }}</h2>
+    <p>{{ t('home.slider.leaders_overview.body') }}</p>
+    <a class="btn ghost" href="{{ url_for('public.schools') }}">{{ t('home.roles.leaders.link') }}</a>
+  </div>
+  <div class="company-image">
+    <img src="{{ url_for('static', filename='images/home-slider/en/08_school_leaders_overview.png') }}" alt="School leaders overview dashboard" loading="lazy" decoding="async" width="683" height="362">
+  </div>
+</section>
+
+<section id="parent-communication" class="section company-split feature-visual-section">
+  <div class="company-image">
+    <img src="{{ url_for('static', filename='images/home-slider/en/09_stronger_parent_communication.png') }}" alt="Stronger parent communication dashboard" loading="lazy" decoding="async" width="683" height="362">
+  </div>
+  <div>
+    <span class="eyebrow">{{ t('home.slider.parent_communication.label') }}</span>
+    <h2>{{ t('home.slider.parent_communication.title') }}</h2>
+    <p>{{ t('home.slider.parent_communication.body') }}</p>
+    <a class="btn ghost" href="{{ url_for('public.request_demo') }}">{{ t('nav.demo') }}</a>
+  </div>
+</section>
+
+<section id="early-alerts" class="section company-split feature-visual-section reverse-layout">
+  <div>
+    <span class="eyebrow">{{ t('home.slider.early_alerts.label') }}</span>
+    <h2>{{ t('home.slider.early_alerts.title') }}</h2>
+    <p>{{ t('home.slider.early_alerts.body') }}</p>
+    <a class="btn ghost" href="{{ url_for('public.pilot') }}">{{ t('home.cta.pilot') }}</a>
+  </div>
+  <div class="company-image">
+    <img src="{{ url_for('static', filename='images/home-slider/en/10_early_alerts_timely_support.png') }}" alt="Early alerts and timely support dashboard" loading="lazy" decoding="async" width="683" height="362">
   </div>
 </section>
 
@@ -115,16 +195,16 @@
     <h2>{{ t('home.roles.title') }}</h2>
   </div>
   <div class="company-grid four role-grid">
-    <article class="company-card"><picture class="smart-picture"><source srcset="{{ url_for('static', filename='img/pages/06_student_nour_ai_companion.webp') }}" type="image/webp"><img src="{{ url_for('static', filename='img/pages/06_student_nour_ai_companion.png') }}" alt="Student companion experience" loading="lazy" decoding="async" width="368" height="312"></picture><h3>{{ t('home.roles.students.title') }}</h3><p>{{ t('home.roles.students.body') }}</p><a href="{{ url_for('public.students') }}">{{ t('home.roles.students.link') }}</a></article>
-    <article class="company-card"><picture class="smart-picture"><source srcset="{{ url_for('static', filename='img/pages/05_teacher_classroom_insights.webp') }}" type="image/webp"><img src="{{ url_for('static', filename='img/pages/05_teacher_classroom_insights.png') }}" alt="Teacher classroom insights" loading="lazy" decoding="async" width="368" height="312"></picture><h3>{{ t('home.roles.teachers.title') }}</h3><p>{{ t('home.roles.teachers.body') }}</p><a href="{{ url_for('public.teachers') }}">{{ t('home.roles.teachers.link') }}</a></article>
-    <article class="company-card"><picture class="smart-picture"><source srcset="{{ url_for('static', filename='img/pages/04_counselor_student_support.webp') }}" type="image/webp"><img src="{{ url_for('static', filename='img/pages/04_counselor_student_support.png') }}" alt="Counselor support workflow" loading="lazy" decoding="async" width="368" height="312"></picture><h3>{{ t('home.roles.counselors.title') }}</h3><p>{{ t('home.roles.counselors.body') }}</p><a href="{{ url_for('public.counselors') }}">{{ t('home.roles.counselors.link') }}</a></article>
-    <article class="company-card"><picture class="smart-picture"><source srcset="{{ url_for('static', filename='img/pages/08_school_admin_operations.webp') }}" type="image/webp"><img src="{{ url_for('static', filename='img/pages/08_school_admin_operations.png') }}" alt="School admin operations" loading="lazy" decoding="async" width="368" height="350"></picture><h3>{{ t('home.roles.leaders.title') }}</h3><p>{{ t('home.roles.leaders.body') }}</p><a href="{{ url_for('public.schools') }}">{{ t('home.roles.leaders.link') }}</a></article>
+    <article class="company-card"><picture class="smart-picture"><source srcset="{{ url_for('static', filename='images/home-slider/en/11_student_check_ins_that_actually_help.png') }}" type="image/png"><img src="{{ url_for('static', filename='images/home-slider/en/11_student_check_ins_that_actually_help.png') }}" alt="Student check-ins dashboard" loading="lazy" decoding="async" width="368" height="312"></picture><h3>{{ t('home.roles.students.title') }}</h3><p>{{ t('home.roles.students.body') }}</p><a href="{{ url_for('public.students') }}">{{ t('home.roles.students.link') }}</a></article>
+    <article class="company-card"><picture class="smart-picture"><source srcset="{{ url_for('static', filename='images/home-slider/en/07_teacher_ready_insights.png') }}" type="image/png"><img src="{{ url_for('static', filename='images/home-slider/en/07_teacher_ready_insights.png') }}" alt="Teacher ready insights dashboard" loading="lazy" decoding="async" width="368" height="312"></picture><h3>{{ t('home.roles.teachers.title') }}</h3><p>{{ t('home.roles.teachers.body') }}</p><a href="{{ url_for('public.teachers') }}">{{ t('home.roles.teachers.link') }}</a></article>
+    <article class="company-card"><picture class="smart-picture"><source srcset="{{ url_for('static', filename='images/home-slider/en/02_organized_counselor_workflows.png') }}" type="image/png"><img src="{{ url_for('static', filename='images/home-slider/en/02_organized_counselor_workflows.png') }}" alt="Organized counselor workflows dashboard" loading="lazy" decoding="async" width="368" height="312"></picture><h3>{{ t('home.roles.counselors.title') }}</h3><p>{{ t('home.roles.counselors.body') }}</p><a href="{{ url_for('public.counselors') }}">{{ t('home.roles.counselors.link') }}</a></article>
+    <article class="company-card"><picture class="smart-picture"><source srcset="{{ url_for('static', filename='images/home-slider/en/08_school_leaders_overview.png') }}" type="image/png"><img src="{{ url_for('static', filename='images/home-slider/en/08_school_leaders_overview.png') }}" alt="School leaders overview dashboard" loading="lazy" decoding="async" width="368" height="350"></picture><h3>{{ t('home.roles.leaders.title') }}</h3><p>{{ t('home.roles.leaders.body') }}</p><a href="{{ url_for('public.schools') }}">{{ t('home.roles.leaders.link') }}</a></article>
   </div>
 </section>
 
 <section class="section company-split mobile-proof-section">
   <div class="company-image">
-    <picture class="smart-picture"><source srcset="{{ url_for('static', filename='img/pages/09_mobile_app_experience.webp') }}" type="image/webp"><img src="{{ url_for('static', filename='img/pages/09_mobile_app_experience.png') }}" alt="SchoolMind AI mobile experience" loading="lazy" decoding="async" width="431" height="312"></picture>
+    <picture class="smart-picture"><source srcset="{{ url_for('static', filename='images/home-slider/en/17_try_the_demo_before_you_sign_in.png') }}" type="image/png"><img src="{{ url_for('static', filename='images/home-slider/en/17_try_the_demo_before_you_sign_in.png') }}" alt="Try the demo before you sign in" loading="lazy" decoding="async" width="431" height="312"></picture>
   </div>
   <div>
     <span class="eyebrow">{{ t('home.mobile.eyebrow') }}</span>
@@ -138,7 +218,7 @@
   </div>
 </section>
 
-<section class="section trust-deep-section">
+<section id="trust" class="section trust-deep-section">
   <div class="section-head">
     <span class="eyebrow">{{ t('home.trust.eyebrow') }}</span>
     <h2>{{ t('home.trust.title') }}</h2>
@@ -162,8 +242,9 @@
     <article class="price-card {% if key == 'growth' %}featured{% endif %}">
       <span class="eyebrow">{{ plan.name }}</span>
       {% if plan.price %}
-        <span class="price-number">${{ plan.price }}<small>/mo</small></span>
-        <p class="price-note">{{ t('home.pricing.annual') }} ${{ plan.annual_price }}/year</p>
+        <span class="badge">Best value</span>
+        <span class="price-number">${{ "%.2f"|format(plan.price) }}<small>/mo</small></span>
+        <p class="price-note">6 mo: ${{ "%.2f"|format(plan.six_month_price if plan.get('six_month_price') else (plan.price*6)) }} · Annual: ${{ "%.2f"|format(plan.annual_price) }}/year</p>
       {% else %}
         <span class="price-number">{{ t('home.pricing.custom') }}</span>
         <p class="price-note">{{ t('home.pricing.custom_note') }}</p>
@@ -189,7 +270,7 @@
     </div>
   </div>
   <div class="company-image">
-    <picture class="smart-picture"><source srcset="{{ url_for('static', filename='img/pages/10_school_partnership_meeting.webp') }}" type="image/webp"><img src="{{ url_for('static', filename='img/pages/10_school_partnership_meeting.png') }}" alt="School partnership meeting" loading="lazy" decoding="async" width="431" height="312"></picture>
+    <picture class="smart-picture"><source srcset="{{ url_for('static', filename='images/home-slider/en/20_reports_you_can_act_on.png') }}" type="image/png"><img src="{{ url_for('static', filename='images/home-slider/en/20_reports_you_can_act_on.png') }}" alt="Reports you can act on" loading="lazy" decoding="async" width="431" height="312"></picture>
   </div>
 </section>
 

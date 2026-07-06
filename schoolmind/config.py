@@ -1,8 +1,9 @@
 PLANS = {
     "starter": {
         "name": "Standard",
-        "price": 50,
-        "annual_price": 500,
+        "price": 9.99,
+        "six_month_price": 49.99,
+        "annual_price": 89.99,
         "tagline": "For schools starting a supervised wellbeing workflow",
         "limits": "Up to 300 students",
         "student_limit": 300,
@@ -23,8 +24,9 @@ PLANS = {
     },
     "growth": {
         "name": "Pro",
-        "price": 120,
-        "annual_price": 1200,
+        "price": 100.00,
+        "six_month_price": 600.00,
+        "annual_price": 1200.00,
         "tagline": "For active support teams that need deeper workflows",
         "limits": "Up to 1,000 students",
         "student_limit": 1000,
